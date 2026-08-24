@@ -15,6 +15,7 @@ cache locale una volta scaricati).
 """
 
 import json
+import os
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -151,10 +152,11 @@ def _riscrivi_con_gemini(api_key, titolo, estratto, fonte):
 
 
 def genera_news():
-    env = _leggi_env()
-    api_key = env.get("GEMINI_API_KEY")
+    # In locale la chiave sta in .env (gitignored); su GitHub Actions arriva
+    # come variabile d'ambiente dal secret GEMINI_API_KEY, non c'e' un .env.
+    api_key = os.environ.get("GEMINI_API_KEY") or _leggi_env().get("GEMINI_API_KEY")
     if not api_key:
-        print("[news] GEMINI_API_KEY mancante in .env: impossibile generare le news.")
+        print("[news] GEMINI_API_KEY mancante (ne' in .env ne' nell'ambiente): impossibile generare le news.")
         return
 
     cache = _carica_cache()

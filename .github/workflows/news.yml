@@ -1,0 +1,65 @@
+name: Aggiorna News
+
+on:
+  schedule:
+    - cron: "0 */3 * * *" # ogni 3 ore
+  workflow_dispatch: {} # permette anche il lancio manuale da GitHub
+
+permissions:
+  contents: write
+
+concurrency:
+  group: news
+  cancel-in-progress: false
+
+jobs:
+  aggiorna-news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verifica che il secret GEMINI_API_KEY sia configurato
+        run: |
+          if [ -z "${{ secrets.GEMINI_API_KEY }}" ]; then
+            echo "::error::Secret GEMINI_API_KEY non configurato (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installa dipendenze
+        run: pip install requests feedparser beautifulsoup4
+
+      # cache/news_cache.json evita di richiamare Gemini due volte sullo
+      # stesso articolo tra una run e l'altra — vive nella cache di Actions
+      # (non nel repo: cache/ resta gitignored, com'e' per tutto il resto
+      # del progetto, vedi README).
+      - name: Ripristina cache news tra le run
+        uses: actions/cache@v4
+        with:
+          path: cache/news_cache.json
+          key: news-cache-${{ github.run_id }}
+          restore-keys: |
+            news-cache-
+
+      - name: Genera news.json
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python build_news.py
+
+      - name: Commit e push se ci sono novita'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/news.json
+          if git diff --staged --quiet; then
+            echo "Nessuna novita' da committare."
+          else
+            git commit -m "Aggiorna news.json [automatico]"
+            git push
+          fi
