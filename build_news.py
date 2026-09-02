@@ -66,7 +66,14 @@ def _leggi_env():
 
 def _carica_cache():
     if CACHE_FILE.exists():
-        return json.loads(CACHE_FILE.read_text(encoding="utf-8"))
+        try:
+            return json.loads(CACHE_FILE.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            # Cache troncata (es. run precedente interrotta a meta' scrittura
+            # da _salva_cache, non atomica): meglio ripartire da zero — nel
+            # peggiore dei casi si rimanda a Gemini qualche articolo gia'
+            # riscritto — che restare bloccati per sempre su ogni run futura.
+            return {}
     return {}
 
 

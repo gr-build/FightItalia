@@ -66,7 +66,7 @@ def main():
     args = parser.parse_args()
 
     file_lottatori = sorted(CARTELLA_LOTTATORI.glob("*.json"))
-    if args.limite:
+    if args.limite is not None:
         file_lottatori = file_lottatori[: args.limite]
 
     righe_report = [

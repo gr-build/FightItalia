@@ -362,8 +362,17 @@ def scarica_dettaglio_lottatore(link, usa_cache=True):
     cache_storico = CACHE_DIR / f"storico_{slug}.csv"
 
     if usa_cache and cache_file.exists():
-        infobox = pd.read_csv(cache_file).set_index("campo")["valore"].to_dict()
-        storico = pd.read_csv(cache_storico) if cache_storico.exists() else pd.DataFrame()
+        # _record_puliti: stesso bug di dtype/NaN descritto sopra, qui non
+        # applicato in precedenza (un valore vuoto nell'infobox tornava NaN
+        # invece di None dopo il giro per CSV).
+        infobox = {r["campo"]: r["valore"] for r in _record_puliti(pd.read_csv(cache_file).to_dict("records"))}
+        try:
+            storico = pd.read_csv(cache_storico) if cache_storico.exists() else pd.DataFrame()
+        except pd.errors.EmptyDataError:
+            # Nessuna tabella storico per questo lottatore: la cache di un
+            # DataFrame vuoto e' un CSV senza intestazione (vedi commento
+            # identico su scarica_card_evento), non un errore.
+            storico = pd.DataFrame()
         return {"nome": infobox.get("_nome"), "infobox": infobox, "storico": storico}
 
     soup = _get_soup(link)
@@ -738,13 +747,21 @@ def scarica_orari_evento(nome_evento, luogo, usa_cache=True):
         # _record_puliti (non ".where(...).iloc[0]" + "or None": NaN e'
         # truthy in Python, quindi "nan or None" ritorna nan invariato,
         # non None — stesso bug di dtype descritto sopra per _record_puliti)
-        riga = _record_puliti(pd.read_csv(cache_file).to_dict("records"))[0]
-        return {
-            "fuso_sede": riga["fuso_sede"],
-            "early_prelims": riga["early_prelims"],
-            "prelims": riga["prelims"],
-            "main_card": riga["main_card"],
-        }
+        try:
+            righe = _record_puliti(pd.read_csv(cache_file).to_dict("records"))
+        except pd.errors.EmptyDataError:
+            righe = []
+        if righe:
+            riga = righe[0]
+            return {
+                "fuso_sede": riga["fuso_sede"],
+                "early_prelims": riga["early_prelims"],
+                "prelims": riga["prelims"],
+                "main_card": riga["main_card"],
+            }
+        # Cache troncata/corrotta (es. processo interrotto a meta' scrittura
+        # durante una run automatica): non e' un "nessun orario disponibile"
+        # permanente, si ritenta lo scraping sotto invece di andare in crash.
 
     try:
         from selenium import webdriver
