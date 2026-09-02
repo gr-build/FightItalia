@@ -1,0 +1,56 @@
+name: Aggiorna Dati
+
+on:
+  schedule:
+    - cron: "15 6 * * *" # ogni giorno alle 6:15 UTC (sfasato rispetto a news.yml, che gira ogni 3 ore in punto)
+  workflow_dispatch: {} # permette anche il lancio manuale da GitHub
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dati
+  cancel-in-progress: false
+
+jobs:
+  aggiorna-dati:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installa dipendenze
+        run: pip install -r requirements.txt
+
+      # scarica_roster()/scarica_eventi() (usati da genera_roster_e_eventi)
+      # ignorano la cache CSV di default, quindi roster.json/eventi.json
+      # vengono sempre rigenerati da capo qui — e' proprio quello che serve
+      # per far avanzare lo stato "programmato" -> "passato" quando un
+      # evento si e' disputato. genera_dettagli_lottatori/genera_card_eventi
+      # invece saltano tutto cio' che ha gia' un JSON in docs/data/ (versionato
+      # nel repo, sopravvive tra una run e l'altra), tranne gli eventi
+      # disputati di recente ancora senza risultati (vedi FINESTRA_RIPROVA_RISULTATI
+      # in build_data.py) — quindi ogni run e' rapida, non un rescraping completo.
+      - name: Genera roster/eventi/card UFC
+        run: python build_data.py
+
+      - name: Genera roster/eventi KSW e Oktagon (Europa)
+        run: python -c "from build_data import genera_europa; genera_europa()"
+
+      - name: Commit e push se ci sono novita'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data
+          if git diff --staged --quiet; then
+            echo "Nessuna novita' da committare."
+          else
+            git commit -m "Aggiorna dati UFC/Europa [automatico]"
+            git push
+          fi

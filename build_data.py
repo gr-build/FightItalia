@@ -13,7 +13,7 @@ docs/data/lottatori/<slug>.json, scaricato dal browser solo quando serve.
 import json
 import re
 import time
-from datetime import date
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -307,6 +307,16 @@ def genera_dettagli_lottatori(roster, limite=None, pausa=0.3):
     print(f"Dettagli lottatori: {fatti} scaricati ora, {saltati} gia' in cache. Totale file: {len(list(WEB_DATA_LOTTATORI.glob('*.json')))}")
 
 
+FINESTRA_RIPROVA_RISULTATI = timedelta(days=45)
+
+
+def _data_evento(s):
+    try:
+        return datetime.strptime(s, "%b %d, %Y").date()
+    except (ValueError, TypeError):
+        return None
+
+
 def genera_card_eventi(eventi, limite=None, pausa=0.3):
     """Card completa (main + preliminary + early preliminary) per ogni
     evento con una pagina Wikipedia propria — un JSON per evento in
@@ -317,28 +327,50 @@ def genera_card_eventi(eventi, limite=None, pausa=0.3):
     if limite:
         con_link = con_link.head(limite)
 
-    fatti, saltati, vuoti = 0, 0, 0
+    fatti, saltati, aggiornati, vuoti = 0, 0, 0, 0
     for i, riga in con_link.iterrows():
         out_file = WEB_DATA_EVENTI / f"{riga['slug']}.json"
+        ricarica = False
         if out_file.exists():
-            saltati += 1
-            continue
+            # Un evento "passato" la cui card salvata e' ancora senza
+            # risultati (scaricata mentre l'evento era "programmato", prima
+            # di disputarsi) va ripresa da capo: altrimenti il file esiste
+            # gia', viene solo saltato, e i risultati non arrivano mai —
+            # anche rilanciando lo script ogni giorno. Limitato agli eventi
+            # disputati di recente: oltre la finestra assumiamo che i
+            # risultati mancanti siano definitivi (es. evento cancellato,
+            # come UFC 151), altrimenti li riproveremmo in eterno ogni giorno.
+            data_ev = _data_evento(riga.get("data"))
+            entro_finestra = riga["stato"] == "passato" and data_ev and (date.today() - data_ev) <= FINESTRA_RIPROVA_RISULTATI
+            if entro_finestra:
+                try:
+                    card_esistente = json.loads(out_file.read_text(encoding="utf-8"))
+                except (json.JSONDecodeError, OSError):
+                    card_esistente = []
+                if card_esistente and any(not (b.get("metodo") or "").strip() for b in card_esistente):
+                    ricarica = True
+            if not ricarica:
+                saltati += 1
+                continue
 
         try:
-            card = scarica_card_evento(riga["link"])
+            card = scarica_card_evento(riga["link"], usa_cache=not ricarica)
         except Exception as e:
             print(f"  [{i+1}/{len(con_link)}] ERRORE {riga['evento']}: {e}")
             continue
 
         out_file.write_text(json.dumps(card, ensure_ascii=False), encoding="utf-8")
-        fatti += 1
+        if ricarica:
+            aggiornati += 1
+        else:
+            fatti += 1
         if not card:
             vuoti += 1
-        if fatti % 20 == 0:
+        if (fatti + aggiornati) % 20 == 0:
             print(f"  [{i+1}/{len(con_link)}] fatti {fatti}, ultimo: {riga['evento']}")
         time.sleep(pausa)
 
-    print(f"Card eventi: {fatti} scaricate ora ({vuoti} vuote/non trovate), {saltati} gia' in cache.")
+    print(f"Card eventi: {fatti} scaricate ora, {aggiornati} riscaricate coi risultati ({vuoti} vuote/non trovate), {saltati} gia' in cache.")
 
 
 def genera_europa():

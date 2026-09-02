@@ -48,7 +48,21 @@ python -m http.server 8000 --directory docs
 
 Si apre su `http://localhost:8000`. Rilanciare `build_data.py` ogni volta
 che si vogliono dati aggiornati (salta tutto ciò che è già scaricato,
-quindi le run successive sono quasi istantanee).
+tranne gli eventi disputati di recente ancora senza risultati — vedi sotto
+— quindi le run successive sono quasi istantanee).
+
+Una volta pubblicato su GitHub, questo passo gira da solo: il workflow
+`.github/workflows/dati.yml` rilancia `build_data.py` (+ `genera_europa`)
+ogni giorno e committa `docs/data/` se ci sono novità — stesso pattern di
+`news.yml` per le news (vedi sotto), ma senza bisogno di secret. Roster ed
+elenco eventi vengono sempre riscaricati da zero (mai dalla cache), così lo
+stato "programmato" → "passato" di un evento si aggiorna appena Wikipedia
+lo riflette; la card di un evento già "passato" ma ancora senza risultati
+(scaricata mentre era "programmato") viene invece ripresa da capo solo se
+disputato negli ultimi 45 giorni (`FINESTRA_RIPROVA_RISULTATI` in
+`build_data.py`) — oltre si assume che i risultati mancanti siano
+definitivi (es. evento cancellato, come UFC 151), altrimenti verrebbe
+riprovato ogni giorno per sempre.
 
 Per la sezione News serve una chiave Gemini gratuita (da
 [Google AI Studio](https://aistudio.google.com/apikey)) in un file `.env`

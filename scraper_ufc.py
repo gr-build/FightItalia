@@ -735,12 +735,15 @@ def scarica_orari_evento(nome_evento, luogo, usa_cache=True):
 
     cache_file = CACHE_DIR / f"orari_{slug}.csv"
     if usa_cache and cache_file.exists():
-        riga = pd.read_csv(cache_file).where(lambda d: pd.notna(d), None).iloc[0]
+        # _record_puliti (non ".where(...).iloc[0]" + "or None": NaN e'
+        # truthy in Python, quindi "nan or None" ritorna nan invariato,
+        # non None — stesso bug di dtype descritto sopra per _record_puliti)
+        riga = _record_puliti(pd.read_csv(cache_file).to_dict("records"))[0]
         return {
             "fuso_sede": riga["fuso_sede"],
-            "early_prelims": riga["early_prelims"] or None,
-            "prelims": riga["prelims"] or None,
-            "main_card": riga["main_card"] or None,
+            "early_prelims": riga["early_prelims"],
+            "prelims": riga["prelims"],
+            "main_card": riga["main_card"],
         }
 
     try:

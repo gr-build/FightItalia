@@ -173,9 +173,16 @@ async function init() {
     : [[], []];
 
   if (card.length) {
-    const main = card.filter((b) => (b.sezione || "").toLowerCase().startsWith("main"));
-    const prelim = card.filter((b) => (b.sezione || "").toLowerCase().startsWith("preliminary"));
+    // Dagli eventi trasmessi su Paramount+ (nuovo partner UFC) in poi,
+    // Wikipedia etichetta la sezione principale della card "Fight card
+    // (Paramount+)" invece di "Main card" — senza un fallback qui quei
+    // bout (compresi i main event) sparivano del tutto dalla pagina,
+    // perche' non iniziano per "main". "Main" resta quindi il bucket di
+    // default per qualsiasi etichetta che non sia esplicitamente
+    // preliminary/early (o mancante).
     const early = card.filter((b) => (b.sezione || "").toLowerCase().startsWith("early"));
+    const prelim = card.filter((b) => (b.sezione || "").toLowerCase().startsWith("preliminary"));
+    const main = card.filter((b) => !early.includes(b) && !prelim.includes(b));
     cardBox.innerHTML = sezioneCard("Main Card", main, roster) + sezioneCard("Preliminary Card", prelim, roster) + sezioneCard("Early Preliminary Card", early, roster);
   } else {
     cardBox.innerHTML = `<div class="empty-state">Card non ancora disponibile per questo evento.</div>`;
