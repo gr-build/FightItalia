@@ -85,11 +85,22 @@ export function debounce(fn, wait = 200) {
   };
 }
 
+// Unica fonte di verita' per "cosa conta come KO/TKO o sottomissione":
+// usata sia qui (statistiche di carriera) sia da ritmoFinalizzazione
+// (ultime 5 uscite), cosi' le due non possono disallinearsi in futuro.
+const PREFISSI_KO = ["ko", "tko"];
+const PREFISSI_SUB = ["submission"];
+
+function metodoIniziaCon(method, prefissi) {
+  const m = (method || "").toLowerCase();
+  return prefissi.some((p) => m.startsWith(p));
+}
+
 export function metodoVittorie(storico) {
   const vittorie = (storico || []).filter((f) => classeRisultato(f["res."]) === "win");
-  const conta = (prefissi) => vittorie.filter((f) => prefissi.some((p) => (f.method || "").toLowerCase().startsWith(p))).length;
-  const ko = conta(["ko", "tko"]);
-  const sub = conta(["submission"]);
+  const conta = (prefissi) => vittorie.filter((f) => metodoIniziaCon(f.method, prefissi)).length;
+  const ko = conta(PREFISSI_KO);
+  const sub = conta(PREFISSI_SUB);
   const dec = conta(["decision"]);
   return { ko, sub, dec, altro: vittorie.length - ko - sub - dec, totale: vittorie.length };
 }
@@ -158,10 +169,7 @@ function ritmoFinalizzazione(storico) {
   const ultimi5 = (storico || []).slice(0, 5);
   const vittorie = ultimi5.filter((f) => classeRisultato(f["res."]) === "win");
   if (!vittorie.length) return null;
-  const finish = vittorie.filter((f) => {
-    const m = (f.method || "").toLowerCase();
-    return m.startsWith("ko") || m.startsWith("tko") || m.startsWith("submission");
-  }).length;
+  const finish = vittorie.filter((f) => metodoIniziaCon(f.method, [...PREFISSI_KO, ...PREFISSI_SUB])).length;
   return Math.round((finish / vittorie.length) * 100);
 }
 

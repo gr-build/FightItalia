@@ -226,10 +226,6 @@ def genera_roster_e_eventi():
         json.dumps(_pulisci_per_json(eventi), ensure_ascii=False, indent=None), encoding="utf-8"
     )
     print(f"eventi.json: {len(eventi)} eventi")
-
-    (WEB_DATA / "meta.json").write_text(
-        json.dumps({"ultimo_aggiornamento": date.today().isoformat()}), encoding="utf-8"
-    )
     return roster
 
 
@@ -342,12 +338,18 @@ def genera_card_eventi(eventi, limite=None, pausa=0.3):
             # come UFC 151), altrimenti li riproveremmo in eterno ogni giorno.
             data_ev = _data_evento(riga.get("data"))
             entro_finestra = riga["stato"] == "passato" and data_ev and (date.today() - data_ev) <= FINESTRA_RIPROVA_RISULTATI
+            card_esistente = []
             if entro_finestra:
                 try:
                     card_esistente = json.loads(out_file.read_text(encoding="utf-8"))
                 except (json.JSONDecodeError, OSError):
                     card_esistente = []
-                if card_esistente and any(not (b.get("metodo") or "").strip() for b in card_esistente):
+                # "not card_esistente" copre anche il caso di una card
+                # salvata vuota (pagina Wikipedia non ancora pronta al
+                # momento dello scraping): senza, "[] and ..." e' sempre
+                # falsy e quell'evento non verrebbe MAI piu' riprovato,
+                # a differenza di uno con risultati solo parziali.
+                if not card_esistente or any(not (b.get("metodo") or "").strip() for b in card_esistente):
                     ricarica = True
             if not ricarica:
                 saltati += 1
@@ -357,6 +359,14 @@ def genera_card_eventi(eventi, limite=None, pausa=0.3):
             card = scarica_card_evento(riga["link"], usa_cache=not ricarica)
         except Exception as e:
             print(f"  [{i+1}/{len(con_link)}] ERRORE {riga['evento']}: {e}")
+            continue
+
+        if ricarica and not card and card_esistente:
+            # Il tentativo di riscaricare non ha trovato nulla (probabile
+            # intoppo temporaneo di rete/parsing, non un vero azzeramento
+            # della card su Wikipedia): meglio tenere i risultati buoni
+            # gia' salvati che sovrascriverli con un risultato vuoto.
+            saltati += 1
             continue
 
         out_file.write_text(json.dumps(card, ensure_ascii=False), encoding="utf-8")
