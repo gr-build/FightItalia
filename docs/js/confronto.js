@@ -1,7 +1,7 @@
 import {
   fetchJSON, renderChrome, cmDaStringa, numeroDaRecord,
   classeRisultato, letteraRisultato, debounce, slugDaLink, formDots,
-  metodoVittorie, badgeStreak,
+  metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave,
 } from "./common.js";
 
 renderChrome("confronto");
@@ -178,6 +178,10 @@ async function aggiornaConfronto() {
       ${barraCoppia("Vittorie per sottomissione", pct(metA.sub, metA.totale), pct(metB.sub, metB.totale), "%")}
     </div>
     ${testaATesta(dA, dB)}
+    ${blocPuntiChiave(puntiChiaveMatch(
+      { nome: dA.nome, inf: dA.infobox, storico: dA.storico },
+      { nome: dB.nome, inf: dB.infobox, storico: dB.storico }
+    ))}
 
     <div class="section-title">Storico Incontri</div>
     <div class="history-columns">

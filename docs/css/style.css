@@ -608,6 +608,36 @@ h1, h2, h3, h4 {
 .head-to-head.found { border-color: rgba(47, 184, 114, 0.4); background: rgba(47, 184, 114, 0.07); }
 .head-to-head strong { color: var(--win); }
 
+.key-points {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+
+.key-points-title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.key-points ul {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.key-points li {
+  font-size: 13.5px;
+  color: var(--text);
+}
+
 .history-columns {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

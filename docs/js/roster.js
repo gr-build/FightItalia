@@ -26,18 +26,11 @@ function nomeBreveCategoria(cat) {
   return cat.replace(/\s*\([^)]*\)/, "");
 }
 
-function dataItaliana(iso) {
-  if (!iso) return null;
-  const d = new Date(iso);
-  return isNaN(d) ? null : d.toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" });
-}
-
-function renderStatStrip(ultimoAgg) {
+function renderStatStrip() {
   const categorie = new Set(roster.map((r) => r.categoria).filter((c) => ORDINE_CATEGORIE.includes(c)));
   document.getElementById("stat-strip").innerHTML = `
     <div class="stat"><div class="value">${roster.length}</div><div class="label">Lottatori</div></div>
     <div class="stat"><div class="value">${categorie.size}</div><div class="label">Categorie di peso</div></div>
-    <div class="stat"><div class="value">${ultimoAgg ? dataItaliana(ultimoAgg) : "—"}</div><div class="label">Ultimo aggiornamento</div></div>
   `;
 }
 
@@ -129,10 +122,8 @@ function renderGrid() {
 
 async function init() {
   roster = await fetchJSON("data/roster.json");
-  let meta = {};
-  try { meta = await fetchJSON("data/meta.json"); } catch { meta = {}; }
 
-  renderStatStrip(meta.ultimo_aggiornamento);
+  renderStatStrip();
   renderPills();
   renderGrid();
   document.getElementById("search").addEventListener("input", debounce(renderGrid, 120));

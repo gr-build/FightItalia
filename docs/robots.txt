@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gr-build.github.io/FightItalia/sitemap.xml

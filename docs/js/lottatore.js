@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak } from "./common.js";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave } from "./common.js";
 
 renderChrome(null);
 
@@ -130,6 +130,10 @@ async function renderTestaATesta(slugA, dettA, rigaA) {
         <span class="k">Ultimi 5</span>
         <span class="v">${formDots(dettB.storico)}</span>
       </div>
+      ${blocPuntiChiave(puntiChiaveMatch(
+        { nome: dettA.nome, inf: infA, storico: dettA.storico },
+        { nome: dettB.nome, inf: infB, storico: dettB.storico }
+      ))}
     `;
   }
 }

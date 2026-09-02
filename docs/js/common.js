@@ -39,7 +39,8 @@ export function renderChrome(active) {
     footer.innerHTML = `
       <div class="container">
         <p style="margin:0 0 6px;">I dati riportati hanno scopo informativo e statistico; non costituiscono consiglio di scommessa. Gioca responsabilmente.</p>
-        <p style="margin:0;">FightItalia — statistiche e confronti sugli sport da combattimento. Dati e immagini da Wikipedia (licenza CC BY-SA), aggiornati periodicamente. In Italia gli eventi UFC si seguono in streaming legale su DAZN.</p>
+        <p style="margin:0 0 6px;">FightItalia — statistiche e confronti sugli sport da combattimento. Dati e immagini da Wikipedia (licenza CC BY-SA), aggiornati periodicamente. In Italia gli eventi UFC si seguono in streaming legale su DAZN.</p>
+        <p style="margin:0; font-size:11.5px; color:var(--text-muted);">FightItalia è un progetto indipendente, non affiliato né sponsorizzato da UFC o Zuffa, LLC.</p>
       </div>`;
   }
 }
@@ -136,4 +137,86 @@ export function slugDaLink(link) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+export function pctDaStringa(testo) {
+  if (typeof testo !== "string") return null;
+  const m = testo.trim().match(/^([\d.]+)\s*%/);
+  return m ? parseFloat(m[1]) : null;
+}
+
+function formattaNumero(n) {
+  const arrotondato = Math.round(n * 10) / 10;
+  return Number.isInteger(arrotondato) ? String(arrotondato) : arrotondato.toFixed(1);
+}
+
+// Percentuale di vittorie per KO/TKO o sottomissione sulle ultime 5 uscite
+// (non sull'intera carriera): indica se un lottatore sta chiudendo gli
+// incontri di recente. null se non ha vittorie negli ultimi 5 (dato non
+// significativo, va omesso).
+function ritmoFinalizzazione(storico) {
+  const ultimi5 = (storico || []).slice(0, 5);
+  const vittorie = ultimi5.filter((f) => classeRisultato(f["res."]) === "win");
+  if (!vittorie.length) return null;
+  const finish = vittorie.filter((f) => {
+    const m = (f.method || "").toLowerCase();
+    return m.startsWith("ko") || m.startsWith("tko") || m.startsWith("submission");
+  }).length;
+  return Math.round((finish / vittorie.length) * 100);
+}
+
+// Punti chiave statistici e fattuali del match, senza pronostico: ogni
+// fatto compare solo se i dati necessari sono disponibili per entrambi i
+// lottatori, altrimenti viene omesso invece di mostrare un buco/N-D.
+// fA/fB: { nome, inf (infobox), storico }
+export function puntiChiaveMatch(fA, fB) {
+  const infA = fA.inf || {}, infB = fB.inf || {};
+  const punti = [];
+
+  const diffFavore = (etichetta, vA, vB, unita) => {
+    if (vA == null || vB == null || vA === vB) return;
+    const chi = vA > vB ? fA.nome : fB.nome;
+    punti.push(`${etichetta}: +${formattaNumero(Math.abs(vA - vB))}${unita} a favore di ${chi}`);
+  };
+
+  diffFavore("Reach", cmDaStringa(infA.Reach), cmDaStringa(infB.Reach), "cm");
+  diffFavore("Altezza", cmDaStringa(infA.Height), cmDaStringa(infB.Height), "cm");
+
+  diffFavore("Striking accuracy", pctDaStringa(infA["Striking accuracy"]), pctDaStringa(infB["Striking accuracy"]), "%");
+  diffFavore("Striking defense", pctDaStringa(infA["Striking defense"]), pctDaStringa(infB["Striking defense"]), "%");
+
+  const tdAccA = pctDaStringa(infA["Takedown accuracy"]), tdAccB = pctDaStringa(infB["Takedown accuracy"]);
+  const tdDefA = pctDaStringa(infA["Takedown defense"]), tdDefB = pctDaStringa(infB["Takedown defense"]);
+  diffFavore("Takedown accuracy", tdAccA, tdAccB, "%");
+  diffFavore("Takedown defense", tdDefA, tdDefB, "%");
+  // Uno stile da grappler forte (takedown accuracy alta) che incontra una
+  // takedown defense piu' bassa dell'altro, in entrambe le direzioni.
+  if (tdAccA != null && tdDefB != null && tdAccA > tdDefB) {
+    punti.push(`Takedown accuracy di ${fA.nome} (${formattaNumero(tdAccA)}%) supera la takedown defense di ${fB.nome} (${formattaNumero(tdDefB)}%)`);
+  }
+  if (tdAccB != null && tdDefA != null && tdAccB > tdDefA) {
+    punti.push(`Takedown accuracy di ${fB.nome} (${formattaNumero(tdAccB)}%) supera la takedown defense di ${fA.nome} (${formattaNumero(tdDefA)}%)`);
+  }
+
+  const stanceA = (infA.Stance || "").trim(), stanceB = (infB.Stance || "").trim();
+  if (stanceA && stanceB && stanceA.toLowerCase() !== stanceB.toLowerCase()) {
+    punti.push(`Mismatch di stance: ${stanceA} vs ${stanceB} — combinazione statisticamente rilevante nell'MMA`);
+  }
+
+  const finA = ritmoFinalizzazione(fA.storico), finB = ritmoFinalizzazione(fB.storico);
+  if (finA != null && finB != null && finA !== finB) {
+    const chi = finA > finB ? fA.nome : fB.nome;
+    punti.push(`Ritmo di finalizzazione più alto nelle ultime 5: ${chi} (${Math.max(finA, finB)}% delle vittorie per KO/TKO o sottomissione)`);
+  }
+
+  return punti;
+}
+
+export function blocPuntiChiave(punti) {
+  if (!punti || !punti.length) return "";
+  return `
+    <div class="key-points">
+      <div class="key-points-title">Punti chiave del match</div>
+      <ul>${punti.map((p) => `<li>${p}</li>`).join("")}</ul>
+    </div>`;
 }
