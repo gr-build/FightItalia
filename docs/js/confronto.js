@@ -192,8 +192,15 @@ async function aggiornaConfronto() {
 }
 
 async function init() {
-  const roster = await fetchJSON("data/roster.json");
-  opzioni = roster.filter((r) => r.link && r.slug);
+  // extra-lottatori.json copre chi compare in una card evento ma non nel
+  // roster UFC attuale — senza, arrivando da un link "Confronta" per uno
+  // di loro (vedi evento.js) la ricerca per slug fallirebbe silenziosamente
+  // e la pagina mostrerebbe una coppia di default a caso invece di loro.
+  const [roster, extra] = await Promise.all([
+    fetchJSON("data/roster.json"),
+    fetchJSON("data/extra-lottatori.json").catch(() => []),
+  ]);
+  opzioni = [...roster, ...extra].filter((r) => r.link && r.slug);
 
   setupAutocomplete("a");
   setupAutocomplete("b");

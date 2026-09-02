@@ -168,9 +168,18 @@ async function init() {
   `;
 
   const cardBox = document.getElementById("card-evento");
-  const [card, roster] = ev.link
-    ? await Promise.all([caricaCard(ev.link), fetchJSON("data/roster.json").catch(() => [])])
-    : [[], []];
+  // extra-lottatori.json copre chi compare in una card evento ma non nel
+  // roster UFC attuale (undercard di eventi passati, o un nome uscito dal
+  // roster su Wikipedia pur avendo appena combattuto) — senza, per loro non
+  // comparirebbe mai il link "Confronta" (vedi commento su linkConfronta).
+  const [card, roster, extra] = ev.link
+    ? await Promise.all([
+        caricaCard(ev.link),
+        fetchJSON("data/roster.json").catch(() => []),
+        fetchJSON("data/extra-lottatori.json").catch(() => []),
+      ])
+    : [[], [], []];
+  const rosterCompleto = [...roster, ...extra];
 
   if (card.length) {
     // Dagli eventi trasmessi su Paramount+ (nuovo partner UFC) in poi,
@@ -183,7 +192,7 @@ async function init() {
     const early = card.filter((b) => (b.sezione || "").toLowerCase().startsWith("early"));
     const prelim = card.filter((b) => (b.sezione || "").toLowerCase().startsWith("preliminary"));
     const main = card.filter((b) => !early.includes(b) && !prelim.includes(b));
-    cardBox.innerHTML = sezioneCard("Main Card", main, roster) + sezioneCard("Preliminary Card", prelim, roster) + sezioneCard("Early Preliminary Card", early, roster);
+    cardBox.innerHTML = sezioneCard("Main Card", main, rosterCompleto) + sezioneCard("Preliminary Card", prelim, rosterCompleto) + sezioneCard("Early Preliminary Card", early, rosterCompleto);
   } else {
     cardBox.innerHTML = `<div class="empty-state">Card non ancora disponibile per questo evento.</div>`;
   }

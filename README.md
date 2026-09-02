@@ -105,7 +105,11 @@ DNS del registrar + Settings → Pages → Custom domain sul repository.
   con foto), vedi record e statistiche affiancate, ultimi 5 incontri (con
   banner avversario/data al passaggio del mouse), storico incontri
   completo, grafici fisico/record, e se si sono già affrontati lo
-  scontro diretto.
+  scontro diretto. Oltre al roster attuale copre anche chi è apparso in
+  una card evento senza essere (più) nel roster UFC — es. un nome uscito
+  dalla pagina Wikipedia del roster pur avendo appena combattuto, o
+  qualsiasi undercard di un evento passato: vedi `extra-lottatori.json`
+  più sotto.
 - **Eventi**: eventi UFC in ordine cronologico (più vicino per primo) con
   tag "Numerato"/"Fight Night" (per non confondere le due numerazioni
   indipendenti di UFC — es. "UFC 293" del 2023 e "UFC Fight Night 293"
@@ -180,7 +184,14 @@ analisi), più eventualmente pubblicità display e affiliazione DAZN
 - `build_data.py` — genera tutti i JSON in `docs/data/` a partire dalla
   cache: `roster.json`, `eventi.json`, un JSON per lottatore in
   `lottatori/`, un JSON per evento in `eventi/`, e per Europa
-  `europa/{ksw,oktagon}-{roster,eventi}.json`.
+  `europa/{ksw,oktagon}-{roster,eventi}.json`. `extra-lottatori.json` è un
+  indice leggero (nome/slug/record/foto, generato da
+  `genera_lottatori_extra()`) di chi compare in una card evento ma non nel
+  roster attuale — `confronto.js`, `evento.js` e `lottatore.js` lo caricano
+  in aggiunta a `roster.json` per non perdere il link "Confronta" su
+  questi lottatori; resta fuori apposta dalla pagina "Database Lottatori"
+  (`roster.js`/`campioni.js`), che continua a mostrare solo roster attuale
+  + leggende.
 - `build_news.py` — legge i 4 feed RSS, riscrive titolo e riassunto in
   italiano con Gemini (chiave in `.env`, variabile `GEMINI_API_KEY`) e
   genera `docs/data/news.json`. Cache su `cache/news_cache.json` (per

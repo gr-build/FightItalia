@@ -383,6 +383,81 @@ def genera_card_eventi(eventi, limite=None, pausa=0.3):
     print(f"Card eventi: {fatti} scaricate ora, {aggiornati} riscaricate coi risultati ({vuoti} vuote/non trovate), {saltati} gia' in cache.")
 
 
+def genera_lottatori_extra(pausa=0.3):
+    """Lottatori che compaiono in almeno una card evento ma non nel roster
+    UFC attuale ne' tra le leggende (undercard di eventi passati, o un nome
+    uscito dal roster su Wikipedia pur avendo appena combattuto — succede,
+    verificato con Gilbert Burns) — senza una scheda propria non hanno ne'
+    un link "Confronta" ne' una pagina di dettaglio (vedi commento in
+    evento.js). Scrive comunque un JSON in docs/data/lottatori/<slug>.json
+    (stesso formato/posizione dei lottatori del roster, cosi' lottatore.html
+    e confronto.js non richiedono modifiche per leggerlo) piu' un indice
+    leggero in docs/data/extra-lottatori.json (nome/slug/record/foto) che
+    confronto.js ed evento.js caricano IN AGGIUNTA a roster.json. Restano
+    fuori apposta dalla pagina "Database Lottatori": quella resta solo
+    roster attuale + leggende, come descritto nel README."""
+    roster_slugs = {r["slug"] for r in json.loads((WEB_DATA / "roster.json").read_text(encoding="utf-8"))}
+
+    trovati = {}  # slug -> (nome, link, categoria)
+    for path in sorted(WEB_DATA_EVENTI.glob("*.json")):
+        card = json.loads(path.read_text(encoding="utf-8"))
+        for b in card:
+            for lato in ("fighter1", "fighter2"):
+                link = b.get(f"{lato}_link")
+                slug = _slug_da_link(link) if link else None
+                if slug and slug not in roster_slugs and slug not in trovati:
+                    trovati[slug] = (b.get(lato), link, b.get("categoria"))
+
+    fatti, saltati = 0, 0
+    for slug, (nome, link, categoria) in trovati.items():
+        out_file = WEB_DATA_LOTTATORI / f"{slug}.json"
+        if out_file.exists():
+            saltati += 1
+            continue
+        try:
+            dettaglio = scarica_dettaglio_lottatore(link)
+        except Exception as e:
+            print(f"  ERRORE {nome}: {e}")
+            continue
+
+        storico = dettaglio["storico"]
+        out = {
+            "nome": dettaglio["nome"] or nome,
+            "link": link,
+            "infobox": dettaglio["infobox"],
+            "storico": _pulisci_per_json(storico) if not storico.empty else [],
+            "ultimo_aggiornamento": date.today().isoformat(),
+        }
+        out_file.write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")
+        fatti += 1
+        if fatti % 50 == 0:
+            print(f"  [{fatti}/{len(trovati)}] fatti, ultimo: {nome}")
+        time.sleep(pausa)
+
+    print(f"Lottatori extra: {fatti} scaricati ora, {saltati} gia' in cache. Candidati totali: {len(trovati)}")
+
+    indice = []
+    for slug, (nome, link, categoria) in trovati.items():
+        path = WEB_DATA_LOTTATORI / f"{slug}.json"
+        if not path.exists():
+            continue
+        indice.append({
+            "slug": slug,
+            "nome": nome,
+            "link": link,
+            "categoria": categoria,
+            "record_mma": _record_da_storico_json(path),
+            "foto": _foto_da_json(path),
+            "eta": None,
+            "campione_attuale": False,
+            "ex_campione": False,
+            "percentile_altezza": None,
+            "percentile_reach": None,
+        })
+    (WEB_DATA / "extra-lottatori.json").write_text(json.dumps(indice, ensure_ascii=False), encoding="utf-8")
+    print(f"extra-lottatori.json: {len(indice)} lottatori")
+
+
 def genera_europa():
     for org, cfg in ORGANIZZAZIONI_EUROPA.items():
         roster = scarica_roster_organizzazione(cfg["roster_url"], f"{org}_roster")
@@ -413,3 +488,4 @@ if __name__ == "__main__":
 
     eventi = pd.read_json(WEB_DATA / "eventi.json")
     genera_card_eventi(eventi)
+    genera_lottatori_extra()

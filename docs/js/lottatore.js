@@ -3,6 +3,7 @@ import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, c
 renderChrome(null);
 
 let roster = [];
+let extra = []; // extra-lottatori.json: chi compare in una card evento ma non nel roster UFC attuale
 let dettCorrente = null;
 let rigaCorrente = null;
 
@@ -58,12 +59,14 @@ function righeAvanzate(inf) {
 }
 
 async function caricaLottatore(slug) {
-  const [dett, rosterFresco] = await Promise.all([
+  const [dett, rosterFresco, extraFresco] = await Promise.all([
     fetchJSON(`data/lottatori/${slug}.json`),
     roster.length ? Promise.resolve(roster) : fetchJSON("data/roster.json"),
+    extra.length ? Promise.resolve(extra) : fetchJSON("data/extra-lottatori.json").catch(() => []),
   ]);
   roster = rosterFresco;
-  const riga = roster.find((r) => r.slug === slug) || {};
+  extra = extraFresco;
+  const riga = [...roster, ...extra].find((r) => r.slug === slug) || {};
   return { dett, riga };
 }
 
@@ -81,7 +84,7 @@ async function renderTestaATesta(slugA, dettA, rigaA) {
   const infA = dettA.infobox || {};
   const [vintA, persA] = numeroDaRecord(rigaA.record_mma);
 
-  const opzioni = roster.filter((r) => r.link && r.slug && r.slug !== slugA);
+  const opzioni = [...roster, ...extra].filter((r) => r.link && r.slug && r.slug !== slugA);
   const wrap = document.getElementById("tt-picker");
   wrap.innerHTML = `
     <div class="autocomplete" id="tt-autocomplete">
@@ -100,7 +103,7 @@ async function renderTestaATesta(slugA, dettA, rigaA) {
     lista.classList.add("open");
     lista.querySelectorAll("div[data-slug]").forEach((el) => {
       el.addEventListener("mousedown", async () => {
-        const rigaB = roster.find((r) => r.slug === el.dataset.slug);
+        const rigaB = [...roster, ...extra].find((r) => r.slug === el.dataset.slug);
         input.value = rigaB.nome;
         lista.classList.remove("open");
         const dettB = await fetchJSON(`data/lottatori/${rigaB.slug}.json`);
