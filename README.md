@@ -88,12 +88,26 @@ Cloudflare Pages, GitHub Pages). Con GitHub Pages:
 1. In GitHub Desktop: **Publish repository** (repository **pubblico**,
    altrimenti GitHub Pages gratis non funziona).
 2. Sul sito GitHub, nel repository: **Settings → Pages → Source: Deploy
-   from a branch → Branch: master, cartella: /docs → Save**.
+   from a branch → Branch: main, cartella: /docs → Save**.
 3. Dopo un minuto il sito è live su `https://<utente>.github.io/<repo>/`.
 
 Per un dominio personalizzato (es. fightitalia.it): comprarlo da un
 registrar (Register.it, Namecheap...), poi collegarlo nelle impostazioni
 DNS del registrar + Settings → Pages → Custom domain sul repository.
+
+## SEO e condivisione social
+
+Ogni pagina ha meta tag Open Graph/Twitter Card statici (titolo,
+descrizione, `og-image.png`) cosi' un link condiviso su WhatsApp/Telegram/X
+mostra un'anteprima invece di un URL nudo — sono generici per pagina (non
+per singolo lottatore/evento) perche' i bot dei social non eseguono
+JavaScript e vedono solo l'HTML statico iniziale. `lottatore.html` ed
+`evento.html` iniettano invece via JS (`impostaMetaPagina` in
+`common.js`) titolo, descrizione e dati strutturati JSON-LD (schema.org
+`Person`/`SportsEvent`) specifici — Google quello lo esegue, quindi puo'
+mostrare risultati di ricerca piu' ricchi per le pagine dei singoli
+lottatori/eventi. `sitemap.xml`/`robots.txt` restano in `docs/`
+(rigenerati da `build_sitemap.py`).
 
 ## Cosa c'è
 

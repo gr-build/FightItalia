@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato } from "./common.js";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina } from "./common.js";
 
 renderChrome(null);
 
@@ -148,8 +148,21 @@ async function init() {
     return;
   }
 
-  document.title = `${ev.evento} — FightItalia`;
   const luogo = [ev.sede, ev.luogo].filter(Boolean).join(", ");
+  const dataParsata = new Date(ev.data);
+  impostaMetaPagina({
+    titolo: `${ev.evento} — FightItalia`,
+    descrizione: `${ev.evento}${luogo ? ` — ${luogo}` : ""}. Data, card completa e risultati su FightItalia.`,
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "SportsEvent",
+      name: ev.evento,
+      startDate: isNaN(dataParsata) ? undefined : dataParsata.toISOString().slice(0, 10),
+      location: luogo ? { "@type": "Place", name: luogo } : undefined,
+      url: `https://gr-build.github.io/FightItalia/evento.html?slug=${slug}`,
+      sport: "Mixed Martial Arts",
+    },
+  });
 
   out.innerHTML = `
     <section class="hero" style="padding:44px 0 24px; border-bottom:none;">

@@ -18,6 +18,29 @@ export function icon(name) {
   return ICONS[name] || "";
 }
 
+// I bot dei social (WhatsApp/Twitter/Facebook) non eseguono JS, quindi vedono
+// solo i meta tag statici dell'HTML (title/description generici) — questa
+// funzione serve invece Google, che le pagine JS le esegue davvero: aggiorna
+// document.title + meta description con i dati veri del lottatore/evento, e
+// inietta JSON-LD (schema.org) cosi' i risultati di ricerca possono mostrare
+// record, data, sede ecc. invece del solo link.
+export function impostaMetaPagina({ titolo, descrizione, jsonLd }) {
+  if (titolo) document.title = titolo;
+  if (descrizione) {
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute("content", descrizione);
+  }
+  if (jsonLd) {
+    let script = document.querySelector('script[type="application/ld+json"]');
+    if (!script) {
+      script = document.createElement("script");
+      script.type = "application/ld+json";
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(jsonLd);
+  }
+}
+
 export function renderChrome(active) {
   const header = document.getElementById("site-header");
   if (header) {

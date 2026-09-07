@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave } from "./common.js";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina } from "./common.js";
 
 renderChrome(null);
 
@@ -219,14 +219,20 @@ async function init() {
     </div>
   `;
 
-  document.title = `${dett.nome} — FightItalia`;
-  const metaDesc = document.querySelector('meta[name="description"]');
-  if (metaDesc) {
-    metaDesc.setAttribute(
-      "content",
-      `${dett.nome} — ${categoria || "MMA"}, record ${rigaRoster.record_mma || "n/d"}. Statistiche, storico incontri e confronto su FightItalia.`
-    );
-  }
+  impostaMetaPagina({
+    titolo: `${dett.nome} — FightItalia`,
+    descrizione: `${dett.nome} — ${categoria || "MMA"}, record ${rigaRoster.record_mma || "n/d"}. Statistiche, storico incontri e confronto su FightItalia.`,
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name: dett.nome,
+      url: `https://gr-build.github.io/FightItalia/lottatore.html?slug=${slug}`,
+      image: foto || undefined,
+      nationality: inf["Nationality"] || undefined,
+      knowsAbout: "Mixed Martial Arts",
+      ...(categoria ? { jobTitle: `Lottatore MMA — ${categoria}` } : {}),
+    },
+  });
 
   renderTestaATesta(slug, dett, rigaRoster);
 }
