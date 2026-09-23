@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A5%8A</text></svg>">
+<title>FightItalia — MMA Gauntlet (30-0)</title>
+<meta name="description" content="Minigioco MMA a scelte multiple: gestisci Mento, Hype e Aura e prova a chiudere la carriera imbattuto sul 30-0 senza finire KO, tagliato dal roster o squalificato.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FightItalia">
+<meta property="og:title" content="MMA Gauntlet — arrivi al 30-0?">
+<meta property="og:description" content="Minigioco MMA a scelte multiple: gestisci Mento, Hype e Aura e prova a chiudere la carriera imbattuto sul 30-0 senza finire KO, tagliato dal roster o squalificato.">
+<meta property="og:image" content="https://gr-build.github.io/FightItalia/og-image.png">
+<meta property="og:url" content="https://gr-build.github.io/FightItalia/gauntlet.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MMA Gauntlet — arrivi al 30-0?">
+<meta name="twitter:description" content="Minigioco MMA a scelte multiple: gestisci Mento, Hype e Aura e prova a chiudere la carriera imbattuto sul 30-0 senza finire KO, tagliato dal roster o squalificato.">
+<meta name="twitter:image" content="https://gr-build.github.io/FightItalia/og-image.png">
+<link rel="canonical" href="https://gr-build.github.io/FightItalia/gauntlet.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script defer data-domain="gr-build.github.io" src="https://plausible.io/js/script.js"></script>
+</head>
+<body>
+
+<header id="site-header" class="site-header"></header>
+
+<section class="hero">
+  <div class="container">
+    <h1>MMA <span class="accent">Gauntlet</span></h1>
+    <p>Gestisci Mento &amp; Cardio, Dana White Hype e Aura attraverso una carriera UFC a scelte multiple. Un KO, un taglio dal roster o una squalifica finiscono la run. L'obiettivo: chiudere imbattuto sul 30-0.</p>
+  </div>
+</section>
+
+<div class="container">
+  <div id="intro" class="gauntlet-intro">
+    <div class="gauntlet-regole">
+      <div class="regola"><strong>Mento &amp; Cardio</strong><span>A zero: KO brutale, game over.</span></div>
+      <div class="regola"><strong>Dana White Hype</strong><span>A zero: tagliato dal roster, game over.</span></div>
+      <div class="regola"><strong>Aura / Trash Talk</strong><span>Alta abbastanza sblocca scelte speciali.</span></div>
+    </div>
+
+    <div class="nickname-wrap">
+      <label for="nickname" class="nickname-label">Nome da combattimento (opzionale)</label>
+      <input id="nickname" type="text" maxlength="24" placeholder="Es. «Lo Sciacallo»" class="nickname-input">
+    </div>
+
+    <div class="section-title" style="margin:8px 0 4px;">Scegli il tuo stile</div>
+    <p class="gauntlet-sotto">Ogni personaggio parte con statistiche diverse e un vantaggio passivo per tutta la carriera.</p>
+    <div id="personaggi" class="personaggi-grid"></div>
+  </div>
+
+  <div id="gioco" class="gauntlet-box" hidden>
+    <div class="gauntlet-status">
+      <div class="gauntlet-record">
+        <span class="label">Record</span>
+        <span id="record" class="valore">0-0</span>
+      </div>
+      <div class="gauntlet-turno-wrap">
+        <span class="gauntlet-personaggio-riga">
+          <span id="personaggio-attivo" class="gauntlet-personaggio"></span>
+          <span id="eta" class="gauntlet-eta"></span>
+        </span>
+        <span id="turno" class="gauntlet-turno">Turno 1</span>
+      </div>
+    </div>
+
+    <div class="stat-bar" id="barra-mento">
+      <div class="stat-head"><span>Mento &amp; Cardio</span><span class="stat-valore">70</span></div>
+      <div class="stat-track"><div class="stat-fill mento" style="width:70%"></div></div>
+    </div>
+    <div class="stat-bar" id="barra-hype">
+      <div class="stat-head"><span>Dana White Hype</span><span class="stat-valore">60</span></div>
+      <div class="stat-track"><div class="stat-fill hype" style="width:60%"></div></div>
+    </div>
+    <div class="stat-bar" id="barra-aura">
+      <div class="stat-head"><span>Aura / Trash Talk</span><span class="stat-valore">50</span></div>
+      <div class="stat-track"><div class="stat-fill aura" style="width:50%"></div></div>
+    </div>
+    <p id="aura-sblocco" class="gauntlet-hint" hidden>Aura alta: hai sbloccato una scelta speciale in questo turno.</p>
+
+    <div class="gauntlet-ritiro">
+      <button id="ritirati" class="link-ritiro">Ritirati con questo record</button>
+    </div>
+
+    <div id="card" class="scenario-card"></div>
+  </div>
+
+  <div id="finale" class="finale" hidden></div>
+</div>
+
+<footer id="site-footer" class="site-footer"></footer>
+
+<script type="module" src="js/gauntlet.js"></script>
+</body>
+</html>

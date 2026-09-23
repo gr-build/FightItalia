@@ -54,6 +54,7 @@ export function renderChrome(active) {
           <li><a href="europa.html" class="${active === "europa" ? "active" : ""}">Europa</a></li>
           <li><a href="campioni.html" class="${active === "campioni" ? "active" : ""}">Campioni</a></li>
           <li><a href="news.html" class="${active === "news" ? "active" : ""}">News</a></li>
+          <li><a href="gauntlet.html" class="nav-gauntlet ${active === "gauntlet" ? "active" : ""}">MMA Gauntlet (30-0)</a></li>
         </ul>
       </div>`;
   }
