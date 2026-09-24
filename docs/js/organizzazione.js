@@ -1,5 +1,5 @@
-import { fetchJSON, renderChrome, debounce } from "./common.js?v=202609241258";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202609241258";
+import { fetchJSON, renderChrome, debounce } from "./common.js?v=202609241635";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202609241635";
 
 renderChrome("europa");
 
@@ -62,7 +62,7 @@ async function init() {
   try { eventi = await fetchJSON(`data/europa/${orgId}-eventi.json`); } catch { eventi = []; }
 
   const nomeOrg = meta ? meta.nome : orgId.toUpperCase();
-  document.title = `${nomeOrg} — FightItalia`;
+  document.title = `${nomeOrg} — MMA Oggi`;
 
   out.innerHTML = `
     <section class="hero" style="padding:44px 0 24px; border-bottom:none;">

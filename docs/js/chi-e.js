@@ -2,8 +2,8 @@
 // ogni errore (come nei giochi calcistici tipo Tiki-Taka-Toe/Who Are Ya) e
 // ultimi incontri svelati uno alla volta come indizi.
 
-import { renderChrome } from "./common.js?v=202609241258";
-import { caricaLottatori, leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO, bandiera, genere } from "./giochi-comuni.js?v=202609241258";
+import { renderChrome } from "./common.js?v=202609241635";
+import { caricaLottatori, leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO, bandiera, genere } from "./giochi-comuni.js?v=202609241635";
 
 renderChrome("giochi");
 
@@ -179,7 +179,7 @@ async function init() {
 
   function mostraFine(vinto) {
     const esito = vinto ? `${tentativi.length}/${TENTATIVI}` : `X/${TENTATIVI}`;
-    const testo = `FightItalia · Chi è? ${libero ? "(libero)" : `#${n}`} ${esito}\n${quadratini(tentativi, segreto)}\n${SITO}chi-e.html`;
+    const testo = `MMA Oggi · Chi è? ${libero ? "(libero)" : `#${n}`} ${esito}\n${quadratini(tentativi, segreto)}\n${SITO}chi-e.html`;
     const serie = libero ? null : leggi("chie-serie", { attuale: 0, migliore: 0, ultimo: null });
     document.getElementById("fine").innerHTML = `
       <div class="chie-fine ${vinto ? "vinto" : "perso"}">

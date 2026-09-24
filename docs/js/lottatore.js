@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve } from "./common.js?v=202609241258";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve } from "./common.js?v=202609241635";
 
 renderChrome(null);
 
@@ -225,8 +225,8 @@ async function init() {
   `;
 
   impostaMetaPagina({
-    titolo: `${dett.nome} — FightItalia`,
-    descrizione: `${dett.nome} — ${categoria || "MMA"}, record ${rigaRoster.record_mma || "n/d"}. Statistiche, storico incontri e confronto su FightItalia.`,
+    titolo: `${dett.nome} — MMA Oggi`,
+    descrizione: `${dett.nome} — ${categoria || "MMA"}, record ${rigaRoster.record_mma || "n/d"}. Statistiche, storico incontri e confronto su MMA Oggi.`,
     jsonLd: {
       "@context": "https://schema.org",
       "@type": "Person",

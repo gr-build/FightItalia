@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina } from "./common.js?v=202609241258";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina } from "./common.js?v=202609241635";
 
 renderChrome(null);
 
@@ -177,8 +177,8 @@ async function init() {
   const luogo = [ev.sede, ev.luogo].filter(Boolean).join(", ");
   const dataParsata = new Date(ev.data);
   impostaMetaPagina({
-    titolo: `${ev.evento} — FightItalia`,
-    descrizione: `${ev.evento}${luogo ? ` — ${luogo}` : ""}. Data, card completa e risultati su FightItalia.`,
+    titolo: `${ev.evento} — MMA Oggi`,
+    descrizione: `${ev.evento}${luogo ? ` — ${luogo}` : ""}. Data, card completa e risultati su MMA Oggi.`,
     jsonLd: {
       "@context": "https://schema.org",
       "@type": "SportsEvent",

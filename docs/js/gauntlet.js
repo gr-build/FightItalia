@@ -1,7 +1,7 @@
 // MMA Gauntlet — minigioco a scelte multiple: arrivare a 30-0 senza
 // finire KO, senza farsi tagliare dal roster e senza squalifiche.
 
-import { renderChrome } from "./common.js?v=202609241258";
+import { renderChrome } from "./common.js?v=202609241635";
 
 // Una carriera vera dura un numero finito di turni, non un numero di vittorie:
 // arrivare in fondo imbattuto e' il vero obiettivo del 30-0.
@@ -1077,7 +1077,7 @@ function mostraEsito(testo, deltas, esitoIncontro) {
 function testoCondivisione(causa) {
   const finale = FINALI[causa];
   const record = `${stato.vittorie}-${stato.sconfitte}`;
-  return `🥊 Ho chiuso la carriera UFC di ${nomeAttivo} sul ${record} (a ${etaCorrente()} anni) su FightItalia ${finale.frase}! ${finale.emoji}\nProva a fare meglio: ${URL_GIOCO}`;
+  return `🥊 Ho chiuso la carriera UFC di ${nomeAttivo} sul ${record} (a ${etaCorrente()} anni) su MMA Oggi ${finale.frase}! ${finale.emoji}\nProva a fare meglio: ${URL_GIOCO}`;
 }
 
 function finePartita(causa) {
