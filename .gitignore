@@ -6,3 +6,6 @@ venv/
 .claude/
 audit_report.txt
 .env
+
+# Memoria del radar: vive nella cache di GitHub Actions (radar.yml)
+radar/
