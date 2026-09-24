@@ -3,7 +3,7 @@
 // ultimi incontri svelati uno alla volta come indizi.
 
 import { renderChrome } from "./common.js";
-import { caricaLottatori, leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO, bandiera, genere } from "./giochi-comuni.js";
+import { caricaLottatori, leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO, bandiera, genere } from "./giochi-comuni.js?v=202609241252";
 
 renderChrome("giochi");
 

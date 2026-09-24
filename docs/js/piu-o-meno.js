@@ -2,7 +2,7 @@
 // di meno del primo? Una risposta sbagliata e la serie finisce.
 
 import { renderChrome } from "./common.js";
-import { caricaLottatori, leggi, scrivi, iniziali, condividi, SITO, bandiera } from "./giochi-comuni.js";
+import { caricaLottatori, leggi, scrivi, iniziali, condividi, SITO, bandiera } from "./giochi-comuni.js?v=202609241252";
 
 renderChrome("giochi");
 
