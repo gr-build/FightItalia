@@ -41,6 +41,61 @@ export function impostaMetaPagina({ titolo, descrizione, jsonLd }) {
   }
 }
 
+// ---------- Lingue ----------
+// Il sito nasce e resta in italiano. Le altre lingue passano dal proxy di
+// Google Traduttore (<host>.translate.goog), che traduce la pagina al volo
+// senza bisogno di mantenere testi tradotti a mano: funziona con qualsiasi
+// dominio, anche dopo il passaggio a fightitalia.it.
+const LINGUE = [
+  ["it", "Italiano"], ["en", "English"], ["es", "Español"], ["fr", "Français"],
+  ["de", "Deutsch"], ["pt", "Português"], ["pl", "Polski"], ["ro", "Română"],
+  ["sq", "Shqip"], ["ar", "العربية"], ["ru", "Русский"], ["uk", "Українська"],
+  ["tr", "Türkçe"], ["zh-CN", "中文"], ["ja", "日本語"],
+];
+
+const SU_TRADUTTORE = location.hostname.endsWith(".translate.goog");
+
+function linguaAttuale() {
+  if (!SU_TRADUTTORE) return "it";
+  return new URLSearchParams(location.search).get("_x_tr_tl") || "it";
+}
+
+function hostOriginale() {
+  // gr--build-github-io.translate.goog -> gr-build.github.io
+  return location.hostname
+    .replace(/\.translate\.goog$/, "")
+    .replace(/--/g, "\u0000")
+    .replace(/-/g, ".")
+    .replace(/\u0000/g, "-");
+}
+
+function cambiaLingua(lingua) {
+  const params = new URLSearchParams(location.search);
+  ["_x_tr_sl", "_x_tr_tl", "_x_tr_hl", "_x_tr_pto"].forEach((k) => params.delete(k));
+  const host = SU_TRADUTTORE ? hostOriginale() : location.hostname;
+  if (lingua === "it") {
+    const q = params.toString();
+    location.href = `https://${host}${location.pathname}${q ? `?${q}` : ""}${location.hash}`;
+    return;
+  }
+  const hostTradotto = host.replace(/-/g, "--").replace(/\./g, "-") + ".translate.goog";
+  params.set("_x_tr_sl", "it");
+  params.set("_x_tr_tl", lingua);
+  params.set("_x_tr_hl", lingua);
+  location.href = `https://${hostTradotto}${location.pathname}?${params.toString()}${location.hash}`;
+}
+
+function selettoreLingua() {
+  const attuale = linguaAttuale();
+  const opzioni = LINGUE.map(([codice, nome]) => `<option value="${codice}"${codice === attuale ? " selected" : ""}>${nome}</option>`).join("");
+  return `
+    <label class="lingua" title="Lingua / Language">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+      <span class="sr-only">Lingua</span>
+      <select id="lingua" aria-label="Lingua / Language">${opzioni}</select>
+    </label>`;
+}
+
 export function renderChrome(active) {
   const header = document.getElementById("site-header");
   if (header) {
@@ -54,9 +109,12 @@ export function renderChrome(active) {
           <li><a href="europa.html" class="${active === "europa" ? "active" : ""}">Europa</a></li>
           <li><a href="campioni.html" class="${active === "campioni" ? "active" : ""}">Campioni</a></li>
           <li><a href="news.html" class="${active === "news" ? "active" : ""}">News</a></li>
-          <li><a href="gauntlet.html" class="nav-gauntlet ${active === "gauntlet" ? "active" : ""}">MMA Gauntlet (30-0)</a></li>
+          <li><a href="giochi.html" class="nav-gauntlet ${active === "giochi" || active === "gauntlet" ? "active" : ""}">Giochi</a></li>
         </ul>
+        ${selettoreLingua()}
       </div>`;
+    const sel = header.querySelector("#lingua");
+    if (sel) sel.addEventListener("change", () => cambiaLingua(sel.value));
   }
   const footer = document.getElementById("site-footer");
   if (footer) {

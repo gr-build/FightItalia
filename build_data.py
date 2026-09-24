@@ -547,6 +547,109 @@ def genera_europa():
         print(f"{org}: {len(eventi)} eventi")
 
 
+
+# ---------- Dati per i giochi (Chi e'?, Piu' o meno) ----------
+# Un file unico e leggero con solo i campi che servono ai giochi, invece di
+# far scaricare al browser centinaia di schede. Il paese e' quello di
+# nascita (il campo Nationality di Wikipedia manca in 3 schede su 4).
+
+_PAESI_IT = {
+    "U.S.": ("Stati Uniti", "🇺🇸"), "United States": ("Stati Uniti", "🇺🇸"), "United States of America": ("Stati Uniti", "🇺🇸"),
+    "Brazil": ("Brasile", "🇧🇷"), "Russia": ("Russia", "🇷🇺"), "Soviet Union": ("Russia/URSS", "🇷🇺"),
+    "China": ("Cina", "🇨🇳"), "Poland": ("Polonia", "🇵🇱"), "Mexico": ("Messico", "🇲🇽"), "México": ("Messico", "🇲🇽"),
+    "England": ("Regno Unito", "🇬🇧"), "Scotland": ("Regno Unito", "🇬🇧"), "Wales": ("Regno Unito", "🇬🇧"),
+    "Australia": ("Australia", "🇦🇺"), "South Australia": ("Australia", "🇦🇺"), "Canada": ("Canada", "🇨🇦"),
+    "France": ("Francia", "🇫🇷"), "New Zealand": ("Nuova Zelanda", "🇳🇿"), "Japan": ("Giappone", "🇯🇵"),
+    "Nigeria": ("Nigeria", "🇳🇬"), "Argentina": ("Argentina", "🇦🇷"), "Uzbekistan": ("Uzbekistan", "🇺🇿"),
+    "South Korea": ("Corea del Sud", "🇰🇷"), "FR Yugoslavia": ("Jugoslavia", "🏳️"), "SFR Yugoslavia": ("Jugoslavia", "🏳️"),
+    "Germany": ("Germania", "🇩🇪"), "West Germany": ("Germania", "🇩🇪"), "Iran": ("Iran", "🇮🇷"), "Slovakia": ("Slovacchia", "🇸🇰"),
+    "Kyrgyzstan": ("Kirghizistan", "🇰🇬"), "Switzerland": ("Svizzera", "🇨🇭"), "Moldova": ("Moldavia", "🇲🇩"),
+    "Ukraine": ("Ucraina", "🇺🇦"), "Netherlands": ("Paesi Bassi", "🇳🇱"), "South Africa": ("Sudafrica", "🇿🇦"),
+    "Ireland": ("Irlanda", "🇮🇪"), "Jamaica": ("Giamaica", "🇯🇲"), "Ecuador": ("Ecuador", "🇪🇨"), "Kazakhstan": ("Kazakistan", "🇰🇿"),
+    "India": ("India", "🇮🇳"), "Tajikistan": ("Tagikistan", "🇹🇯"), "Bosnia and Herzegovina": ("Bosnia", "🇧🇦"),
+    "Austria": ("Austria", "🇦🇹"), "Dominican Republic": ("Rep. Dominicana", "🇩🇴"), "Cuba": ("Cuba", "🇨🇺"),
+    "Portugal": ("Portogallo", "🇵🇹"), "Croatia": ("Croazia", "🇭🇷"), "Czechoslovakia": ("Cechia/Slovacchia", "🇨🇿"),
+    "Lithuania": ("Lituania", "🇱🇹"), "Turkey": ("Turchia", "🇹🇷"), "Italy": ("Italia", "🇮🇹"), "Cameroon": ("Camerun", "🇨🇲"),
+    "Iceland": ("Islanda", "🇮🇸"), "Denmark": ("Danimarca", "🇩🇰"), "Sweden": ("Svezia", "🇸🇪"), "Spain": ("Spagna", "🇪🇸"),
+    "Chile": ("Cile", "🇨🇱"), "Peru": ("Perù", "🇵🇪"), "Georgia": ("Georgia", "🇬🇪"), "Morocco": ("Marocco", "🇲🇦"),
+    "Armenia": ("Armenia", "🇦🇲"), "Uganda": ("Uganda", "🇺🇬"), "Philippines": ("Filippine", "🇵🇭"), "Guinea": ("Guinea", "🇬🇳"),
+    "Afghanistan": ("Afghanistan", "🇦🇫"), "Iraq": ("Iraq", "🇮🇶"), "Angola": ("Angola", "🇦🇴"), "Myanmar": ("Myanmar", "🇲🇲"),
+    "Panama": ("Panama", "🇵🇦"), "Venezuela": ("Venezuela", "🇻🇪"), "Thailand": ("Thailandia", "🇹🇭"), "Cyprus": ("Cipro", "🇨🇾"),
+}
+
+
+def _paese_nascita(infobox):
+    nato = re.sub(r"\[.*?\]|\(.*?\)", "", infobox.get("Born") or "").strip()
+    if "," not in nato:
+        return None, None
+    return _PAESI_IT.get(nato.split(",")[-1].strip(), (None, None))
+
+
+def _intero(v):
+    try:
+        return int(str(v).strip().split()[0])
+    except (ValueError, IndexError, TypeError):
+        return None
+
+
+def _categoria_giochi(cat):
+    """'Women's flyweights (125 lb, 56 kg)' -> ('Mosca', 'F')."""
+    nomi = {
+        "heavyweights": "Massimi", "light heavyweights": "Mediomassimi", "middleweights": "Medi",
+        "welterweights": "Welter", "lightweights": "Leggeri", "featherweights": "Piuma",
+        "bantamweights": "Gallo", "flyweights": "Mosca", "strawweights": "Paglia",
+    }
+    base = re.sub(r"\s*\(.*", "", cat or "").lower()
+    genere = "F" if base.startswith("women's") else "M"
+    base = base.replace("women's ", "")
+    return nomi.get(base), genere
+
+
+def genera_dati_giochi():
+    roster = json.loads((WEB_DATA / "roster.json").read_text(encoding="utf-8"))
+    out = []
+    for r in roster:
+        cat, genere = _categoria_giochi(r.get("categoria"))
+        if not r.get("slug") or not cat:
+            continue  # leggende e liste speciali (recent signings...) senza categoria di peso
+        path = WEB_DATA_LOTTATORI / f"{r['slug']}.json"
+        if not path.exists():
+            continue
+        scheda = json.loads(path.read_text(encoding="utf-8"))
+        ib = scheda.get("infobox", {})
+        # Ultimi 5 incontri come indizi per "Chi e'?": esito, avversario, metodo.
+        esiti = {"win": "V", "loss": "S", "draw": "P", "nc": "NC"}
+        ultimi = [
+            [esiti.get(str(f.get("res.", "")).strip().lower(), "?"), f.get("opponent") or "", (f.get("method") or "").split("(")[0].strip(), f.get("event") or ""]
+            for f in (scheda.get("storico") or [])[:5]
+        ]
+        paese, bandiera = _paese_nascita(ib)
+        # Il record viene dal roster (record_mma, "28–14 (1 NC)"): nell'infobox
+        # Wins/Losses a volte mescolano pugilato e MMA (Derrick Lewis: 1-14).
+        m = re.match(r"\s*(\d+)\D+(\d+)", r.get("record_mma") or "")
+        if not m:
+            continue
+        vinte, perse = int(m.group(1)), int(m.group(2))
+        # Vittorie per KO/sottomissione contate dallo storico incontri: i
+        # campi "By knockout"/"By submission" dell'infobox sono spesso
+        # indietro rispetto al record (Makhachev: 1+13+11 su 29 vittorie).
+        vittorie = [str(f.get("method") or "").lower() for f in (scheda.get("storico") or []) if str(f.get("res.", "")).strip().lower() == "win"]
+        if vittorie and abs(len(vittorie) - vinte) <= 1:
+            ko = sum(1 for m in vittorie if m.startswith(("ko", "tko")))
+            sub = sum(1 for m in vittorie if m.startswith(("submission", "technical submission")))
+        else:
+            ko = sub = None
+        out.append({
+            "n": r["nome"], "s": r["slug"], "c": cat, "g": genere,
+            "p": paese, "b": bandiera,
+            "e": _intero(r.get("eta")),
+            "h": r.get("altezza_cm"), "r": r.get("reach_cm"),
+            "v": vinte, "l": perse, "ko": ko, "sub": sub,
+            "f": r.get("foto"), "ch": bool(r.get("campione_attuale")), "u": ultimi,
+        })
+    (WEB_DATA / "giochi.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    print(f"Dati giochi: {len(out)} lottatori ({sum(1 for x in out if x['p'])} con paese)")
+
 if __name__ == "__main__":
     roster = genera_roster_e_eventi()
     genera_dettagli_lottatori(roster)
@@ -555,3 +658,4 @@ if __name__ == "__main__":
     eventi = pd.read_json(WEB_DATA / "eventi.json")
     genera_card_eventi(eventi)
     genera_lottatori_extra()
+    genera_dati_giochi()
