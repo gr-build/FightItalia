@@ -14,6 +14,7 @@ articoli piu' vecchi di CACHE_GIORNI, altrimenti crescerebbe senza limite
 cache locale una volta scaricati).
 """
 
+import html
 import json
 import os
 import time
@@ -42,8 +43,10 @@ HEADERS = {
     "User-Agent": "FightItaliaBot/1.0 (+progetto personale non commerciale, aggrega feed RSS pubblici)"
 }
 
-GEMINI_MODEL = "gemini-flash-latest"
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
+# Il modello principale ogni tanto e' sovraccarico (503 per ore): si passa
+# al successivo della lista, e solo se falliscono tutti si rinuncia.
+GEMINI_MODELLI = ["gemini-flash-latest", "gemini-flash-lite-latest", "gemini-2.5-flash-lite"]
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{modello}:generateContent"
 
 ROOT = Path(__file__).parent
 CACHE_DIR = ROOT / "cache"
@@ -115,10 +118,31 @@ def _ritardo_da_errore_429(risposta, attesa_base):
     return attesa_base
 
 
+class ModelloNonDisponibile(Exception):
+    """503/timeout: il modello e' sovraccarico, conviene provarne un altro."""
+
+
 def _chiama_gemini_con_retry(body, api_key):
+    ultimo_errore = None
+    for modello in GEMINI_MODELLI:
+        try:
+            return _chiama_modello(body, api_key, modello)
+        except ModelloNonDisponibile as errore:
+            ultimo_errore = errore
+            continue
+    raise ultimo_errore
+
+
+def _chiama_modello(body, api_key, modello):
     attesa = 5
+    url = GEMINI_URL.format(modello=modello)
     for tentativo in range(TENTATIVI_MAX):
-        r = requests.post(f"{GEMINI_URL}?key={api_key}", json=body, timeout=30)
+        try:
+            r = requests.post(f"{url}?key={api_key}", json=body, timeout=30)
+        except requests.Timeout as errore:
+            raise ModelloNonDisponibile(f"{modello}: timeout") from errore
+        if r.status_code in (500, 503):
+            raise ModelloNonDisponibile(f"{modello}: {r.status_code}")
         if r.status_code != 429:
             r.raise_for_status()
             return r
@@ -158,6 +182,14 @@ def _riscrivi_con_gemini(api_key, titolo, estratto, fonte):
     return dati["titolo"].strip(), dati["riassunto"].strip()
 
 
+def _voce_originale(titolo, estratto, fonte, link, pubblicato):
+    """Notizia com'e' nel feed (inglese), usata quando Gemini non risponde o
+    si e' gia' raggiunto il tetto della run. Non va in cache: alla run
+    successiva si riprova a riscriverla in italiano."""
+    riassunto = estratto if len(estratto) <= 280 else estratto[:280].rsplit(" ", 1)[0] + "…"
+    return {"titolo": titolo, "riassunto": riassunto, "fonte": fonte, "url": link, "pubblicato": pubblicato, "lingua": "en"}
+
+
 def genera_news():
     # In locale la chiave sta in .env (gitignored); su GitHub Actions arriva
     # come variabile d'ambiente dal secret GEMINI_API_KEY, non c'e' un .env.
@@ -177,8 +209,6 @@ def genera_news():
 
     limite_raggiunto = False
     for fonte, url_feed in FEEDS.items():
-        if limite_raggiunto:
-            break
         try:
             feed = feedparser.parse(url_feed, agent=HEADERS["User-Agent"])
             if feed.bozo and not feed.entries:
@@ -197,24 +227,27 @@ def genera_news():
                 da_cache += 1
                 continue
 
-            if nuovi >= NUOVI_MAX_PER_RUN:
-                continue
-
-            titolo_orig = entry.get("title", "").strip()
+            titolo_orig = html.unescape(entry.get("title", "")).strip()
             estratto = _pulisci_html(entry.get("summary", "") or entry.get("description", ""))[:1200]
             pubblicato = _data_iso(entry)
             if not titolo_orig:
                 continue
 
+            if nuovi >= NUOVI_MAX_PER_RUN or limite_raggiunto:
+                articoli.append(_voce_originale(titolo_orig, estratto, fonte, link, pubblicato))
+                continue
+
             try:
                 titolo_it, riassunto_it = _riscrivi_con_gemini(api_key, titolo_orig, estratto, fonte)
             except LimiteRaggiunto as errore:
-                print(f"  [news] {errore}: mi fermo qui, il resto alla prossima run")
+                print(f"  [news] {errore}: niente piu' Gemini in questa run, il resto resta in inglese")
                 limite_raggiunto = True
-                break
+                articoli.append(_voce_originale(titolo_orig, estratto, fonte, link, pubblicato))
+                continue
             except Exception as errore:
                 print(f"  [news] Gemini fallito per '{titolo_orig[:60]}': {errore}")
                 falliti += 1
+                articoli.append(_voce_originale(titolo_orig, estratto, fonte, link, pubblicato))
                 continue
 
             voce = {

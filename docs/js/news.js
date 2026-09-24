@@ -18,6 +18,7 @@ function cardNews(articolo) {
     <article class="news-card">
       <div class="news-meta">
         <span class="news-fonte">${articolo.fonte}</span>
+        ${articolo.lingua === "en" ? `<span class="news-lingua" title="Traduzione in arrivo">EN</span>` : ""}
         <span class="news-tempo">${tempoFa(articolo.pubblicato)}</span>
       </div>
       <h2 class="news-titolo">${articolo.titolo}</h2>
