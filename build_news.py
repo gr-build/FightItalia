@@ -143,6 +143,11 @@ def _chiama_modello(body, api_key, modello):
             raise ModelloNonDisponibile(f"{modello}: timeout") from errore
         if r.status_code in (500, 503):
             raise ModelloNonDisponibile(f"{modello}: {r.status_code}")
+        if r.status_code == 400 and "thinkingConfig" in body.get("generationConfig", {}):
+            # Non tutti i modelli accettano thinkingConfig (flash-lite -> 400):
+            # si riprova la stessa richiesta senza.
+            body = {**body, "generationConfig": {k: v for k, v in body["generationConfig"].items() if k != "thinkingConfig"}}
+            continue
         if r.status_code != 429:
             r.raise_for_status()
             return r
