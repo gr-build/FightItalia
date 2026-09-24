@@ -1877,3 +1877,18 @@ h1, h2, h3, h4 {
 .ac-sesso.m { background: rgba(57, 135, 229, 0.18); color: #7fb2f0; }
 .ac-sesso.f { background: rgba(232, 123, 164, 0.18); color: #f0a3c2; }
 .bandiera { width: 20px; height: 15px; object-fit: cover; border-radius: 2px; vertical-align: -2px; display: inline-block; }
+
+/* News brevi (campioni) */
+.news-brevi { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.news-breve {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 12px 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  transition: border-color 0.15s ease;
+}
+.news-breve:hover { border-color: var(--border); }
+.news-breve-meta { font-size: 11.5px; color: var(--text-muted); }
+.news-breve-meta b { color: var(--gold); font-weight: 600; }
+.news-breve-titolo { font-size: 14px; line-height: 1.45; color: var(--text); }

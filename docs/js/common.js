@@ -314,3 +314,29 @@ export function blocPuntiChiave(punti) {
       <ul>${punti.map((p) => `<li>${p}</li>`).join("")}</ul>
     </div>`;
 }
+
+// ---------- News sui campioni ----------
+// Le news (data/news.json) non sono collegate ai lottatori: si cercano i
+// cognomi nel titolo e nel riassunto. Solo per i campioni, come richiesto:
+// per tutti gli altri i falsi positivi (cognomi comuni) sarebbero troppi.
+const normalizzaTesto = (t) => (t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+export function newsSu(lottatore, articoli) {
+  const parti = normalizzaTesto(lottatore.nome).split(/\s+/).filter(Boolean);
+  const cognome = parti[parti.length - 1];
+  const nomeCompleto = parti.join(" ");
+  return articoli.filter((a) => {
+    const testo = normalizzaTesto(`${a.titolo} ${a.riassunto}`);
+    return testo.includes(nomeCompleto) || (cognome.length >= 4 && new RegExp(`\\b${cognome}\\b`).test(testo));
+  });
+}
+
+export function cardNewsBreve(a, etichetta = "") {
+  const d = a.pubblicato ? new Date(a.pubblicato) : null;
+  const quando = d && !isNaN(d) ? d.toLocaleDateString("it-IT", { day: "numeric", month: "short" }) : "";
+  return `
+    <a class="news-breve" href="${a.url}" target="_blank" rel="noopener noreferrer">
+      <span class="news-breve-meta">${etichetta ? `<b>${etichetta}</b> · ` : ""}${a.fonte}${quando ? ` · ${quando}` : ""}${a.lingua === "en" ? ` · <span class="news-lingua">EN</span>` : ""}</span>
+      <span class="news-breve-titolo">${a.titolo}</span>
+    </a>`;
+}

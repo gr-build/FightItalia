@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina } from "./common.js";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve } from "./common.js";
 
 renderChrome(null);
 
@@ -209,6 +209,8 @@ async function init() {
 
     ${pannelloComeVince(storico)}
 
+    ${rigaRoster.campione_attuale ? `<div class="section-title" style="margin-top:40px;">Ultime news</div><div id="news-lottatore" class="news-brevi" style="max-width:640px;"><div class="empty-state">Carico le news...</div></div>` : ""}
+
     <div class="section-title" style="margin-top:40px;">Testa a testa</div>
     <div id="tt-picker" style="max-width:520px;"></div>
     <div id="testa-a-testa-risultato" style="max-width:520px; margin-top:16px;"></div>
@@ -235,6 +237,14 @@ async function init() {
   });
 
   renderTestaATesta(slug, dett, rigaRoster);
+
+  // Solo per i campioni in carica: le news che li citano.
+  if (rigaRoster.campione_attuale) {
+    const box = document.getElementById("news-lottatore");
+    const news = await fetchJSON("data/news.json").then((d) => d.articoli || []).catch(() => []);
+    const sue = newsSu({ nome: dett.nome }, news);
+    box.innerHTML = sue.slice(0, 6).map((a) => cardNewsBreve(a)).join("") || `<div class="empty-state">Nessuna notizia recente su ${dett.nome}.</div>`;
+  }
 }
 
 init();

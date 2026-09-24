@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink } from "./common.js";
+import { fetchJSON, renderChrome, icon, slugDaLink, newsSu, cardNewsBreve } from "./common.js";
 import { ORGANIZZAZIONI } from "./europa-data.js";
 
 renderChrome("campioni");
@@ -98,6 +98,22 @@ async function init() {
   const donna = (r) => r.categoria.startsWith("Women's");
   document.getElementById("griglia-campioni").innerHTML = campioni.filter((r) => !donna(r)).map(cardCampione).join("");
   document.getElementById("griglia-campionesse").innerHTML = campioni.filter(donna).map(cardCampione).join("");
+
+  // News che parlano dei campioni attuali, dalla piu' recente. Una notizia
+  // che cita due campioni compare una volta sola.
+  const news = await fetchJSON("data/news.json").then((d) => d.articoli || []).catch(() => []);
+  const viste = new Set();
+  const newsCampioni = [];
+  campioni.forEach((c) => newsSu(c, news).forEach((a) => {
+    if (!viste.has(a.url)) {
+      viste.add(a.url);
+      newsCampioni.push({ a, c });
+    }
+  }));
+  newsCampioni.sort((x, y) => (y.a.pubblicato || "").localeCompare(x.a.pubblicato || ""));
+  document.getElementById("news-campioni").innerHTML =
+    newsCampioni.slice(0, 12).map(({ a, c }) => cardNewsBreve(a, c.nome)).join("") ||
+    `<div class="empty-state">Nessuna notizia sui campioni in questo momento.</div>`;
 
   const leggende = roster.filter((r) => r.ex_campione);
   document.getElementById("griglia-leggende").innerHTML = leggende.map(cardLeggenda).join("");
