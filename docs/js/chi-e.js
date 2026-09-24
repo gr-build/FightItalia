@@ -3,7 +3,7 @@
 // ultimi incontri svelati uno alla volta come indizi.
 
 import { renderChrome } from "./common.js";
-import { caricaLottatori, leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js";
+import { caricaLottatori, leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO, bandiera, genere } from "./giochi-comuni.js";
 
 renderChrome("giochi");
 
@@ -93,7 +93,7 @@ function rigaTentativo(t, s) {
     <div class="tent-riga${t.s === s.s ? " vinto" : ""}">
       <div class="tent-nome">${t.n}</div>
       <div class="tent-cella ${cat}"><span class="k">Categoria</span>${t.c}${t.g === "F" ? " (F)" : ""}</div>
-      <div class="tent-cella ${paese}"><span class="k">Paese</span>${t.b || ""} ${t.p || "—"}</div>
+      <div class="tent-cella ${paese}"><span class="k">Paese</span>${bandiera(t.b)} ${t.p || "—"}</div>
       <div class="tent-cella ${eta.cls}"><span class="k">Età</span>${eta.txt}</div>
       <div class="tent-cella ${alt.cls}"><span class="k">Altezza</span>${alt.txt}</div>
       <div class="tent-cella ${vit.cls}"><span class="k">Vittorie</span>${vit.txt}</div>
@@ -112,7 +112,7 @@ function indizi(s, errori, finito) {
   const nascosti = Math.max(0, Math.min(5, s.u.length) - quanti);
   for (let i = 0; i < nascosti; i++) incontri.push(`<li class="nascosto"><span class="esito">?</span><span class="avv">Indizio al prossimo errore</span></li>`);
   const extra = [];
-  if (finito || errori >= 5) extra.push(`<div class="indizio-extra"><span class="k">Paese di nascita</span>${s.b || ""} ${s.p || "—"}</div>`);
+  if (finito || errori >= 5) extra.push(`<div class="indizio-extra"><span class="k">Paese di nascita</span>${bandiera(s.b)} ${s.p || "—"}</div>`);
   if (finito || errori >= 6) extra.push(`<div class="indizio-extra"><span class="k">Categoria</span>${s.c}${s.g === "F" ? " femminile" : ""}</div>`);
   if (finito || errori >= 7) extra.push(`<div class="indizio-extra"><span class="k">Record</span>${s.v}–${s.l}</div>`);
   return `
@@ -149,8 +149,10 @@ async function init() {
     </div>
     <form class="chie-form" id="form" autocomplete="off">
       <label for="tentativo" class="sr-only">Nome del lottatore</label>
-      <input id="tentativo" list="nomi" placeholder="Scrivi il nome del lottatore…" required>
-      <datalist id="nomi">${tutti.map((x) => `<option value="${x.n}">`).join("")}</datalist>
+      <div class="ac">
+        <input id="tentativo" placeholder="Scrivi il nome del lottatore…" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ac-lista" required>
+        <ul class="ac-lista" id="ac-lista" role="listbox" hidden></ul>
+      </div>
       <button type="submit" class="btn-gioco">Prova</button>
     </form>
     <p class="chie-msg" id="msg" role="status"></p>
@@ -183,7 +185,7 @@ async function init() {
       <div class="chie-fine ${vinto ? "vinto" : "perso"}">
         <div class="chie-fine-titolo">${vinto ? "Preso!" : "Era lui"}</div>
         <div class="chie-fine-nome"><a href="lottatore.html?slug=${segreto.s}">${segreto.n}</a></div>
-        <div class="chie-fine-sub">${segreto.b || ""} ${segreto.c}${segreto.g === "F" ? " femminile" : ""} · ${segreto.v}–${segreto.l}</div>
+        <div class="chie-fine-sub">${bandiera(segreto.b)} ${segreto.c}${segreto.g === "F" ? " femminile" : ""} · ${segreto.v}–${segreto.l}</div>
         ${serie ? `<div class="chie-fine-sub">Serie: ${serie.attuale} · Migliore: ${serie.migliore}</div>` : ""}
         <div class="finale-azioni">
           <button type="button" class="btn-gioco" id="condividi">Condividi il risultato</button>
@@ -204,6 +206,69 @@ async function init() {
     scrivi("chie-serie", serie);
   }
 
+  // ---------- menu a tendina con foto, categoria e sesso ----------
+  const lista = document.getElementById("ac-lista");
+  const normalizza = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const indice = tutti.map((x) => ({ x, chiave: normalizza(x.n) }));
+  let proposte = [];
+  let attiva = -1;
+
+  function voce(x, i) {
+    const avatar = x.f
+      ? `<img src="${x.f}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ac-av vuoto',textContent:'${iniziali(x.n)}'}))" class="ac-av">`
+      : `<span class="ac-av vuoto">${iniziali(x.n)}</span>`;
+    return `<li role="option" id="ac-${i}" class="${i === attiva ? "attiva" : ""}" data-i="${i}" aria-selected="${i === attiva}">
+      ${avatar}
+      <span class="ac-testo"><span class="ac-nome">${x.n}</span><span class="ac-info">${bandiera(x.b)} ${x.c} · ${genere(x)}</span></span>
+      <span class="ac-sesso ${x.g === "F" ? "f" : "m"}">${x.g === "F" ? "F" : "M"}</span>
+    </li>`;
+  }
+
+  function mostraProposte() {
+    const q = normalizza(input.value.trim());
+    const giaProvati = new Set(tentativi.map((t) => t.s));
+    proposte = q.length < 2 ? [] : indice
+      .filter(({ x, chiave }) => !giaProvati.has(x.s) && chiave.split(/\s+/).some((p) => p.startsWith(q)) || (q.length > 2 && chiave.includes(q)))
+      .map(({ x }) => x)
+      .filter((x) => !giaProvati.has(x.s))
+      .slice(0, 8);
+    attiva = proposte.length ? 0 : -1;
+    lista.innerHTML = proposte.map(voce).join("");
+    lista.hidden = !proposte.length;
+    input.setAttribute("aria-expanded", String(!!proposte.length));
+  }
+
+  function scegli(i) {
+    if (!proposte[i]) return;
+    input.value = proposte[i].n;
+    lista.hidden = true;
+    form.requestSubmit();
+  }
+
+  input.addEventListener("input", mostraProposte);
+  input.addEventListener("keydown", (e) => {
+    if (lista.hidden) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      attiva = (attiva + (e.key === "ArrowDown" ? 1 : -1) + proposte.length) % proposte.length;
+      lista.innerHTML = proposte.map(voce).join("");
+      input.setAttribute("aria-activedescendant", `ac-${attiva}`);
+    } else if (e.key === "Enter" && attiva >= 0) {
+      e.preventDefault();
+      scegli(attiva);
+    } else if (e.key === "Escape") {
+      lista.hidden = true;
+    }
+  });
+  lista.addEventListener("mousedown", (e) => {
+    const li = e.target.closest("li[data-i]");
+    if (li) {
+      e.preventDefault();
+      scegli(Number(li.dataset.i));
+    }
+  });
+  input.addEventListener("blur", () => setTimeout(() => (lista.hidden = true), 120));
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const nome = input.value.trim().toLowerCase();
@@ -218,6 +283,7 @@ async function init() {
     }
     msg.textContent = "";
     input.value = "";
+    lista.hidden = true;
     tentativi.push(scelto);
     if (!libero) scrivi(chiave, tentativi.map((t) => t.s));
     const vinto = scelto.s === segreto.s;

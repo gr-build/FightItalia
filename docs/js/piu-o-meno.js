@@ -2,7 +2,7 @@
 // di meno del primo? Una risposta sbagliata e la serie finisce.
 
 import { renderChrome } from "./common.js";
-import { caricaLottatori, leggi, scrivi, iniziali, condividi, SITO } from "./giochi-comuni.js";
+import { caricaLottatori, leggi, scrivi, iniziali, condividi, SITO, bandiera } from "./giochi-comuni.js";
 
 renderChrome("giochi");
 
@@ -44,7 +44,7 @@ function lato(x, stat, mostraValore, id) {
     <div class="pom-lato" id="${id}">
       ${foto(x)}
       <div class="pom-nome">${x.n}</div>
-      <div class="pom-sub">${x.b || ""} ${x.c}${x.g === "F" ? " (F)" : ""}</div>
+      <div class="pom-sub">${bandiera(x.b)} ${x.c}${x.g === "F" ? " (F)" : ""}</div>
       <div class="pom-valore">${mostraValore ? `${valore(x, stat.k)} <span>${stat.unita}</span>` : "?"}</div>
     </div>`;
 }

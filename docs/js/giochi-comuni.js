@@ -76,3 +76,14 @@ export async function condividi(testo, bottone) {
 // Indirizzo pubblico da mettere nei risultati condivisi (come URL_GIOCO in
 // gauntlet.js): da aggiornare al passaggio a fightitalia.it.
 export const SITO = "https://gr-build.github.io/FightItalia/";
+
+// Windows non disegna le bandiere emoji (mostra "US", "BR"...): dalla
+// bandiera emoji si ricava il codice paese e si usa un'immagine.
+export function bandiera(emoji) {
+  const lettere = [...(emoji || "")].map((c) => c.codePointAt(0) - 0x1f1e6).filter((n) => n >= 0 && n < 26);
+  if (lettere.length !== 2) return "";
+  const codice = String.fromCharCode(...lettere.map((n) => 97 + n));
+  return `<img class="bandiera" src="https://flagcdn.com/w40/${codice}.png" alt="" width="20" height="15" loading="lazy">`;
+}
+
+export const genere = (x) => (x.g === "F" ? "Donna" : "Uomo");
