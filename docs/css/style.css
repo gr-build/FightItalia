@@ -724,76 +724,139 @@ h1, h2, h3, h4 {
 
 .bout-row {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px;
   background: var(--bg-elevated);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius);
 }
 
-.bout-cat {
-  flex-shrink: 0;
-  width: 130px;
-  text-align: center;
-  white-space: normal;
+.bout-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.bout-main { flex: 1 1 auto; min-width: 0; }
+.bout-cat { color: var(--text-muted); }
 
 .bout-posizione {
   font-family: "Oswald", sans-serif;
   font-size: 11px;
   letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--accent);
-  margin-bottom: 2px;
 }
 
-.bout-fighters {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  flex-wrap: wrap;
+.bout-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.bout-lato { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.bout-lato.b { flex-direction: row-reverse; text-align: right; }
+.bout-lato-testo { min-width: 0; }
+
+.bout-avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top;
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--border);
+}
+
+.bout-avatar-vuoto {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Oswald", sans-serif;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.bout-lato.vincitore .bout-avatar { border-color: var(--win); }
+
+.bout-nome {
   font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
-.bout-fighters .bout-winner { color: var(--win); font-weight: 600; }
-.bout-vs { color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
+.bout-nome a { color: var(--text); }
+.bout-nome a:hover { color: var(--accent); }
+.bout-lato.vincitore .bout-nome, .bout-lato.vincitore .bout-nome a { color: var(--win); font-weight: 600; }
 
-.bout-result {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.bout-confronto {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 6px;
-  font-size: 11.5px;
-  color: var(--text-secondary);
-}
-
-.bout-confronto .k {
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.bout-w {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 5px;
+  border-radius: 3px;
+  background: rgba(47, 184, 114, 0.14);
+  color: var(--win);
   font-size: 10px;
+  font-weight: 700;
+  vertical-align: 2px;
 }
+
+.bout-meta {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.bout-meta.k { margin-top: 0; color: var(--text-muted); font-size: 11.5px; }
+
+.bout-vs {
+  font-family: "Oswald", sans-serif;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.bout-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border-soft);
+  font-size: 12px;
+}
+
+.bout-esito { color: var(--text-secondary); }
+.bout-esito.da-disputare { color: var(--text-muted); }
 
 .bout-confronto-link {
-  margin-left: auto;
   color: var(--accent);
   font-weight: 600;
   white-space: nowrap;
 }
 
 .bout-confronto-link:hover { text-decoration: underline; }
+
+.bout-confronto-na {
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-size: 11.5px;
+}
+
+@media (max-width: 520px) {
+  .bout-avatar { width: 32px; height: 32px; }
+  .bout-grid { gap: 8px; }
+  .bout-nome { font-size: 13.5px; }
+  .bout-meta { font-size: 11px; }
+}
 
 /* ---------- Eventi ---------- */
 

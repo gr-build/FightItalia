@@ -60,37 +60,40 @@ async function riassuntoWikipedia(link) {
   }
 }
 
-function nomeConLink(nome, link) {
-  if (!nome) return "—";
-  const slug = link ? slugDaLink(link) : null;
-  return slug ? `<a href="lottatore.html?slug=${slug}">${nome}</a>` : nome;
-}
-
 // "Confronta ->" verso il Tale of the Tape: solo se ENTRAMBI i lottatori
-// sono nel nostro database (il roster copre solo UFC attuale + leggende,
-// molti nomi di prelim/undercard non ci sono — in quel caso non c'e' una
-// scheda a cui linkare, quindi niente link invece di uno rotto).
-function linkConfronta(rigaA, rigaB) {
-  if (!rigaA?.slug || !rigaB?.slug) return "";
-  return `<a href="confronto.html?a=${rigaA.slug}&b=${rigaB.slug}" class="bout-confronto-link">Confronta →</a>`;
+// hanno una scheda (molti esordienti non hanno una pagina Wikipedia). La
+// riga ha comunque sempre la stessa struttura: dove il link non c'e' resta
+// una nota discreta, cosi' la card non alterna righe piene e righe vuote.
+function azioneConfronto(rigaA, rigaB) {
+  if (rigaA?.slug && rigaB?.slug) {
+    return `<a href="confronto.html?a=${rigaA.slug}&b=${rigaB.slug}" class="bout-confronto-link">Confronta →</a>`;
+  }
+  return `<span class="bout-confronto-na">Confronto non disponibile</span>`;
 }
 
-// Confronto rapido dentro la card del match, per gli incontri non ancora
-// disputati: oltre al link, anche record ed eta' affiancati a colpo
-// d'occhio (per gli incontri gia' disputati c'e' gia' il risultato, non
-// serve ripetere questi dati — vedi rigaIncontro).
-function confrontoRapidoBout(rigaA, rigaB) {
-  if (!rigaA && !rigaB) return "";
-  rigaA = rigaA || {};
-  rigaB = rigaB || {};
-  const eta = rigaA.eta && rigaB.eta ? `${rigaA.eta} — ${rigaB.eta} anni` : null;
+function iniziali(nome) {
+  return (nome || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
+}
+
+// Un lato dell'incontro: foto (o iniziali), nome, record ed eta'. Stessi
+// campi per tutti, con "—" dove il dato manca.
+function latoIncontro(nome, riga, slugLink, lato, vincitore) {
+  const slug = riga?.slug || slugLink;
+  const nomeHtml = nome ? (slug ? `<a href="lottatore.html?slug=${slug}">${nome}</a>` : nome) : "—";
+  const vuoto = `<span class="bout-avatar bout-avatar-vuoto" aria-hidden="true">${iniziali(nome)}</span>`;
+  // Se la foto Wikimedia non carica, al suo posto le iniziali come per
+  // chi la foto non ce l'ha.
+  const avatar = riga?.foto
+    ? `<img class="bout-avatar" src="${riga.foto}" alt="" loading="lazy" onerror="this.outerHTML=this.dataset.vuoto" data-vuoto='${vuoto}'>`
+    : vuoto;
+  const meta = `<div class="bout-meta">${riga?.record_mma || "—"}</div><div class="bout-meta k">${riga?.eta ? `${riga.eta} anni` : "—"}</div>`;
   return `
-    <div class="bout-confronto">
-      <span>${rigaA.record_mma || "—"}</span>
-      <span class="k">Record</span>
-      <span>${rigaB.record_mma || "—"}</span>
-      ${eta ? `<span>${rigaA.eta}</span><span class="k">Età</span><span>${rigaB.eta}</span>` : ""}
-      ${linkConfronta(rigaA, rigaB)}
+    <div class="bout-lato ${lato}${vincitore ? " vincitore" : ""}">
+      ${avatar}
+      <div class="bout-lato-testo">
+        <div class="bout-nome">${nomeHtml}${vincitore ? ` <span class="bout-w">W</span>` : ""}</div>
+        ${meta}
+      </div>
     </div>`;
 }
 
@@ -110,26 +113,28 @@ function trovaLottatore(slug, nome, roster) {
 
 function rigaIncontro(b, roster, posizione = "") {
   const haRisultato = b.metodo && b.metodo.trim();
+  // Nelle tabelle risultati di Wikipedia il vincitore e' sempre a sinistra,
+  // tranne pareggi e no contest.
+  const vinceA = haRisultato && !/draw|no contest|pareggio/i.test(b.metodo);
   const slugA = b.fighter1_link ? slugDaLink(b.fighter1_link) : null;
   const slugB = b.fighter2_link ? slugDaLink(b.fighter2_link) : null;
   const rigaA = trovaLottatore(slugA, b.fighter1, roster);
   const rigaB = trovaLottatore(slugB, b.fighter2, roster);
+  const esito = haRisultato
+    ? `<span class="bout-esito">${b.metodo} · R${b.round} · ${b.tempo}</span>`
+    : `<span class="bout-esito da-disputare">Da disputare</span>`;
   return `
     <div class="bout-row">
-      <span class="tag bout-cat">${b.categoria || ""}</span>
-      <div class="bout-main">
-        ${posizione ? `<div class="bout-posizione">${posizione}</div>` : ""}
-        <div class="bout-fighters">
-          <span class="${haRisultato ? "bout-winner" : ""}">${nomeConLink(b.fighter1, b.fighter1_link)}</span>
-          <span class="bout-vs">vs</span>
-          <span>${nomeConLink(b.fighter2, b.fighter2_link)}</span>
-        </div>
-        ${
-          haRisultato
-            ? `<div class="bout-result"><span>${b.metodo} · Round ${b.round} · ${b.tempo}</span>${linkConfronta(rigaA, rigaB)}</div>`
-            : confrontoRapidoBout(rigaA, rigaB)
-        }
+      <div class="bout-head">
+        <span class="bout-cat">${b.categoria || ""}</span>
+        ${posizione ? `<span class="bout-posizione">${posizione}</span>` : ""}
       </div>
+      <div class="bout-grid">
+        ${latoIncontro(b.fighter1, rigaA, slugA, "a", vinceA)}
+        <span class="bout-vs">vs</span>
+        ${latoIncontro(b.fighter2, rigaB, slugB, "b", false)}
+      </div>
+      <div class="bout-foot">${esito}${azioneConfronto(rigaA, rigaB)}</div>
     </div>`;
 }
 
@@ -205,7 +210,7 @@ async function init() {
   // extra-lottatori.json copre chi compare in una card evento ma non nel
   // roster UFC attuale (undercard di eventi passati, o un nome uscito dal
   // roster su Wikipedia pur avendo appena combattuto) — senza, per loro non
-  // comparirebbe mai il link "Confronta" (vedi commento su linkConfronta).
+  // comparirebbe mai il link "Confronta" (vedi commento su azioneConfronto).
   const [card, roster, extra] = ev.link
     ? await Promise.all([
         caricaCard(ev.link),
