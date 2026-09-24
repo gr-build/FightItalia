@@ -741,6 +741,15 @@ h1, h2, h3, h4 {
 
 .bout-main { flex: 1 1 auto; min-width: 0; }
 
+.bout-posizione {
+  font-family: "Oswald", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
 .bout-fighters {
   display: flex;
   align-items: baseline;

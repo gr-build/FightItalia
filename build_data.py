@@ -26,6 +26,7 @@ from scraper_ufc import (
     scarica_orari_evento,
     scarica_roster,
     scarica_roster_organizzazione,
+    fuso_da_luogo,
 )
 
 WEB_DATA = Path(__file__).parent / "docs" / "data"
@@ -154,11 +155,28 @@ def _fisico_da_json(path):
     return _cm_da_stringa(inf.get("Height")), _cm_da_stringa(inf.get("Reach"))
 
 
+# Orari tipici UFC, usati solo quando quelli ufficiali di ufc.com non sono
+# disponibili (il JSON li marca "indicativo" e la pagina lo dice). In Nord
+# America la UFC ragiona in orario della costa Est qualunque sia la sede
+# (Las Vegas compresa); altrove l'orario e' quello locale di prima serata.
+ORARI_TIPICI_NORD_AMERICA = {"fuso_orari": "America/New_York", "early_prelims": "18:00", "prelims": "20:00", "main_card": "22:00"}
+ORARI_TIPICI_RESTO_DEL_MONDO = {"early_prelims": "16:00", "prelims": "18:00", "main_card": "21:00"}
+
+
+def _orari_tipici(luogo):
+    fuso = fuso_da_luogo(luogo)
+    if not fuso:
+        return None
+    if fuso.startswith("America/"):
+        return {**ORARI_TIPICI_NORD_AMERICA, "fuso_sede": fuso}
+    return {**ORARI_TIPICI_RESTO_DEL_MONDO, "fuso_orari": fuso, "fuso_sede": fuso}
+
+
 def _orari_evento_italia(nome_evento, luogo, data_evento):
     """Orari locali sede + conversione Italia (Europe/Rome, DST automatica
     via zoneinfo) per un singolo evento futuro. Ritorna None se manca uno
-    qualsiasi degli ingredienti affidabili (fuso sede, orario da ufc.com,
-    data leggibile): mai un orario indovinato o parzialmente inventato."""
+    fuso sede o data leggibile. Senza orario ufficiale da ufc.com usa gli
+    orari tipici (_orari_tipici) e marca il risultato "indicativo"."""
     from datetime import datetime
     from zoneinfo import ZoneInfo
 
@@ -166,24 +184,33 @@ def _orari_evento_italia(nome_evento, luogo, data_evento):
         orari = scarica_orari_evento(nome_evento, luogo)
     except Exception as errore:
         print(f"  [orari] {nome_evento}: scraping fallito ({errore})")
-        return None
-    if not orari:
-        return None
+        orari = None
     try:
         giorno = datetime.strptime(data_evento, "%b %d, %Y").date()
     except (ValueError, TypeError):
         return None
 
+    indicativo = False
+    if not orari:
+        # ufc.com non leggibile (Selenium+Edge non c'e' su GitHub Actions,
+        # o pagina evento non ancora pubblicata): meglio un orario tipico
+        # dichiarato come tale che nessun orario — vedi ORARI_TIPICI.
+        orari = _orari_tipici(luogo)
+        if not orari:
+            return None
+        indicativo = True
+
     fuso_sede = ZoneInfo(orari["fuso_sede"])
     fuso_italia = ZoneInfo("Europe/Rome")
-    risultato = {"fuso_sede": orari["fuso_sede"]}
+    risultato = {"fuso_sede": orari["fuso_sede"], "indicativo": indicativo}
     for chiave in ("early_prelims", "prelims", "main_card"):
         ora_testo = orari.get(chiave)
         if not ora_testo:
             risultato[chiave] = None
             continue
         ore, minuti = (int(x) for x in ora_testo.split(":"))
-        istante_sede = datetime(giorno.year, giorno.month, giorno.day, ore, minuti, tzinfo=fuso_sede)
+        fuso_orario = ZoneInfo(orari.get("fuso_orari", orari["fuso_sede"]))
+        istante_sede = datetime(giorno.year, giorno.month, giorno.day, ore, minuti, tzinfo=fuso_orario).astimezone(fuso_sede)
         istante_italia = istante_sede.astimezone(fuso_italia)
         risultato[chiave] = {
             "locale": istante_sede.strftime("%H:%M"),
@@ -339,7 +366,20 @@ def genera_card_eventi(eventi, limite=None, pausa=0.3):
             data_ev = _data_evento(riga.get("data"))
             entro_finestra = riga["stato"] == "passato" and data_ev and (date.today() - data_ev) <= FINESTRA_RIPROVA_RISULTATI
             card_esistente = []
-            if entro_finestra:
+            if riga["stato"] == "programmato":
+                # La card di un evento futuro cambia fino all'ultimo su
+                # Wikipedia: incontri aggiunti/cancellati, divisione in
+                # main/preliminary/early che arriva solo a card completa,
+                # ordine dei bout che si assesta. Scaricata una volta sola
+                # restava congelata alla prima versione (es. UFC 332 con
+                # tutto sotto "Main card" e senza il main event) — quindi
+                # si riprende sempre. Sono ~10-15 eventi, costa poco.
+                try:
+                    card_esistente = json.loads(out_file.read_text(encoding="utf-8"))
+                except (json.JSONDecodeError, OSError):
+                    card_esistente = []
+                ricarica = True
+            elif entro_finestra:
                 try:
                     card_esistente = json.loads(out_file.read_text(encoding="utf-8"))
                 except (json.JSONDecodeError, OSError):
@@ -380,7 +420,7 @@ def genera_card_eventi(eventi, limite=None, pausa=0.3):
             print(f"  [{i+1}/{len(con_link)}] fatti {fatti}, ultimo: {riga['evento']}")
         time.sleep(pausa)
 
-    print(f"Card eventi: {fatti} scaricate ora, {aggiornati} riscaricate coi risultati ({vuoti} vuote/non trovate), {saltati} gia' in cache.")
+    print(f"Card eventi: {fatti} scaricate ora, {aggiornati} riscaricate (eventi futuri o senza risultati) ({vuoti} vuote/non trovate), {saltati} gia' in cache.")
 
 
 def genera_lottatori_extra(pausa=0.3):

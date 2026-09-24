@@ -26,10 +26,12 @@ function blocoOrari(orari) {
   if (!righe) return "";
   return `
     <div style="margin-top:20px; max-width:420px;">
-      <div class="section-title" style="margin-top:0;">Orario di inizio</div>
+      <div class="section-title" style="margin-top:0;">Orario di inizio${orari.indicativo ? " (indicativo)" : ""}</div>
       <div class="compare-col a">${righe}</div>
       <p style="margin-top:8px; font-size:11.5px; color:var(--text-muted);">
-        Fuso sede: ${orari.fuso_sede}. Orario Italia calcolato automaticamente (cambio ora legale incluso). Fonte: ufc.com.
+        ${orari.indicativo
+          ? `Orario indicativo: è l'orario tipico UFC per questa sede, quello ufficiale non è ancora pubblicato. Fuso sede: ${orari.fuso_sede}.`
+          : `Fuso sede: ${orari.fuso_sede}. Orario Italia calcolato automaticamente (cambio ora legale incluso). Fonte: ufc.com.`}
       </p>
     </div>`;
 }
@@ -90,7 +92,7 @@ function confrontoRapidoBout(rigaA, rigaB) {
     </div>`;
 }
 
-function rigaIncontro(b, roster) {
+function rigaIncontro(b, roster, posizione = "") {
   const haRisultato = b.metodo && b.metodo.trim();
   const slugA = b.fighter1_link ? slugDaLink(b.fighter1_link) : null;
   const slugB = b.fighter2_link ? slugDaLink(b.fighter2_link) : null;
@@ -100,6 +102,7 @@ function rigaIncontro(b, roster) {
     <div class="bout-row">
       <span class="tag bout-cat">${b.categoria || ""}</span>
       <div class="bout-main">
+        ${posizione ? `<div class="bout-posizione">${posizione}</div>` : ""}
         <div class="bout-fighters">
           <span class="${haRisultato ? "bout-winner" : ""}">${nomeConLink(b.fighter1, b.fighter1_link)}</span>
           <span class="bout-vs">vs</span>
@@ -114,11 +117,13 @@ function rigaIncontro(b, roster) {
     </div>`;
 }
 
-function sezioneCard(titolo, incontri, roster) {
+// Wikipedia elenca la main card dal main event in giu': il primo bout e'
+// il main event, il secondo il co-main — lo stesso ordine della serata.
+function sezioneCard(titolo, incontri, roster, conPosizioni = false) {
   if (!incontri.length) return "";
   return `
     <div class="event-group-title">${titolo}</div>
-    <div class="bout-list">${incontri.map((b) => rigaIncontro(b, roster)).join("")}</div>`;
+    <div class="bout-list">${incontri.map((b, i) => rigaIncontro(b, roster, conPosizioni ? ["Main event", "Co-main event"][i] || "" : "")).join("")}</div>`;
 }
 
 async function caricaCard(link) {
@@ -205,7 +210,7 @@ async function init() {
     const early = card.filter((b) => (b.sezione || "").toLowerCase().startsWith("early"));
     const prelim = card.filter((b) => (b.sezione || "").toLowerCase().startsWith("preliminary"));
     const main = card.filter((b) => !early.includes(b) && !prelim.includes(b));
-    cardBox.innerHTML = sezioneCard("Main Card", main, rosterCompleto) + sezioneCard("Preliminary Card", prelim, rosterCompleto) + sezioneCard("Early Preliminary Card", early, rosterCompleto);
+    cardBox.innerHTML = sezioneCard("Main Card", main, rosterCompleto, true) + sezioneCard("Preliminary Card", prelim, rosterCompleto) + sezioneCard("Early Preliminary Card", early, rosterCompleto);
   } else {
     cardBox.innerHTML = `<div class="empty-state">Card non ancora disponibile per questo evento.</div>`;
   }
