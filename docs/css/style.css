@@ -1906,3 +1906,7 @@ h1, h2, h3, h4 {
 @media (max-width: 900px) {
   .profilo-colonne.con-news { grid-template-columns: minmax(0, 1fr); gap: 24px; }
 }
+
+.champ-card.vacante { box-shadow: none; border-style: dashed; }
+.champ-card.vacante:hover { transform: none; }
+.champ-card.vacante .champ-nome-grande { color: var(--text-muted); }

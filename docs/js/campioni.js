@@ -1,5 +1,5 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, newsSu, cardNewsBreve } from "./common.js?v=202609241256";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202609241256";
+import { fetchJSON, renderChrome, icon, slugDaLink, newsSu, cardNewsBreve } from "./common.js?v=202609241258";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202609241258";
 
 renderChrome("campioni");
 
@@ -37,6 +37,24 @@ function cardCampione(r) {
         <div class="champ-record-grande">${r.record_mma || ""}</div>
       </div>
     </a>`;
+}
+
+// Titoli senza campione e senza lottatrici nel roster (Wikipedia non ha una
+// sezione per la categoria), quindi non ricavabili dai dati: vanno a mano.
+const TITOLI_VACANTI = [
+  { categoria: "Women's featherweights", peso: "145 lb, 66 kg", nota: "Ultima campionessa: Amanda Nunes, ritirata nel 2023" },
+];
+
+function cardVacante(t) {
+  return `
+    <div class="champ-card senza-foto vacante">
+      <span class="champ-iniziali" aria-hidden="true">—</span>
+      <div class="champ-overlay">
+        <span class="champ-div">${t.categoria}</span>
+        <div class="champ-nome-grande">Vacante</div>
+        <div class="champ-record-grande">${t.peso} · ${t.nota}</div>
+      </div>
+    </div>`;
 }
 
 function cardLeggenda(r) {
@@ -97,7 +115,7 @@ async function init() {
   const campioni = ORDINE_CATEGORIE.map((cat) => roster.find((r) => r.categoria === cat && r.campione_attuale)).filter(Boolean);
   const donna = (r) => r.categoria.startsWith("Women's");
   document.getElementById("griglia-campioni").innerHTML = campioni.filter((r) => !donna(r)).map(cardCampione).join("");
-  document.getElementById("griglia-campionesse").innerHTML = campioni.filter(donna).map(cardCampione).join("");
+  document.getElementById("griglia-campionesse").innerHTML = TITOLI_VACANTI.map(cardVacante).join("") + campioni.filter(donna).map(cardCampione).join("");
 
   // News che parlano dei campioni attuali, dalla piu' recente. Una notizia
   // che cita due campioni compare una volta sola.
