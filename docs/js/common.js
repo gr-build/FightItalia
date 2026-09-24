@@ -63,7 +63,7 @@ export function renderChrome(active) {
     footer.innerHTML = `
       <div class="container">
         <p style="margin:0 0 6px;">I dati riportati hanno scopo informativo e statistico; non costituiscono consiglio di scommessa. Gioca responsabilmente.</p>
-        <p style="margin:0 0 6px;">FightItalia — statistiche e confronti sugli sport da combattimento. Dati e immagini da Wikipedia (licenza CC BY-SA), aggiornati periodicamente. In Italia gli eventi UFC si seguono in streaming legale su DAZN.</p>
+        <p style="margin:0 0 6px;">FightItalia — statistiche e confronti sugli sport da combattimento. Dati e immagini da Wikipedia (licenza CC BY-SA), aggiornati periodicamente. In Italia gli eventi UFC si seguono in streaming legale su discovery+ (e in parte su Eurosport).</p>
         <p style="margin:0; font-size:11.5px; color:var(--text-muted);">FightItalia è un progetto indipendente, non affiliato né sponsorizzato da UFC o Zuffa, LLC.</p>
       </div>`;
   }
