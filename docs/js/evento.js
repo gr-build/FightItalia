@@ -71,7 +71,7 @@ function nomeConLink(nome, link) {
 // molti nomi di prelim/undercard non ci sono — in quel caso non c'e' una
 // scheda a cui linkare, quindi niente link invece di uno rotto).
 function linkConfronta(rigaA, rigaB) {
-  if (!rigaA || !rigaB) return "";
+  if (!rigaA?.slug || !rigaB?.slug) return "";
   return `<a href="confronto.html?a=${rigaA.slug}&b=${rigaB.slug}" class="bout-confronto-link">Confronta →</a>`;
 }
 
@@ -80,7 +80,9 @@ function linkConfronta(rigaA, rigaB) {
 // d'occhio (per gli incontri gia' disputati c'e' gia' il risultato, non
 // serve ripetere questi dati — vedi rigaIncontro).
 function confrontoRapidoBout(rigaA, rigaB) {
-  if (!rigaA || !rigaB) return "";
+  if (!rigaA && !rigaB) return "";
+  rigaA = rigaA || {};
+  rigaB = rigaB || {};
   const eta = rigaA.eta && rigaB.eta ? `${rigaA.eta} — ${rigaB.eta} anni` : null;
   return `
     <div class="bout-confronto">
@@ -92,12 +94,26 @@ function confrontoRapidoBout(rigaA, rigaB) {
     </div>`;
 }
 
+// Molti esordienti e prelim non hanno una pagina Wikipedia: nella card
+// arrivano senza link, ma il roster li ha comunque (con record, senza slug).
+// Il fallback per nome serve a mostrare almeno record ed eta' affiancati.
+const normalizzaNome = (n) => (n || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+function trovaLottatore(slug, nome, roster) {
+  if (slug) {
+    const perSlug = roster.find((r) => r.slug === slug);
+    if (perSlug) return perSlug;
+  }
+  const n = normalizzaNome(nome);
+  return n ? roster.find((r) => normalizzaNome(r.nome) === n) || null : null;
+}
+
 function rigaIncontro(b, roster, posizione = "") {
   const haRisultato = b.metodo && b.metodo.trim();
   const slugA = b.fighter1_link ? slugDaLink(b.fighter1_link) : null;
   const slugB = b.fighter2_link ? slugDaLink(b.fighter2_link) : null;
-  const rigaA = slugA ? roster.find((r) => r.slug === slugA) : null;
-  const rigaB = slugB ? roster.find((r) => r.slug === slugB) : null;
+  const rigaA = trovaLottatore(slugA, b.fighter1, roster);
+  const rigaB = trovaLottatore(slugB, b.fighter2, roster);
   return `
     <div class="bout-row">
       <span class="tag bout-cat">${b.categoria || ""}</span>
