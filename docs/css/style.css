@@ -1009,15 +1009,23 @@ h1, h2, h3, h4 {
   background: linear-gradient(to top, rgba(10, 10, 13, 0.95) 20%, rgba(10, 10, 13, 0.4) 70%, transparent);
 }
 
-.champ-card.senza-foto {
-  aspect-ratio: auto;
+/* Senza foto la card mantiene la stessa forma delle altre: iniziali
+   grandi al posto della foto, invece di una card piu' bassa e vuota. */
+.champ-iniziali { display: none; }
+
+.champ-card.senza-foto .champ-iniziali {
+  display: flex;
+  position: absolute;
+  inset: 0 0 35% 0;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 64px;
+  color: var(--border);
+  background: radial-gradient(circle at 50% 40%, var(--bg-elevated-2), var(--bg-elevated));
 }
 
-.champ-card.senza-foto .champ-overlay {
-  position: static;
-  background: none;
-  padding: 24px 14px;
-}
+.champ-card.senza-foto .champ-foto { display: none; }
 
 .champ-div {
   display: inline-block;

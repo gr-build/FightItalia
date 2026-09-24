@@ -26,9 +26,11 @@ function cardCampione(r) {
   const foto = r.foto
     ? `<img src="${r.foto}" alt="" onerror="this.parentElement.classList.add('senza-foto')" class="champ-foto">`
     : "";
+  const iniziali = (r.nome || "?").split(/\s+/).slice(0, 2).map((p) => p[0]).join("");
   return `
     <a href="${href}" class="champ-card${r.foto ? "" : " senza-foto"}">
       ${foto}
+      <span class="champ-iniziali" aria-hidden="true">${iniziali}</span>
       <div class="champ-overlay">
         <span class="champ-div">${nomeBreveCategoria(r.categoria)}</span>
         <div class="champ-nome-grande">${r.nome}</div>
@@ -93,7 +95,9 @@ async function init() {
   const roster = await fetchJSON("data/roster.json");
 
   const campioni = ORDINE_CATEGORIE.map((cat) => roster.find((r) => r.categoria === cat && r.campione_attuale)).filter(Boolean);
-  document.getElementById("griglia-campioni").innerHTML = campioni.map(cardCampione).join("");
+  const donna = (r) => r.categoria.startsWith("Women's");
+  document.getElementById("griglia-campioni").innerHTML = campioni.filter((r) => !donna(r)).map(cardCampione).join("");
+  document.getElementById("griglia-campionesse").innerHTML = campioni.filter(donna).map(cardCampione).join("");
 
   const leggende = roster.filter((r) => r.ex_campione);
   document.getElementById("griglia-leggende").innerHTML = leggende.map(cardLeggenda).join("");
