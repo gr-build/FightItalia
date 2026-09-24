@@ -294,21 +294,47 @@ def scrivi_roster_json(roster):
     print(f"roster.json: {len(roster)} lottatori ({mask.sum()} leggende)")
 
 
+# Una scheda scaricata restava uguale per sempre: storico incontri fermo
+# e foto mai aggiunte (es. Joshua Van, campione dei mosca, rimasto senza
+# foto anche dopo che Wikipedia l'aveva pubblicata). Ora si riscarica
+# quando e' vecchia: ~1/30 del roster al giorno, i campioni ogni settimana.
+GIORNI_AGGIORNAMENTO_SCHEDA = 30
+GIORNI_AGGIORNAMENTO_CAMPIONE = 7
+# Tetto per run: la prima volta sono scadute tutte le ~2.000 schede insieme,
+# e riscaricarle in un colpo sforerebbe il timeout del workflow (30 min).
+MAX_AGGIORNAMENTI_PER_RUN = 100
+
+
+def _scheda_da_aggiornare(path, campione):
+    try:
+        ultimo = date.fromisoformat(json.loads(path.read_text(encoding="utf-8")).get("ultimo_aggiornamento", ""))
+    except (ValueError, OSError, json.JSONDecodeError):
+        return True
+    giorni = GIORNI_AGGIORNAMENTO_CAMPIONE if campione else GIORNI_AGGIORNAMENTO_SCHEDA
+    return (date.today() - ultimo).days >= giorni
+
+
 def genera_dettagli_lottatori(roster, limite=None, pausa=0.3):
     con_link = roster.dropna(subset=["link"]).reset_index(drop=True)
     if limite:
         con_link = con_link.head(limite)
 
-    fatti, saltati = 0, 0
+    # Campioni per primi, cosi' rientrano sempre nel tetto di aggiornamenti.
+    if "campione_attuale" in con_link:
+        con_link = con_link.sort_values("campione_attuale", ascending=False, kind="stable").reset_index(drop=True)
+
+    fatti, saltati, aggiornati = 0, 0, 0
     for i, riga in con_link.iterrows():
         slug = riga["slug"]
         out_file = WEB_DATA_LOTTATORI / f"{slug}.json"
         if out_file.exists():
-            saltati += 1
-            continue
+            if aggiornati >= MAX_AGGIORNAMENTI_PER_RUN or not _scheda_da_aggiornare(out_file, bool(riga.get("campione_attuale"))):
+                saltati += 1
+                continue
+            aggiornati += 1
 
         try:
-            dettaglio = scarica_dettaglio_lottatore(riga["link"])
+            dettaglio = scarica_dettaglio_lottatore(riga["link"], usa_cache=not out_file.exists())
         except Exception as e:
             print(f"  [{i+1}/{len(con_link)}] ERRORE {riga['nome']}: {e}")
             continue
@@ -327,7 +353,7 @@ def genera_dettagli_lottatori(roster, limite=None, pausa=0.3):
             print(f"  [{i+1}/{len(con_link)}] fatti {fatti}, ultimo: {riga['nome']}")
         time.sleep(pausa)
 
-    print(f"Dettagli lottatori: {fatti} scaricati ora, {saltati} gia' in cache. Totale file: {len(list(WEB_DATA_LOTTATORI.glob('*.json')))}")
+    print(f"Dettagli lottatori: {fatti} scaricati/aggiornati ora, {saltati} ancora recenti. Totale file: {len(list(WEB_DATA_LOTTATORI.glob('*.json')))}")
 
 
 FINESTRA_RIPROVA_RISULTATI = timedelta(days=45)
