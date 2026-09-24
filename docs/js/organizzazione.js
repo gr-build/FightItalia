@@ -1,5 +1,5 @@
-import { fetchJSON, renderChrome, debounce } from "./common.js?v=202609241709";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202609241709";
+import { fetchJSON, renderChrome, debounce } from "./common.js?v=202609241710";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202609241710";
 
 renderChrome("europa");
 
@@ -89,11 +89,11 @@ async function init() {
       <div class="champ-list" style="max-width:520px;">${meta.campioni.map((c) => `<div class="champ-row"><span class="champ-cat">${c.categoria}</span><span class="champ-nome">${c.nome}</span></div>`).join("")}</div>` : ""}
 
     <div class="org-tabs"${soloEventi ? " hidden" : ""}>
-      <button class="org-tab active" data-tab="roster">Roster</button>
-      <button class="org-tab" data-tab="eventi">Eventi</button>
+      <button class="org-tab active" data-tab="eventi">Eventi</button>
+      <button class="org-tab" data-tab="roster">Roster</button>
     </div>
 
-    <div id="tab-roster"${soloEventi ? " hidden" : ""}>
+    <div id="tab-roster" style="display:none;"${soloEventi ? " hidden" : ""}>
       <div class="filter-bar">
         <div class="search-input"><input id="ricerca-org" type="text" placeholder="Cerca un lottatore..."></div>
       </div>
@@ -101,7 +101,7 @@ async function init() {
       <div class="fighter-grid" id="grid-org"></div>
     </div>
 
-    <div id="tab-eventi" style="display:${soloEventi ? "block" : "none"};">
+    <div id="tab-eventi">
       <div class="section-title" style="margin-top:24px;">Eventi</div>
       <div id="eventi-org">${eventi.length ? eventi.map(rigaEventoOrg).join("") : `<div class="empty-state">Nessun evento trovato per il periodo coperto.</div>`}</div>
     </div>
