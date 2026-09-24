@@ -162,6 +162,10 @@ def genera_news():
     # In locale la chiave sta in .env (gitignored); su GitHub Actions arriva
     # come variabile d'ambiente dal secret GEMINI_API_KEY, non c'e' un .env.
     api_key = os.environ.get("GEMINI_API_KEY") or _leggi_env().get("GEMINI_API_KEY")
+    # Il secret su GitHub era stato incollato con un "a capo" finale: finiva
+    # nell'URL come %0A e Gemini rispondeva 401 a ogni articolo, per settimane,
+    # con news.json sempre vuoto. Spazi e a capo non fanno mai parte della chiave.
+    api_key = (api_key or "").strip()
     if not api_key:
         print("[news] GEMINI_API_KEY mancante (ne' in .env ne' nell'ambiente): impossibile generare le news.")
         return
