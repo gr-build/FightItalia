@@ -2,7 +2,7 @@ import {
   fetchJSON, renderChrome, cmDaStringa, numeroDaRecord,
   classeRisultato, letteraRisultato, debounce, slugDaLink, formDots,
   metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave,
-} from "./common.js?v=202609241710";
+} from "./common.js?v=202609241748";
 
 renderChrome("confronto");
 

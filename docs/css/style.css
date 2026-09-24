@@ -100,6 +100,25 @@ h1, h2, h3, h4 {
 
 .brand .dot { color: var(--accent); }
 
+/* Il logo e' grande e "appeso" sotto la barra, come uno stemma. */
+.brand-logo {
+  width: 56px;
+  height: 56px;
+  margin-bottom: -14px;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+  transition: transform 0.2s ease;
+}
+
+.brand:hover .brand-logo { transform: rotate(-8deg) scale(1.05); }
+
+@media (prefers-reduced-motion: reduce) {
+  .brand:hover .brand-logo { transform: none; }
+}
+
+@media (max-width: 980px) {
+  .brand-logo { width: 40px; height: 40px; margin-bottom: 0; }
+}
+
 .nav-links {
   display: flex;
   gap: 4px;
