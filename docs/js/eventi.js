@@ -37,12 +37,42 @@ function ordinaData(lista, crescente) {
 }
 
 let passati = [];
+let filtrati = [];
 let mostrati = 15;
 
+// Ricerca senza accenti e maiuscole: "sao paulo" trova "São Paulo".
+const normalizza = (t) => (t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+function applicaFiltri() {
+  const parole = normalizza(document.getElementById("cerca-evento").value).split(/\s+/).filter(Boolean);
+  const anno = document.getElementById("filtro-anno").value;
+  const tipo = document.getElementById("filtro-tipo").value;
+  const data = document.getElementById("filtro-data").value;
+  const giorno = data ? Date.parse(data) : null;
+  filtrati = passati.filter((ev) => {
+    const d = new Date(ev.data);
+    if (anno && d.getFullYear() !== Number(anno)) return false;
+    if (tipo && ev.tipo !== tipo) return false;
+    // Per data: stesso giorno o fino a 3 giorni di distanza (fusi orari e
+    // date "americane" della serata spostano spesso di un giorno).
+    if (giorno && (isNaN(d) || Math.abs(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - giorno) > 3 * 86400000)) return false;
+    if (parole.length) {
+      const testo = normalizza([ev.evento, ev.sede, ev.luogo, isNaN(d) ? "" : `${d.getDate()} ${MESI[d.getMonth()]} ${d.getFullYear()}`].join(" "));
+      if (!parole.every((p) => testo.includes(p))) return false;
+    }
+    return true;
+  });
+  mostrati = 15;
+  renderPassati();
+}
+
 function renderPassati() {
-  document.getElementById("eventi-passati").innerHTML = passati.slice(0, mostrati).map(rigaEvento).join("");
-  document.getElementById("passati-count").textContent = `(${passati.length})`;
-  document.getElementById("load-more").style.display = mostrati >= passati.length ? "none" : "block";
+  const filtrando = filtrati.length !== passati.length;
+  document.getElementById("eventi-passati").innerHTML =
+    filtrati.slice(0, mostrati).map(rigaEvento).join("") ||
+    `<div class="empty-state">Nessun evento trovato. Prova con un altro nome, un'altra città o un altro anno.</div>`;
+  document.getElementById("passati-count").textContent = filtrando ? `(${filtrati.length} di ${passati.length})` : `(${passati.length})`;
+  document.getElementById("load-more").style.display = mostrati >= filtrati.length ? "none" : "block";
 }
 
 async function init() {
@@ -54,7 +84,12 @@ async function init() {
 
   document.getElementById("eventi-prossimi").innerHTML =
     prossimi.map(rigaEvento).join("") || `<div class="empty-state">Nessun evento programmato trovato.</div>`;
-  renderPassati();
+  const anni = [...new Set(passati.map((e) => new Date(e.data).getFullYear()).filter((a) => !isNaN(a)))].sort((a, b) => b - a);
+  document.getElementById("filtro-anno").insertAdjacentHTML("beforeend", anni.map((a) => `<option value="${a}">${a}</option>`).join(""));
+  ["cerca-evento", "filtro-anno", "filtro-tipo", "filtro-data"].forEach((id) => {
+    document.getElementById(id).addEventListener(id === "cerca-evento" ? "input" : "change", applicaFiltri);
+  });
+  applicaFiltri();
   document.getElementById("load-more").addEventListener("click", () => {
     mostrati += 20;
     renderPassati();

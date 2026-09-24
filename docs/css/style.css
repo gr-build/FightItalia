@@ -1815,3 +1815,31 @@ h1, h2, h3, h4 {
   .pom-valore { font-size: 26px; }
   .pom-nome { font-size: 13.5px; }
 }
+
+/* ---------- Ricerca eventi passati ---------- */
+.filtri-eventi {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.filtri-eventi input,
+.filtri-eventi select {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font: 14px var(--font-body);
+  color-scheme: dark;
+}
+
+.filtri-eventi input:focus,
+.filtri-eventi select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+@media (max-width: 700px) {
+  .filtri-eventi { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .filtro-cerca { grid-column: 1 / -1; }
+}

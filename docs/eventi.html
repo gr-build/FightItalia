@@ -40,6 +40,28 @@
   <div class="dazn-note">In Italia gli eventi UFC si seguono in streaming legale su discovery+ (e in parte su Eurosport).</div>
 
   <div class="section-title">Passati <span class="count" id="passati-count"></span></div>
+  <form class="filtri-eventi" id="filtri-eventi" role="search" onsubmit="return false">
+    <label class="filtro-cerca">
+      <span class="sr-only">Cerca evento</span>
+      <input type="search" id="cerca-evento" placeholder="Cerca: UFC 300, Poirier, Las Vegas…" autocomplete="off">
+    </label>
+    <label>
+      <span class="sr-only">Anno</span>
+      <select id="filtro-anno"><option value="">Tutti gli anni</option></select>
+    </label>
+    <label>
+      <span class="sr-only">Data</span>
+      <input type="date" id="filtro-data" title="Cerca per data (± 3 giorni)">
+    </label>
+    <label>
+      <span class="sr-only">Tipo</span>
+      <select id="filtro-tipo">
+        <option value="">Tutti i tipi</option>
+        <option value="Numerato">Numerati</option>
+        <option value="Fight Night">Fight Night</option>
+      </select>
+    </label>
+  </form>
   <div id="eventi-passati"></div>
   <button class="load-more" id="load-more">Mostra altri eventi</button>
 </div>
