@@ -39,6 +39,7 @@ export const ORGANIZZAZIONI = [
     ],
   },
   {
+    id: "cagewarriors",
     nome: "Cage Warriors",
     nomeCompleto: "Cage Warriors Fighting Championship",
     paese: "🇬🇧 Regno Unito",

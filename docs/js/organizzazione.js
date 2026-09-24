@@ -1,5 +1,5 @@
-import { fetchJSON, renderChrome, debounce } from "./common.js?v=202609241635";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202609241635";
+import { fetchJSON, renderChrome, debounce } from "./common.js?v=202609241709";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202609241709";
 
 renderChrome("europa");
 
@@ -39,8 +39,8 @@ function rigaEventoOrg(ev) {
     <div class="event-row">
       <div class="event-date"><span class="day">${giorno}</span><span class="month">${mese}</span></div>
       <div class="event-main">
-        <div class="name">${ev.evento}</div>
-        ${luogo ? `<div class="venue">${luogo}</div>` : ""}
+        <div class="name">${ev.evento}${/italy/i.test(ev.luogo || "") ? ` <span class="tag numerato">In Italia</span>` : ""}${!isNaN(d) && d > new Date() ? ` <span class="tag fight-night">In arrivo</span>` : ""}</div>
+        ${luogo ? `<div class="venue">${luogo.replace(/Italy/, "Italia")}</div>` : ""}
       </div>
       <span></span>
     </div>`;
@@ -60,8 +60,18 @@ async function init() {
   let roster = [], eventi = [];
   try { roster = await fetchJSON(`data/europa/${orgId}-roster.json`); } catch { roster = []; }
   try { eventi = await fetchJSON(`data/europa/${orgId}-eventi.json`); } catch { eventi = []; }
+  // Prima i prossimi (dal piu' vicino), poi i passati (dal piu' recente).
+  const adesso = new Date();
+  const quando = (e) => new Date(e.data);
+  eventi = [
+    ...eventi.filter((e) => quando(e) >= adesso).sort((a, b) => quando(a) - quando(b)),
+    ...eventi.filter((e) => !(quando(e) >= adesso)).sort((a, b) => quando(b) - quando(a)),
+  ];
 
   const nomeOrg = meta ? meta.nome : orgId.toUpperCase();
+  // Senza roster su Wikipedia (es. Cage Warriors) la pagina mostra solo
+  // campioni ed eventi, senza la scheda Roster vuota.
+  const soloEventi = !roster.length;
   document.title = `${nomeOrg} — MMA Oggi`;
 
   out.innerHTML = `
@@ -69,17 +79,21 @@ async function init() {
       <h1 style="font-size:clamp(28px,4vw,42px);">${nomeOrg}</h1>
       ${meta ? `<p>${meta.descrizione}</p>` : ""}
       <div class="stat-strip">
-        <div class="stat"><div class="value">${roster.length}</div><div class="label">Lottatori nel roster</div></div>
+        ${roster.length ? `<div class="stat"><div class="value">${roster.length}</div><div class="label">Lottatori nel roster</div></div>` : ""}
         <div class="stat"><div class="value">${eventi.length}</div><div class="label">Eventi (2025–2026)</div></div>
       </div>
     </section>
 
-    <div class="org-tabs">
+    ${soloEventi && meta?.campioni?.length ? `
+      <div class="section-title" style="margin-top:24px;">Campioni attuali</div>
+      <div class="champ-list" style="max-width:520px;">${meta.campioni.map((c) => `<div class="champ-row"><span class="champ-cat">${c.categoria}</span><span class="champ-nome">${c.nome}</span></div>`).join("")}</div>` : ""}
+
+    <div class="org-tabs"${soloEventi ? " hidden" : ""}>
       <button class="org-tab active" data-tab="roster">Roster</button>
       <button class="org-tab" data-tab="eventi">Eventi</button>
     </div>
 
-    <div id="tab-roster">
+    <div id="tab-roster"${soloEventi ? " hidden" : ""}>
       <div class="filter-bar">
         <div class="search-input"><input id="ricerca-org" type="text" placeholder="Cerca un lottatore..."></div>
       </div>
@@ -87,7 +101,7 @@ async function init() {
       <div class="fighter-grid" id="grid-org"></div>
     </div>
 
-    <div id="tab-eventi" style="display:none;">
+    <div id="tab-eventi" style="display:${soloEventi ? "block" : "none"};">
       <div class="section-title" style="margin-top:24px;">Eventi</div>
       <div id="eventi-org">${eventi.length ? eventi.map(rigaEventoOrg).join("") : `<div class="empty-state">Nessun evento trovato per il periodo coperto.</div>`}</div>
     </div>

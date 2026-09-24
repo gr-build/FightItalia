@@ -57,6 +57,15 @@ ORGANIZZAZIONI_EUROPA = {
             "https://en.wikipedia.org/wiki/2026_in_Oktagon_MMA",
         ],
     },
+    # Cage Warriors non ha una pagina "List of current ... fighters" su
+    # Wikipedia: solo eventi (i campioni sono a mano in europa-data.js).
+    "cagewarriors": {
+        "roster_url": None,
+        "anni_eventi": [
+            "https://en.wikipedia.org/wiki/2025_in_Cage_Warriors",
+            "https://en.wikipedia.org/wiki/2026_in_Cage_Warriors",
+        ],
+    },
 }
 
 
@@ -526,7 +535,7 @@ def genera_lottatori_extra(pausa=0.3):
 
 def genera_europa():
     for org, cfg in ORGANIZZAZIONI_EUROPA.items():
-        roster = scarica_roster_organizzazione(cfg["roster_url"], f"{org}_roster")
+        roster = scarica_roster_organizzazione(cfg["roster_url"], f"{org}_roster") if cfg["roster_url"] else pd.DataFrame()
         if not roster.empty:
             roster = roster.assign(slug=roster["link"].apply(lambda l: _slug_da_link(l) if isinstance(l, str) else None))
             (WEB_DATA_EUROPA / f"{org}-roster.json").write_text(
