@@ -40,6 +40,9 @@ jobs:
       - name: Genera roster/eventi/card UFC
         run: python build_data.py
 
+      - name: Genera i dati della Griglia MMA
+        run: python build_griglia.py
+
       - name: Genera roster/eventi KSW e Oktagon (Europa)
         run: python -c "from build_data import genera_europa; genera_europa()"
 

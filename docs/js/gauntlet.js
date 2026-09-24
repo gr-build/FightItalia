@@ -1,7 +1,7 @@
 // MMA Gauntlet — minigioco a scelte multiple: arrivare a 30-0 senza
 // finire KO, senza farsi tagliare dal roster e senza squalifiche.
 
-import { renderChrome } from "./common.js?v=202609241755";
+import { renderChrome } from "./common.js?v=202609242322";
 
 // Una carriera vera dura un numero finito di turni, non un numero di vittorie:
 // arrivare in fondo imbattuto e' il vero obiettivo del 30-0.

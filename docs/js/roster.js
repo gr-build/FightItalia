@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, debounce } from "./common.js?v=202609241755";
+import { fetchJSON, renderChrome, icon, debounce } from "./common.js?v=202609242322";
 
 renderChrome("database");
 document.getElementById("search-icon").innerHTML = icon("search");
