@@ -1,7 +1,11 @@
 // Utility condivise tra le pagine del sito.
 
 export async function fetchJSON(path) {
-  const res = await fetch(path);
+  // "no-cache": il browser ricontrolla sempre col server (se il file non e'
+  // cambiato risponde 304, costa pochissimo). Senza, GitHub Pages lascia in
+  // cache i dati per 10 minuti e dopo un aggiornamento si vedevano ancora le
+  // news vuote o i dati vecchi.
+  const res = await fetch(path, { cache: "no-cache" });
   if (!res.ok) throw new Error(`Errore caricando ${path}: ${res.status}`);
   return res.json();
 }
