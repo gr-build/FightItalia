@@ -1,4 +1,4 @@
-"""Aggiorna il numero di versione (?v=...) di tutti i file JavaScript del sito.
+"""Aggiorna il numero di versione (?v=...) di tutti i file JavaScript e CSS del sito.
 
 GitHub Pages tiene i file in cache 10 minuti: dopo un aggiornamento il
 browser poteva mescolare file nuovi e vecchi (un import che non esiste
@@ -15,7 +15,7 @@ from pathlib import Path
 DOCS = Path(__file__).parent / "docs"
 VERSIONE = datetime.now(timezone.utc).strftime("%Y%m%d%H%M")
 
-html_re = re.compile(r'(src="js/[\w-]+\.js)(\?v=\d+)?(")')
+html_re = re.compile(r'((?:src="js/[\w-]+\.js)|(?:href="css/[\w-]+\.css))(\?v=\d+)?(")')
 import_re = re.compile(r'(from "\./[\w-]+\.js)(\?v=\d+)?(")')
 
 for path in list(DOCS.glob("*.html")) + list((DOCS / "js").glob("*.js")):
@@ -25,4 +25,4 @@ for path in list(DOCS.glob("*.html")) + list((DOCS / "js").glob("*.js")):
     if nuovo != testo:
         path.write_text(nuovo, encoding="utf-8")
 
-print(f"Versione JS: {VERSIONE}")
+print(f"Versione JS e CSS: {VERSIONE}")
