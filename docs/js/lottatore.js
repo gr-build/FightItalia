@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve } from "./common.js";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve } from "./common.js?v=202609241256";
 
 renderChrome(null);
 
@@ -190,9 +190,11 @@ async function init() {
           <span class="tag">${categoria || "—"}</span>
         </div>
       </div>
-      ${foto ? `<img src="${foto}" alt="${dett.nome}" onerror="this.style.display='none'" class="foto-lottatore-grande">` : ""}
     </section>
 
+    <div class="profilo-colonne${rigaRoster.campione_attuale ? " con-news" : ""}">
+    <div class="profilo-sinistra">
+    ${foto ? `<img src="${foto}" alt="${dett.nome}" onerror="this.style.display='none'" class="foto-lottatore-grande">` : ""}
     <div class="compare-grid" style="grid-template-columns:1fr; max-width:520px;">
       <div class="compare-col a">
         ${campoInfobox("Altezza", inf["Height"])}
@@ -206,10 +208,11 @@ async function init() {
       </div>
       ${storico.length ? `<div style="margin-top:6px;"><span class="row .k" style="color:var(--text-muted); font-size:12px;">Ultimi 5 incontri</span><div style="margin-top:6px;">${formDots(storico)}${badgeStreak(storico)}</div></div>` : ""}
     </div>
+    </div>
+    ${rigaRoster.campione_attuale ? `<aside class="profilo-news"><div class="section-title" style="margin-top:0;">Ultime news</div><div id="news-lottatore" class="news-colonna"><div class="empty-state">Carico le news...</div></div></aside>` : ""}
+    </div>
 
     ${pannelloComeVince(storico)}
-
-    ${rigaRoster.campione_attuale ? `<div class="section-title" style="margin-top:40px;">Ultime news</div><div id="news-lottatore" class="news-brevi" style="max-width:640px;"><div class="empty-state">Carico le news...</div></div>` : ""}
 
     <div class="section-title" style="margin-top:40px;">Testa a testa</div>
     <div id="tt-picker" style="max-width:520px;"></div>

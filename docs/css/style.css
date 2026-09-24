@@ -1892,3 +1892,17 @@ h1, h2, h3, h4 {
 .news-breve-meta { font-size: 11.5px; color: var(--text-muted); }
 .news-breve-meta b { color: var(--gold); font-weight: 600; }
 .news-breve-titolo { font-size: 14px; line-height: 1.45; color: var(--text); }
+
+/* Scheda lottatore: foto e dati a sinistra, news (solo campioni) a destra */
+.profilo-colonne { display: block; }
+.profilo-colonne.con-news {
+  display: grid;
+  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+.profilo-news { padding-top: 24px; }
+.news-colonna { display: flex; flex-direction: column; gap: 10px; }
+@media (max-width: 900px) {
+  .profilo-colonne.con-news { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+}

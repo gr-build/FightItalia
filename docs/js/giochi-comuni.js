@@ -1,9 +1,7 @@
 // Utility condivise dai giochi (Chi e'?, Piu' o meno).
-// Chi e'/Piu' o meno la importano con "?v=<data>": GitHub Pages tiene i file
-// in cache 10 minuti e un gioco nuovo con questo file vecchio non partiva.
-// Quando si cambia questo file, aggiornare il ?v= negli import e negli HTML.
+// Versione negli import: vedi bump_versione.py.
 
-import { fetchJSON } from "./common.js";
+import { fetchJSON } from "./common.js?v=202609241256";
 
 let cacheLottatori = null;
 
