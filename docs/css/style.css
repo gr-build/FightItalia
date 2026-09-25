@@ -916,22 +916,25 @@ h1, h2, h3, h4 {
   .bout-meta { font-size: 11px; }
 }
 
-/* ---------- Home: griglia lottatori con riquadro eventi a destra ---------- */
-/* Statico (non sticky: appiccicato al viewport finiva tagliato dall'header
-   in alto quando si scorreva) e allineato alle foto di "In evidenza", non
-   al titolo sopra di esse. */
+/* ---------- Home: hero + lottatori a sinistra, eventi a destra ---------- */
+/* Tre aree con nome (hero/aside/lottatori) invece di un blocco unico:
+   cosi' da mobile si puo' riordinarle senza margini finti o "order" che
+   lasciano buchi (era il problema prima: l'eventi in cima con un vuoto
+   enorme sotto, perche' restavano i margini pensati per l'altro ordine). */
 
 .home-layout {
   display: grid;
   grid-template-columns: 1fr 320px;
+  grid-template-areas: "hero aside" "lottatori aside";
   gap: 32px;
   align-items: start;
 }
 
-.home-aside {
-  min-width: 0;
-  margin-top: 210px;
-}
+.home-hero { grid-area: hero; padding-bottom: 0; border-bottom: none; }
+.home-aside { grid-area: aside; min-width: 0; margin-top: 178px; }
+.home-lottatori { grid-area: lottatori; min-width: 0; }
+
+.hero-tagline-mobile, .hero-sub-mobile { display: none; }
 
 .evento-widget {
   background: var(--bg-elevated);
@@ -984,8 +987,15 @@ h1, h2, h3, h4 {
 .evento-widget-tutti:hover { border-color: var(--accent); color: var(--accent); }
 
 @media (max-width: 900px) {
-  .home-layout { grid-template-columns: 1fr; }
-  .home-aside { position: static; margin-top: 0; order: -1; margin-bottom: 24px; }
+  .home-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas: "hero" "aside" "lottatori";
+    gap: 20px;
+  }
+  .home-aside { margin-top: 0; }
+  .hero-sub-desktop { display: none; }
+  .hero-tagline-mobile { display: block; font-size: 18px; font-weight: 600; color: var(--text-secondary); margin-top: 8px; }
+  .hero-sub-mobile { display: block; font-size: 13px; color: var(--text-muted); margin: -6px 0 14px; }
 }
 
 /* ---------- Eventi ---------- */
