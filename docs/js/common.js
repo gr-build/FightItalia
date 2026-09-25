@@ -46,10 +46,13 @@ export function impostaMetaPagina({ titolo, descrizione, jsonLd }) {
 }
 
 // ---------- Lingue ----------
-// Il sito nasce e resta in italiano. Le altre lingue passano dal proxy di
-// Google Traduttore (<host>.translate.goog), che traduce la pagina al volo
-// senza bisogno di mantenere testi tradotti a mano: funziona con qualsiasi
-// dominio, anche dopo il passaggio a fightitalia.it.
+// Il sito nasce e resta in italiano. Le altre lingue usano il traduttore di
+// Google DENTRO la pagina (non piu' il proxy <host>.translate.goog, che
+// metteva la barra di Google in cima, cambiava l'indirizzo e traduceva
+// "MMA Oggi" in "MMA Today" e "Lottatori" in "Wrestlers"). La scelta vive nel
+// cookie googtrans (/it/<lingua>) che il traduttore legge da solo.
+// Sopra la traduzione automatica: il nome del sito non si traduce mai, e in
+// inglese menu e categorie di peso usano i termini giusti dell'MMA (GLOSSARIO_EN).
 const LINGUE = [
   ["it", "Italiano"], ["en", "English"], ["es", "Español"], ["fr", "Français"],
   ["de", "Deutsch"], ["pt", "Português"], ["pl", "Polski"], ["ro", "Română"],
@@ -57,36 +60,82 @@ const LINGUE = [
   ["tr", "Türkçe"], ["zh-CN", "中文"], ["ja", "日本語"],
 ];
 
-const SU_TRADUTTORE = location.hostname.endsWith(".translate.goog");
-
 function linguaAttuale() {
-  if (!SU_TRADUTTORE) return "it";
-  return new URLSearchParams(location.search).get("_x_tr_tl") || "it";
-}
-
-function hostOriginale() {
-  // gr--build-github-io.translate.goog -> gr-build.github.io
-  return location.hostname
-    .replace(/\.translate\.goog$/, "")
-    .replace(/--/g, "\u0000")
-    .replace(/-/g, ".")
-    .replace(/\u0000/g, "-");
+  const m = document.cookie.match(/(?:^|;\s*)googtrans=\/it\/([^;]+)/);
+  return m && LINGUE.some(([c]) => c === m[1]) ? m[1] : "it";
 }
 
 function cambiaLingua(lingua) {
-  const params = new URLSearchParams(location.search);
-  ["_x_tr_sl", "_x_tr_tl", "_x_tr_hl", "_x_tr_pto"].forEach((k) => params.delete(k));
-  const host = SU_TRADUTTORE ? hostOriginale() : location.hostname;
-  if (lingua === "it") {
-    const q = params.toString();
-    location.href = `https://${host}${location.pathname}${q ? `?${q}` : ""}${location.hash}`;
-    return;
+  const scadenza = lingua === "it" ? "; expires=Thu, 01 Jan 1970 00:00:00 GMT" : "; max-age=31536000";
+  const valore = lingua === "it" ? "" : `/it/${lingua}`;
+  // il traduttore scrive il cookie anche sul dominio "punto": si puliscono tutti e due
+  for (const dominio of ["", `; domain=${location.hostname}`, `; domain=.${location.hostname}`]) {
+    document.cookie = `googtrans=${valore}; path=/${dominio}${scadenza}`;
   }
-  const hostTradotto = host.replace(/-/g, "--").replace(/\./g, "-") + ".translate.goog";
-  params.set("_x_tr_sl", "it");
-  params.set("_x_tr_tl", lingua);
-  params.set("_x_tr_hl", lingua);
-  location.href = `https://${hostTradotto}${location.pathname}?${params.toString()}${location.hash}`;
+  location.reload();
+}
+
+// Termini dell'MMA che Google traduce male: in inglese si sostituiscono PRIMA
+// che il traduttore passi (un testo gia' in inglese lui lo lascia com'e').
+const GLOSSARIO_EN = [
+  [/\bPesi Mediomassimi\b/g, "Light Heavyweight"], [/\bPesi Massimi\b/g, "Heavyweight"],
+  [/\bPesi Medi\b/g, "Middleweight"], [/\bPesi Welter\b/g, "Welterweight"],
+  [/\bPesi Leggeri\b/g, "Lightweight"], [/\bPesi Piuma\b/g, "Featherweight"],
+  [/\bPesi Gallo\b/g, "Bantamweight"], [/\bPesi Mosca\b/g, "Flyweight"], [/\bPesi Paglia\b/g, "Strawweight"],
+  [/\bLottatori\b/g, "Fighters"], [/\blottatori\b/g, "fighters"], [/\bLottatore\b/g, "Fighter"], [/\blottatore\b/g, "fighter"],
+  [/\blottatrici\b/g, "fighters"], [/\blottatrice\b/g, "fighter"],
+];
+const CATEGORIE_EN = { Massimi: "Heavyweight", Mediomassimi: "Light Heavyweight", Medi: "Middleweight", Welter: "Welterweight", Leggeri: "Lightweight", Piuma: "Featherweight", Gallo: "Bantamweight", Mosca: "Flyweight", Paglia: "Strawweight" };
+
+function applicaGlossario(radice) {
+  const giro = document.createTreeWalker(radice, NodeFilter.SHOW_TEXT);
+  const nodi = [];
+  while (giro.nextNode()) nodi.push(giro.currentNode);
+  for (const n of nodi) {
+    if (n.parentElement && n.parentElement.closest(".notranslate, script, style")) continue;
+    const t = n.nodeValue;
+    const nudo = t.trim();
+    let nuovo = CATEGORIE_EN[nudo] ? t.replace(nudo, CATEGORIE_EN[nudo]) : t;
+    for (const [re, en] of GLOSSARIO_EN) nuovo = nuovo.replace(re, en);
+    if (nuovo !== t) n.nodeValue = nuovo;
+  }
+}
+
+// Nomi di lottatori ed eventi: il traduttore li storpiava ("Ciryl" -> "Cyryl").
+const SELETTORE_NOMI = ".name, .nickname, .champ-nome, .champ-nome-grande, .pom-nome, .gr-nome, .ac-nome, .chie-fine-nome, .tent-nome, .personaggio-nome, .bout-nome";
+
+function proteggiNomi(radice) {
+  const elementi = radice.matches && radice.matches(SELETTORE_NOMI) ? [radice] : [];
+  for (const e of [...elementi, ...radice.querySelectorAll(SELETTORE_NOMI)]) {
+    e.classList.add("notranslate");
+    e.setAttribute("translate", "no");
+  }
+}
+
+function avviaTraduzione() {
+  const lingua = linguaAttuale();
+  if (lingua === "it") return;
+  document.documentElement.classList.add("tradotto");
+  const sistema = (n) => {
+    proteggiNomi(n);
+    if (lingua === "en") applicaGlossario(n);
+  };
+  sistema(document.body);
+  new MutationObserver((cambi) => {
+    for (const c of cambi) for (const n of c.addedNodes) {
+      if (n.nodeType === 1 && !n.closest(".skiptranslate")) sistema(n);
+    }
+  }).observe(document.body, { childList: true, subtree: true });
+  const box = document.createElement("div");
+  box.id = "google_translate_element";
+  box.hidden = true;
+  document.body.appendChild(box);
+  window.googleTranslateElementInit = () => {
+    new window.google.translate.TranslateElement({ pageLanguage: "it", autoDisplay: false }, "google_translate_element");
+  };
+  const s = document.createElement("script");
+  s.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+  document.body.appendChild(s);
 }
 
 function selettoreLingua() {
@@ -121,7 +170,7 @@ export function renderChrome(active) {
   if (header) {
     header.innerHTML = `
       <div class="container nav">
-        <a href="index.html" class="brand" aria-label="MMA Oggi, home"><img src="img/logo-128.png?v=2" alt="" class="brand-logo" width="56" height="56"><span class="brand-testo">MMA<span class="dot">•</span>Oggi</span></a>
+        <a href="index.html" class="brand" aria-label="MMA Oggi, home"><img src="img/logo-128.png?v=2" alt="" class="brand-logo" width="56" height="56"><span class="brand-testo notranslate" translate="no">MMA<span class="dot">•</span>Oggi</span></a>
         <ul class="nav-links">
           <li><a href="index.html" class="${active === "database" ? "active" : ""}">Lottatori</a></li>
           <li><a href="confronto.html" class="${active === "confronto" ? "active" : ""}">Confronto</a></li>
@@ -135,6 +184,10 @@ export function renderChrome(active) {
       </div>`;
     const sel = header.querySelector("#lingua");
     if (sel) sel.addEventListener("change", () => cambiaLingua(sel.value));
+  }
+  if (!window.__traduzioneAvviata) {
+    window.__traduzioneAvviata = true;
+    avviaTraduzione();
   }
   const footer = document.getElementById("site-footer");
   if (footer) {

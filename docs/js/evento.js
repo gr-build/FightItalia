@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina } from "./common.js?v=202609250734";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina } from "./common.js?v=202609250738";
 
 renderChrome(null);
 
@@ -192,7 +192,7 @@ async function init() {
 
   out.innerHTML = `
     <section class="hero" style="padding:44px 0 24px; border-bottom:none;">
-      <h1 style="font-size:clamp(26px,4vw,40px);">${ev.evento}</h1>
+      <h1 class="notranslate" translate="no" style="font-size:clamp(26px,4vw,40px);">${ev.evento}</h1>
       <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         ${tagTipo(ev.tipo)}
         <span style="color:var(--text-secondary); font-size:14px;">${dataEstesa(ev.data)}</span>

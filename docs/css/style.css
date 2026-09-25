@@ -2029,3 +2029,9 @@ h1, h2, h3, h4 {
 .contatto p { margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
 .contatti-email { font-size: 15px; margin: 0; }
 .contatti-email a { color: var(--accent); font-weight: 600; }
+
+/* ---------- Traduttore Google dentro la pagina: niente barra, niente evidenziazioni ---------- */
+body > .skiptranslate, iframe.skiptranslate, .goog-te-banner-frame, #goog-gt-tt, .goog-te-balloon-frame, .VIpgJd-ZVi9od-ORHb-OEVmcd { display: none !important; }
+html.tradotto body { top: 0 !important; position: static !important; }
+.goog-text-highlight { background: none !important; box-shadow: none !important; }
+font { background: none !important; box-shadow: none !important; }

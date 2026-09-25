@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve } from "./common.js?v=202609250734";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve } from "./common.js?v=202609250738";
 
 renderChrome(null);
 
@@ -180,7 +180,7 @@ async function init() {
     <section class="hero" style="padding:44px 0 24px; border-bottom:none;">
       <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
         <div>
-          <h1 style="font-size:clamp(28px,4vw,42px);">${dett.nome}</h1>
+          <h1 class="notranslate" translate="no" style="font-size:clamp(28px,4vw,42px);">${dett.nome}</h1>
           ${inf["Other names"] || rigaRoster.soprannome ? `<p style="margin-top:6px; font-style:italic; color:var(--text-secondary);">"${inf["Other names"] || rigaRoster.soprannome}"</p>` : ""}
           ${badge ? `<div style="margin-top:8px;">${badge}</div>` : ""}
           ${dataAgg ? `<p style="margin-top:10px; font-size:12px; color:var(--text-muted);">Dati aggiornati al: ${dataAgg}</p>` : ""}
