@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609251321";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609251326";
 
 renderChrome(null);
 
@@ -14,23 +14,25 @@ const ETICHETTE_ORARI = { early_prelims: "Early Prelims", prelims: "Prelims", ma
 
 const CLASSE_FASE = { early_prelims: "early", prelims: "prelims", main_card: "main" };
 
-function rigaOrario(chiave, etichetta, o) {
+function rigaOrario(chiave, etichetta, o, citta) {
   if (!o) return "";
-  const italia = o.giorno_dopo ? `${o.italia} <span class="fase-giorno-dopo">giorno dopo</span>` : o.italia;
+  // giorno_it (es. "Dom") arriva dai dati nuovi; sui vecchi non ancora
+  // rigenerati resta il vecchio "(giorno dopo)" come rete di sicurezza.
+  const giorno = o.giorno_dopo ? `<span class="fase-giorno-dopo">${o.giorno_it || "giorno dopo"}</span>` : "";
   return `
     <div class="orario-fase ${CLASSE_FASE[chiave]}">
       <div class="fase-label"><span class="fase-dot"></span>${etichetta}</div>
       <div class="fase-orari">
-        <div class="fase-italia">${italia}</div>
-        <div class="fase-sede">${o.locale} ora sede</div>
+        <div class="fase-italia">${o.italia} ${giorno}</div>
+        <div class="fase-sede">${o.locale}${citta ? ` a ${citta}` : " ora sede"}</div>
       </div>
     </div>`;
 }
 
-function blocoOrari(orari) {
+function blocoOrari(orari, citta) {
   if (!orari) return "";
   const righe = Object.entries(ETICHETTE_ORARI)
-    .map(([chiave, etichetta]) => rigaOrario(chiave, etichetta, orari[chiave]))
+    .map(([chiave, etichetta]) => rigaOrario(chiave, etichetta, orari[chiave], citta))
     .join("");
   if (!righe) return "";
   return `
@@ -185,6 +187,7 @@ async function init() {
   }
 
   const luogo = [ev.sede, ev.luogo].filter(Boolean).join(", ");
+  const citta = (ev.luogo || "").split(",")[0].trim() || null;
   const dataParsata = new Date(ev.data);
   impostaMetaPagina({
     titolo: `${ev.evento} — MMA Oggi`,
@@ -209,7 +212,7 @@ async function init() {
       </div>
       ${luogo ? `<p style="margin-top:14px; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">${icon("pin")} ${luogo}</p>` : ""}
       ${ev.spettatori ? `<p style="margin-top:6px; color:var(--text-muted); font-size:13px;">Spettatori: ${ev.spettatori}</p>` : ""}
-      ${blocoOrari(ev.orari)}
+      ${blocoOrari(ev.orari, citta)}
     </section>
 
     <div id="card-evento" style="max-width:720px;"><div class="empty-state">Carico la card...</div></div>
