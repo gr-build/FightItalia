@@ -168,16 +168,22 @@ def _fisico_da_json(path):
 # disponibili (il JSON li marca "indicativo" e la pagina lo dice). In Nord
 # America la UFC ragiona in orario della costa Est qualunque sia la sede
 # (Las Vegas compresa); altrove l'orario e' quello locale di prima serata.
-ORARI_TIPICI_NORD_AMERICA = {"fuso_orari": "America/New_York", "early_prelims": "18:00", "prelims": "20:00", "main_card": "22:00"}
+# Formato 2026 (Paramount+), visto sugli orari ESPN: gli eventi numerati hanno
+# early prelims, preliminari e main card alle 16/18/20 di New York; le Fight
+# Night solo preliminari e main card alle 17/20. Servono solo per gli eventi
+# oltre i 30 giorni: quelli piu' vicini prendono gli orari veri da ESPN.
+ORARI_TIPICI_NORD_AMERICA = {"fuso_orari": "America/New_York", "early_prelims": "16:00", "prelims": "18:00", "main_card": "20:00"}
+ORARI_TIPICI_FIGHT_NIGHT_NORD_AMERICA = {"fuso_orari": "America/New_York", "prelims": "17:00", "main_card": "20:00"}
 ORARI_TIPICI_RESTO_DEL_MONDO = {"early_prelims": "16:00", "prelims": "18:00", "main_card": "21:00"}
 
 
-def _orari_tipici(luogo):
+def _orari_tipici(luogo, nome_evento=""):
     fuso = fuso_da_luogo(luogo)
     if not fuso:
         return None
     if fuso.startswith("America/"):
-        return {**ORARI_TIPICI_NORD_AMERICA, "fuso_sede": fuso}
+        base = ORARI_TIPICI_FIGHT_NIGHT_NORD_AMERICA if "Fight Night" in (nome_evento or "") else ORARI_TIPICI_NORD_AMERICA
+        return {**base, "fuso_sede": fuso}
     return {**ORARI_TIPICI_RESTO_DEL_MONDO, "fuso_orari": fuso, "fuso_sede": fuso}
 
 
@@ -204,7 +210,7 @@ def _orari_evento_italia(nome_evento, luogo, data_evento):
         # ufc.com non leggibile (Selenium+Edge non c'e' su GitHub Actions,
         # o pagina evento non ancora pubblicata): meglio un orario tipico
         # dichiarato come tale che nessun orario — vedi ORARI_TIPICI.
-        orari = _orari_tipici(luogo)
+        orari = _orari_tipici(luogo, nome_evento)
         if not orari:
             return None
         indicativo = True
@@ -659,6 +665,125 @@ def genera_dati_giochi():
     (WEB_DATA / "giochi.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(f"Dati giochi: {len(out)} lottatori ({sum(1 for x in out if x['p'])} con paese)")
 
+# ---------------------------------------------------------------------------
+# ESPN: card e orari ufficiali degli eventi in arrivo.
+# Wikipedia resta indietro sulle sostituzioni e non ha gli orari (Rosas Jr.
+# vs Barcelos: due incontri cambiati, main card e preliminari invertiti,
+# orari sbagliati di due ore). L'API pubblica di ESPN ha la card aggiornata
+# e l'orario d'inizio di ogni incontro: i gruppi con lo stesso orario sono
+# le sezioni (early prelims, preliminari, main card).
+ESPN_SCOREBOARD = "https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard"
+ESPN_GIORNI_AVANTI = 30
+
+
+def _norm_nome(t):
+    import unicodedata
+    t = unicodedata.normalize("NFKD", t or "").encode("ascii", "ignore").decode().lower()
+    return re.sub(r"[^a-z0-9]", "", t)
+
+
+def evento_espn(giorno):
+    """Card ESPN dell'evento UFC di quel giorno: {"sezioni": [(nome, inizio_utc, [incontri])]} o None."""
+    import requests
+    from datetime import datetime, timezone
+
+    try:
+        r = requests.get(ESPN_SCOREBOARD, params={"dates": giorno.strftime("%Y%m%d")}, timeout=20)
+        r.raise_for_status()
+        eventi = r.json().get("events") or []
+    except Exception as errore:
+        print(f"  [espn] {giorno}: non raggiungibile ({errore})")
+        return None
+    if not eventi:
+        return None
+    incontri = []
+    for c in eventi[0].get("competitions") or []:
+        try:
+            inizio = datetime.strptime(c["date"], "%Y-%m-%dT%H:%MZ").replace(tzinfo=timezone.utc)
+        except (KeyError, ValueError):
+            continue
+        atleti = sorted(c.get("competitors") or [], key=lambda x: x.get("order", 9))
+        if len(atleti) != 2:
+            continue
+        cat = (c.get("type") or {}).get("abbreviation") or ""
+        cat = re.sub(r"^W\s+", "Women's ", cat)
+        incontri.append({"inizio": inizio, "categoria": cat, "nomi": [a["athlete"]["displayName"] for a in atleti]})
+    if not incontri:
+        return None
+    orari = sorted({x["inizio"] for x in incontri})
+    nomi_sezioni = {1: ["Main card"], 2: ["Preliminary card", "Main card"], 3: ["Early preliminary card", "Preliminary card", "Main card"]}
+    nomi = nomi_sezioni.get(len(orari)) or (["Early preliminary card"] * (len(orari) - 2) + ["Preliminary card", "Main card"])
+    sezioni = []
+    for nome, ora in zip(nomi, orari):
+        # ESPN elenca dal primo incontro all'ultimo: il sito vuole il main event in cima
+        gruppo = [x for x in incontri if x["inizio"] == ora][::-1]
+        sezioni.append((nome, ora, gruppo))
+    return {"sezioni": sezioni}
+
+
+def aggiorna_da_espn():
+    """Per gli eventi programmati dei prossimi ESPN_GIORNI_AVANTI giorni sostituisce
+    card e orari con quelli di ESPN. I link Wikipedia dei lottatori si
+    recuperano dalla card vecchia e dal roster."""
+    from datetime import date as _date
+    from zoneinfo import ZoneInfo
+
+    eventi = json.loads((WEB_DATA / "eventi.json").read_text(encoding="utf-8"))
+    roster = json.loads((WEB_DATA / "roster.json").read_text(encoding="utf-8"))
+    link_noti = {_norm_nome(r.get("nome")): r.get("link") for r in roster if r.get("nome")}
+    oggi = _date.today()
+    aggiornati = 0
+    for ev in eventi:
+        if ev.get("stato") != "programmato" or not ev.get("link"):
+            continue
+        giorno = _data_evento(ev.get("data"))
+        if not giorno or not (oggi <= giorno <= oggi + timedelta(days=ESPN_GIORNI_AVANTI)):
+            continue
+        dati = evento_espn(giorno)
+        if not dati:
+            continue
+        file = WEB_DATA_EVENTI / f"{_slug_da_link(ev['link'])}.json"
+        try:
+            vecchia = json.loads(file.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            vecchia = []
+        for b in vecchia:
+            for k in ("fighter1", "fighter2"):
+                if b.get(k) and b.get(k + "_link"):
+                    link_noti.setdefault(_norm_nome(b[k]), b[k + "_link"])
+        n_espn = sum(len(g) for _, _, g in dati["sezioni"])
+        # a settimane dall'evento ESPN puo' avere solo 2-3 incontri: la card
+        # di Wikipedia, piu' completa, resta finche' ESPN non la raggiunge
+        usa_card = n_espn >= len(vecchia) or (giorno - oggi).days <= 8
+        usa_orari = usa_card or len(dati["sezioni"]) >= 2
+        if not usa_card and not usa_orari:
+            continue
+        card = []
+        for sezione, _, gruppo in reversed(dati["sezioni"]):  # main card in cima, come su Wikipedia
+            for x in gruppo:
+                n1, n2 = x["nomi"]
+                card.append({
+                    "sezione": sezione, "categoria": x["categoria"],
+                    "fighter1": n1, "fighter1_link": link_noti.get(_norm_nome(n1)),
+                    "fighter2": n2, "fighter2_link": link_noti.get(_norm_nome(n2)),
+                    "metodo": "", "round": "", "tempo": "", "note": "", "fonte": "ESPN",
+                })
+        if usa_card:
+            file.write_text(json.dumps(card, ensure_ascii=False), encoding="utf-8")
+        fuso_sede = ZoneInfo((ev.get("orari") or {}).get("fuso_sede") or fuso_da_luogo(ev.get("luogo")) or "America/New_York")
+        italia = ZoneInfo("Europe/Rome")
+        orari = {"fuso_sede": str(fuso_sede), "indicativo": False, "fonte": "ESPN", "early_prelims": None, "prelims": None, "main_card": None}
+        chiavi = {"Early preliminary card": "early_prelims", "Preliminary card": "prelims", "Main card": "main_card"}
+        for sezione, ora, _ in dati["sezioni"]:
+            locale, ita = ora.astimezone(fuso_sede), ora.astimezone(italia)
+            orari[chiavi[sezione]] = {"locale": locale.strftime("%H:%M"), "italia": ita.strftime("%H:%M"), "giorno_dopo": ita.date() != locale.date()}
+        ev["orari"] = orari
+        aggiornati += 1
+        print(f"  [espn] {ev['evento']}: " + (f"card ESPN ({n_espn} incontri)" if usa_card else f"card Wikipedia ({len(vecchia)}), solo orari ESPN") + ", " + ", ".join(f"{k} {v['italia']}" for k, v in orari.items() if isinstance(v, dict)))
+    (WEB_DATA / "eventi.json").write_text(json.dumps(eventi, ensure_ascii=False), encoding="utf-8")
+    print(f"ESPN: {aggiornati} eventi aggiornati con card e orari ufficiali")
+
+
 if __name__ == "__main__":
     roster = genera_roster_e_eventi()
     genera_dettagli_lottatori(roster)
@@ -666,5 +791,6 @@ if __name__ == "__main__":
 
     eventi = pd.read_json(WEB_DATA / "eventi.json")
     genera_card_eventi(eventi)
+    aggiorna_da_espn()  # dopo Wikipedia: per gli eventi in arrivo vince ESPN
     genera_lottatori_extra()
     genera_dati_giochi()
