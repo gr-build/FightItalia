@@ -916,16 +916,22 @@ h1, h2, h3, h4 {
   .bout-meta { font-size: 11px; }
 }
 
-/* ---------- Home: vista Lottatori con riquadro eventi a lato ---------- */
+/* ---------- Home: griglia lottatori con riquadro eventi a destra ---------- */
+/* Parte dall'alto (accanto all'hero) e non solo accanto alla griglia,
+   cosi' il riquadro eventi resta visibile scendendo nella pagina. */
 
-.lottatori-layout {
+.home-layout {
   display: grid;
   grid-template-columns: 1fr 280px;
   gap: 32px;
   align-items: start;
 }
 
-.lottatori-aside { min-width: 0; }
+.home-aside {
+  min-width: 0;
+  position: sticky;
+  top: 16px;
+}
 
 .mini-evento {
   display: block;
@@ -944,7 +950,8 @@ h1, h2, h3, h4 {
 .mini-evento .mini-nome { font-size: 13.5px; margin-top: 2px; }
 
 @media (max-width: 900px) {
-  .lottatori-layout { grid-template-columns: 1fr; }
+  .home-layout { grid-template-columns: 1fr; }
+  .home-aside { position: static; }
 }
 
 /* ---------- Eventi ---------- */
