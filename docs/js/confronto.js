@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, cmDaStringa, numeroDaRecord, classeRisultato, letteraRisultato, debounce, slugDaLink, formDots, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, , fotoDi, classeFoto } from "./common.js?v=202609251326";
+import { fetchJSON, renderChrome, cmDaStringa, numeroDaRecord, classeRisultato, letteraRisultato, debounce, slugDaLink, formDots, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, fotoDi, classeFoto } from "./common.js?v=202609251357";
 
 renderChrome("confronto");
 
@@ -192,10 +192,24 @@ async function init() {
   // roster UFC attuale — senza, arrivando da un link "Confronta" per uno
   // di loro (vedi evento.js) la ricerca per slug fallirebbe silenziosamente
   // e la pagina mostrerebbe una coppia di default a caso invece di loro.
-  const [roster, extra] = await Promise.all([
-    fetchJSON("data/roster.json"),
-    fetchJSON("data/extra-lottatori.json").catch(() => []),
-  ]);
+  let roster, extra;
+  try {
+    [roster, extra] = await Promise.all([
+      fetchJSON("data/roster.json"),
+      fetchJSON("data/extra-lottatori.json").catch(() => []),
+    ]);
+  } catch {
+    // roster.json pesa circa 450 KB: con connessione debole il fetch puo'
+    // fallire. Senza questo catch la Promise.all rigettava e setupAutocomplete
+    // non veniva mai chiamato: pagina silenziosamente morta, la ricerca non
+    // rispondeva a niente (ne' il click su "Confronta" ne' scrivere a mano).
+    document.getElementById("risultato").innerHTML = `
+      <div class="empty-state">
+        Dati non caricati (connessione debole?). <button type="button" id="riprova-confronto" class="load-more" style="display:inline-block; margin-left:8px;">Riprova</button>
+      </div>`;
+    document.getElementById("riprova-confronto").addEventListener("click", () => location.reload());
+    return;
+  }
   opzioni = [...roster, ...extra].filter((r) => r.link && r.slug);
 
   setupAutocomplete("a");
