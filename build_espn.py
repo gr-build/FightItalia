@@ -296,11 +296,17 @@ def completa_roster(solo=None):
     print(f"Schede ESPN: {fatte} nuove o aggiornate, {saltate} ancora valide, {non_trovate} non trovate su ESPN")
 
 
-def completa_card(giorni=30, salva_cache=True):
+def completa_card(giorni=30, salva_cache=True, max_chiamate=None):
     """Chi combatte negli eventi dei prossimi giorni ma non e' nel roster UFC
     (esordienti, sostituti: Tina Black a Rosas Jr. vs Barcelos) riceve una
     scheda ESPN e una riga in extra-lottatori.json: cosi' il "Confronta" della
-    pagina evento funziona per tutti gli incontri."""
+    pagina evento funziona per tutti gli incontri.
+
+    Oltre ai prossimi eventi, risale anche gli eventi passati (dal piu'
+    recente) ma solo per la main card: e' li' che manca piu' spesso il
+    "Confronta", e limitarsi alla main card tiene il numero di chiamate ESPN
+    sotto controllo sugli ~800 eventi storici, che si smaltiscono in piu' run
+    grazie alla cache e ai file lottatore gia' scritti su disco."""
     roster = json.loads((DATI / "roster.json").read_text(encoding="utf-8"))
     extra_file = DATI / "extra-lottatori.json"
     extra = json.loads(extra_file.read_text(encoding="utf-8"))
@@ -310,22 +316,39 @@ def completa_card(giorni=30, salva_cache=True):
     except (OSError, ValueError):
         cache = {}
     oggi = date.today()
+    tetto = max_chiamate if max_chiamate is not None else MAX_PER_RUN
     aggiunti = 0
-    for ev in json.loads((DATI / "eventi.json").read_text(encoding="utf-8")):
-        if ev.get("stato") != "programmato" or not ev.get("link"):
-            continue
-        try:
-            giorno = datetime.strptime(ev["data"], "%b %d, %Y").date()
-        except (KeyError, ValueError):
-            continue
-        if not (oggi <= giorno <= oggi + timedelta(days=giorni)):
-            continue
+
+    def eventi_da_esaminare():
+        tutti = json.loads((DATI / "eventi.json").read_text(encoding="utf-8"))
+        prossimi, passati = [], []
+        for ev in tutti:
+            if not ev.get("link"):
+                continue
+            try:
+                giorno = datetime.strptime(ev["data"], "%b %d, %Y").date()
+            except (KeyError, ValueError):
+                continue
+            if ev.get("stato") == "programmato" and oggi <= giorno <= oggi + timedelta(days=giorni):
+                prossimi.append((ev, giorno, False))
+            elif ev.get("stato") == "passato":
+                passati.append((ev, giorno, True))
+        passati.sort(key=lambda t: t[1], reverse=True)
+        return prossimi + passati
+
+    for ev, _giorno, solo_main_card in eventi_da_esaminare():
+        if aggiunti >= tetto:
+            break
         slug_ev = re.sub(r"[^a-z0-9]+", "-", ev["link"].rstrip("/").split("/")[-1].lower()).strip("-")
         try:
             card = json.loads((DATI / "eventi" / f"{slug_ev}.json").read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
+        if solo_main_card:
+            card = [b for b in card if "main card" in (b.get("sezione") or "").lower()]
         for b in card:
+            if aggiunti >= tetto:
+                break
             for k in ("fighter1", "fighter2"):
                 nome = b.get(k)
                 if not nome or _norm(nome) in noti:

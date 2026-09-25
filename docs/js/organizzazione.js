@@ -1,5 +1,5 @@
-import { fetchJSON, renderChrome, debounce } from "./common.js?v=202609251222";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202609251222";
+import { fetchJSON, renderChrome, debounce } from "./common.js?v=202609251247";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202609251247";
 
 renderChrome("europa");
 
@@ -39,7 +39,7 @@ function rigaEventoOrg(ev) {
     <div class="event-row">
       <div class="event-date"><span class="day">${giorno}</span><span class="month">${mese}</span></div>
       <div class="event-main">
-        <div class="name">${ev.evento}${/italy/i.test(ev.luogo || "") ? ` <span class="tag numerato">In Italia</span>` : ""}${!isNaN(d) && d > new Date() ? ` <span class="tag fight-night">In arrivo</span>` : ""}</div>
+        <div class="name">${ev.evento}${/italy/i.test(ev.luogo || "") ? ` <span class="tag numerato">In Italia</span>` : ""}</div>
         ${luogo ? `<div class="venue">${luogo.replace(/Italy/, "Italia")}</div>` : ""}
       </div>
       <span></span>
@@ -60,13 +60,12 @@ async function init() {
   let roster = [], eventi = [];
   try { roster = await fetchJSON(`data/europa/${orgId}-roster.json`); } catch { roster = []; }
   try { eventi = await fetchJSON(`data/europa/${orgId}-eventi.json`); } catch { eventi = []; }
-  // Prima i prossimi (dal piu' vicino), poi i passati (dal piu' recente).
+  // Prossimi (dal piu' vicino) e passati (dal piu' recente) in due liste
+  // separate, come in eventi.js: qui non c'era divisione ed erano mischiati.
   const adesso = new Date();
   const quando = (e) => new Date(e.data);
-  eventi = [
-    ...eventi.filter((e) => quando(e) >= adesso).sort((a, b) => quando(a) - quando(b)),
-    ...eventi.filter((e) => !(quando(e) >= adesso)).sort((a, b) => quando(b) - quando(a)),
-  ];
+  const prossimiOrg = eventi.filter((e) => quando(e) >= adesso).sort((a, b) => quando(a) - quando(b));
+  const passatiOrg = eventi.filter((e) => !(quando(e) >= adesso)).sort((a, b) => quando(b) - quando(a));
 
   const nomeOrg = meta ? meta.nome : orgId.toUpperCase();
   // Senza roster su Wikipedia (es. Cage Warriors) la pagina mostra solo
@@ -80,7 +79,8 @@ async function init() {
       ${meta ? `<p>${meta.descrizione}</p>` : ""}
       <div class="stat-strip">
         ${roster.length ? `<div class="stat"><div class="value">${roster.length}</div><div class="label">Lottatori nel roster</div></div>` : ""}
-        <div class="stat"><div class="value">${eventi.length}</div><div class="label">Eventi (2025–2026)</div></div>
+        <div class="stat"><div class="value">${prossimiOrg.length}</div><div class="label">Eventi in arrivo</div></div>
+        <div class="stat"><div class="value">${passatiOrg.length}</div><div class="label">Eventi passati</div></div>
       </div>
     </section>
 
@@ -102,8 +102,10 @@ async function init() {
     </div>
 
     <div id="tab-eventi">
-      <div class="section-title" style="margin-top:24px;">Eventi</div>
-      <div id="eventi-org">${eventi.length ? eventi.map(rigaEventoOrg).join("") : `<div class="empty-state">Nessun evento trovato per il periodo coperto.</div>`}</div>
+      <div class="section-title" style="margin-top:24px;">Prossimi eventi</div>
+      <div id="eventi-org-prossimi">${prossimiOrg.length ? prossimiOrg.map(rigaEventoOrg).join("") : `<div class="empty-state">Nessun evento programmato trovato.</div>`}</div>
+      <div class="section-title" style="margin-top:24px;">Eventi passati</div>
+      <div id="eventi-org-passati">${passatiOrg.length ? passatiOrg.map(rigaEventoOrg).join("") : `<div class="empty-state">Nessun evento passato trovato.</div>`}</div>
     </div>
 
     <p style="margin:14px 0 60px; font-size:12px; color:var(--text-muted);">Roster ed eventi da Wikipedia. Scheda di dettaglio per singolo lottatore/evento non ancora disponibile per questa organizzazione (solo per UFC per ora).</p>

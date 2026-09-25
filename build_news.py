@@ -192,11 +192,40 @@ def _riscrivi_in_blocco(api_key, voci):
     return out
 
 
+GOOGLE_TRANSLATE_URL = "https://translate.googleapis.com/translate_a/single"
+
+
+def _traduci_google(testo):
+    """Traduzione EN->IT con l'endpoint pubblico e gratuito di Google
+    Traduttore (lo stesso che usa la pagina), senza chiave: rete di sicurezza
+    quando Gemini non risponde. Non riscrive in stile redazionale come
+    Gemini, e' solo una traduzione letterale, ma meglio dell'inglese puro."""
+    if not testo:
+        return testo
+    try:
+        r = requests.get(
+            GOOGLE_TRANSLATE_URL,
+            params={"client": "gtx", "sl": "en", "tl": "it", "dt": "t", "q": testo},
+            headers=HEADERS,
+            timeout=10,
+        )
+        r.raise_for_status()
+        frasi = r.json()[0]
+        return "".join(f[0] for f in frasi if f[0])
+    except Exception:
+        return None
+
+
 def _voce_originale(titolo, estratto, fonte, link, pubblicato):
-    """Notizia com'e' nel feed (inglese), usata quando Gemini non risponde o
-    si e' gia' raggiunto il tetto della run. Non va in cache: alla run
-    successiva si riprova a riscriverla in italiano."""
+    """Notizia del feed (inglese) quando Gemini non risponde o si e' gia'
+    raggiunto il tetto della run: si prova prima con Google Traduttore (senza
+    chiave, sempre disponibile) prima di lasciarla in inglese. Non va in
+    cache: alla run successiva si riprova a riscriverla con Gemini."""
     riassunto = estratto if len(estratto) <= 280 else estratto[:280].rsplit(" ", 1)[0] + "…"
+    titolo_it = _traduci_google(titolo)
+    riassunto_it = _traduci_google(riassunto) if titolo_it else None
+    if titolo_it and riassunto_it:
+        return {"titolo": titolo_it, "riassunto": riassunto_it, "fonte": fonte, "url": link, "pubblicato": pubblicato, "lingua": "it", "tradotto": "google"}
     return {"titolo": titolo, "riassunto": riassunto, "fonte": fonte, "url": link, "pubblicato": pubblicato, "lingua": "en"}
 
 
