@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto } from "./common.js?v=202609250818";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto } from "./common.js?v=202609250824";
 
 renderChrome(null);
 
@@ -30,7 +30,7 @@ function pannelloComeVince(storico) {
   if (!m.totale) return "";
   const pct = (n) => Math.round((n / m.totale) * 100);
   return `
-    <div class="section-title" style="margin-top:40px;">Come vince</div>
+    <div class="section-title" style="margin-top:40px;">Metodi di vittoria</div>
     <div class="compare-col a" style="max-width:520px;">
       ${campoInfobox("KO/TKO", `${m.ko} (${pct(m.ko)}%)`)}
       ${campoInfobox("Sottomissione", `${m.sub} (${pct(m.sub)}%)`)}
