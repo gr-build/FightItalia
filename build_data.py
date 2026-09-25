@@ -600,6 +600,21 @@ def _paese_nascita(infobox):
     return _PAESI_IT.get(nato.split(",")[-1].strip(), (None, None))
 
 
+def _paese_giochi(ib):
+    """Nazionalita' prima del luogo di nascita: Topuria e' nato in Germania ma e'
+    georgiano (e spagnolo). Il luogo di nascita resta per chi non ha il campo."""
+    from build_griglia import NAZIONALITA, BANDIERE
+
+    naz = (ib.get("Nationality") or "").strip()
+    if naz in BANDIERE:  # schede ESPN: nazionalita' gia' in italiano ("Stati Uniti")
+        return naz, BANDIERE[naz]
+    for parola in re.findall(r"[A-Z][a-z]+", naz):
+        if parola in NAZIONALITA:
+            nome = NAZIONALITA[parola]
+            return nome, BANDIERE.get(nome, "🏳️")
+    return _paese_nascita(ib)
+
+
 def _intero(v):
     try:
         return int(str(v).strip().split()[0])
@@ -638,7 +653,7 @@ def genera_dati_giochi():
             [esiti.get(str(f.get("res.", "")).strip().lower(), "?"), f.get("opponent") or "", (f.get("method") or "").split("(")[0].strip(), f.get("event") or ""]
             for f in (scheda.get("storico") or [])[:5]
         ]
-        paese, bandiera = _paese_nascita(ib)
+        paese, bandiera = _paese_giochi(ib)
         # Il record viene dal roster (record_mma, "28–14 (1 NC)"): nell'infobox
         # Wins/Losses a volte mescolano pugilato e MMA (Derrick Lewis: 1-14).
         m = re.match(r"\s*(\d+)\D+(\d+)", r.get("record_mma") or "")

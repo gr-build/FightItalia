@@ -83,14 +83,32 @@ def _get(url, **params):
     return None
 
 
+def _parole(nome):
+    """Parole del nome senza ordine, trattini e 'Jr.': 'Lee Yi-sak' == 'Yisak Lee'."""
+    t = unicodedata.normalize("NFKD", nome or "").encode("ascii", "ignore").decode().lower().replace("-", "")
+    lettere = "".join(p for p in re.findall(r"[a-z]+", t) if p not in ("jr", "sr", "ii", "iii"))
+    return "".join(sorted(lettere))  # stesse lettere, qualsiasi ordine e spaziatura
+
+
 def cerca_atleta(nome):
-    dati = _get(CERCA, query=nome, limit=10) or {}
-    for gruppo in dati.get("results") or []:
-        for c in gruppo.get("contents") or []:
-            if c.get("sport") == "mma" and _norm(c.get("displayName")) == _norm(nome):
+    candidati = []
+    parti = nome.split()
+    rovesciato = " ".join(parti[1:] + parti[:1]) if len(parti) >= 2 else nome  # "Lee Yi-sak" -> "Yi-sak Lee"
+    for query in (nome, re.sub(r"\s+(Jr\.?|Sr\.?)$", "", nome), rovesciato, rovesciato.replace("-", "")):
+        dati = _get(CERCA, query=query, limit=10) or {}
+        for gruppo in dati.get("results") or []:
+            for c in gruppo.get("contents") or []:
                 m = re.search(r"a:(\d+)", c.get("uid") or "")
-                if m:
-                    return m.group(1)
+                if c.get("sport") == "mma" and m:
+                    candidati.append((c.get("displayName") or "", m.group(1)))
+        if candidati:
+            break
+    for nome_espn, id_atleta in candidati:  # nome identico
+        if _norm(nome_espn) == _norm(nome):
+            return id_atleta
+    for nome_espn, id_atleta in candidati:  # stesse parole in altro ordine (nomi coreani, cinesi)
+        if _parole(nome_espn) == _parole(nome):
+            return id_atleta
     return None
 
 
@@ -262,7 +280,7 @@ def completa_roster(solo=None):
             non_trovate += 1
             continue
         scheda = scheda_espn(id_atleta, r["nome"], cache)
-        if not scheda or not scheda["storico"]:
+        if not scheda:  # anche chi debutta (storico vuoto) ha la sua scheda: biografia e record
             non_trovate += 1
             continue
         file.write_text(json.dumps(scheda, ensure_ascii=False), encoding="utf-8")
@@ -276,6 +294,74 @@ def completa_roster(solo=None):
     CACHE.parent.mkdir(exist_ok=True)
     CACHE.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
     print(f"Schede ESPN: {fatte} nuove o aggiornate, {saltate} ancora valide, {non_trovate} non trovate su ESPN")
+
+
+def completa_card(giorni=30, salva_cache=True):
+    """Chi combatte negli eventi dei prossimi giorni ma non e' nel roster UFC
+    (esordienti, sostituti: Tina Black a Rosas Jr. vs Barcelos) riceve una
+    scheda ESPN e una riga in extra-lottatori.json: cosi' il "Confronta" della
+    pagina evento funziona per tutti gli incontri."""
+    roster = json.loads((DATI / "roster.json").read_text(encoding="utf-8"))
+    extra_file = DATI / "extra-lottatori.json"
+    extra = json.loads(extra_file.read_text(encoding="utf-8"))
+    noti = {_norm(r.get("nome")) for r in roster + extra if r.get("slug")}
+    try:
+        cache = json.loads(CACHE.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        cache = {}
+    oggi = date.today()
+    aggiunti = 0
+    for ev in json.loads((DATI / "eventi.json").read_text(encoding="utf-8")):
+        if ev.get("stato") != "programmato" or not ev.get("link"):
+            continue
+        try:
+            giorno = datetime.strptime(ev["data"], "%b %d, %Y").date()
+        except (KeyError, ValueError):
+            continue
+        if not (oggi <= giorno <= oggi + timedelta(days=giorni)):
+            continue
+        slug_ev = re.sub(r"[^a-z0-9]+", "-", ev["link"].rstrip("/").split("/")[-1].lower()).strip("-")
+        try:
+            card = json.loads((DATI / "eventi" / f"{slug_ev}.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for b in card:
+            for k in ("fighter1", "fighter2"):
+                nome = b.get(k)
+                if not nome or _norm(nome) in noti:
+                    continue
+                id_atleta = cerca_atleta(nome)
+                if not id_atleta:
+                    continue
+                scheda = scheda_espn(id_atleta, nome, cache)
+                if not scheda:
+                    continue
+                slug = _slug(nome)
+                if (LOTTATORI / f"{slug}.json").exists():
+                    try:
+                        if json.loads((LOTTATORI / f"{slug}.json").read_text(encoding="utf-8")).get("fonte") != "ESPN":
+                            slug += "-espn"
+                    except (OSError, ValueError):
+                        pass
+                (LOTTATORI / f"{slug}.json").write_text(json.dumps(scheda, ensure_ascii=False), encoding="utf-8")
+                sito = (_get(f"{SITE}/athletes/{id_atleta}") or {}).get("athlete") or {}
+                wld = next((x.get("displayValue") for x in (sito.get("statsSummary") or {}).get("statistics") or [] if x.get("name") == "wins-losses-draws"), "")
+                v, l, p = (wld.split("-") + ["0", "0", "0"])[:3]
+                extra = [x for x in extra if _norm(x.get("nome")) != _norm(nome)]
+                extra.append({
+                    "slug": slug, "nome": nome, "link": scheda["link"], "categoria": b.get("categoria"),
+                    "record_mma": f"{v}–{l}" + (f"–{p}" if p not in ("", "0") else "") if wld else None,
+                    "foto": None, "foto_espn": (sito.get("headshot") or {}).get("href"),
+                    "eta": str(sito.get("age") or "") or None, "campione_attuale": False, "ex_campione": False,
+                    "percentile_altezza": None, "percentile_reach": None, "fonte": "ESPN",
+                })
+                noti.add(_norm(nome))
+                aggiunti += 1
+    extra_file.write_text(json.dumps(extra, ensure_ascii=False), encoding="utf-8")
+    if salva_cache:
+        CACHE.parent.mkdir(exist_ok=True)
+        CACHE.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+    print(f"Card: {aggiunti} lottatori fuori roster con scheda ESPN")
 
 
 def foto_roster():
@@ -320,4 +406,5 @@ def foto_roster():
 if __name__ == "__main__":
     completa_roster(sys.argv[1] if len(sys.argv) > 1 else None)
     if len(sys.argv) == 1:
+        completa_card()
         foto_roster()

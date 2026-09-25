@@ -2035,3 +2035,5 @@ body > .skiptranslate, iframe.skiptranslate, .goog-te-banner-frame, #goog-gt-tt,
 html.tradotto body { top: 0 !important; position: static !important; }
 .goog-text-highlight { background: none !important; box-shadow: none !important; }
 font { background: none !important; box-shadow: none !important; }
+/* ritratti ESPN: ritagliati su trasparente, sfondo chiaro come su UFC.com */
+img.foto-bianca { background: linear-gradient(180deg, #ffffff 0%, #e9e9ee 100%); object-position: top; }

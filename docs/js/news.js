@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon } from "./common.js?v=202609250748";
+import { fetchJSON, renderChrome, icon } from "./common.js?v=202609250816";
 
 renderChrome("news");
 

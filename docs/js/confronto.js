@@ -1,8 +1,4 @@
-import {
-  fetchJSON, renderChrome, cmDaStringa, numeroDaRecord,
-  classeRisultato, letteraRisultato, debounce, slugDaLink, formDots,
-  metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave,
-} from "./common.js?v=202609250748";
+import { fetchJSON, renderChrome, cmDaStringa, numeroDaRecord, classeRisultato, letteraRisultato, debounce, slugDaLink, formDots, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, , fotoDi, classeFoto } from "./common.js?v=202609250816";
 
 renderChrome("confronto");
 
@@ -71,12 +67,12 @@ function rigaConPercentile(k, v, percentile) {
 
 function colonna(dett, chiave, riga) {
   const inf = dett.infobox || {};
-  const foto = inf["_immagine"];
+  const foto = fotoDi(riga) || inf["_immagine"];
   const badge = riga.campione_attuale ? "Campione in carica" : riga.ex_campione ? "Ex campione" : "";
   return `
     <div class="compare-col ${chiave}">
-      ${foto ? `<img src="${foto}" alt="${dett.nome}" onerror="this.style.display='none'" style="width:72px; height:72px; object-fit:cover; border-radius:var(--radius); border:1px solid var(--border-soft); margin-bottom:10px;">` : ""}
-      <h2 class="notranslate" translate="no"><a href="lottatore.html?slug=${slugDaLink(dett.link)}">${dett.nome}</a></h2>
+      ${foto ? `<img class="${classeFoto(foto).trim()}" src="${foto}" alt="${dett.nome}" onerror="this.style.display='none'" style="width:72px; height:72px; object-fit:cover; border-radius:var(--radius); border:1px solid var(--border-soft); margin-bottom:10px;">` : ""}
+      <h2 class="notranslate" translate="no"><a href="lottatore.html?slug=${riga.slug || slugDaLink(dett.link)}">${dett.nome}</a></h2>
       <div class="compare-record">${riga.record_mma || "—"}</div>
       ${badge ? `<span class="tag numerato">${badge}</span>` : ""}
       ${rigaInfo("Categoria", inf["Division"])}

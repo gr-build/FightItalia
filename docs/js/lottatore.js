@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve } from "./common.js?v=202609250748";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto } from "./common.js?v=202609250816";
 
 renderChrome(null);
 
@@ -167,7 +167,7 @@ async function init() {
   const inf = dett.infobox || {};
   const storico = dett.storico || [];
   const categoria = (inf["Division"] || rigaRoster.categoria || "").replace(/\s*\([^)]*\)/, "");
-  const foto = inf["_immagine"];
+  const foto = fotoDi(rigaRoster) || inf["_immagine"];
   const badge = rigaRoster.campione_attuale
     ? `<span class="tag numerato">Campione in carica</span>`
     : rigaRoster.ex_campione
@@ -194,7 +194,7 @@ async function init() {
 
     <div class="profilo-colonne${rigaRoster.campione_attuale ? " con-news" : ""}">
     <div class="profilo-sinistra">
-    ${foto ? `<img src="${foto}" alt="${dett.nome}" onerror="this.style.display='none'" class="foto-lottatore-grande">` : ""}
+    ${foto ? `<img src="${foto}" alt="${dett.nome}" onerror="this.style.display='none'" class="foto-lottatore-grande${classeFoto(foto)}">` : ""}
     <div class="compare-grid" style="grid-template-columns:1fr; max-width:520px;">
       <div class="compare-col a">
         ${campoInfobox("Altezza", inf["Height"])}

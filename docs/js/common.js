@@ -149,6 +149,16 @@ function selettoreLingua() {
     </label>`;
 }
 
+// Foto di un lottatore: il ritratto ufficiale ESPN (sfondo trasparente, stesso
+// taglio per tutti) se c'e', altrimenti quella di Wikimedia. Le foto ESPN hanno
+// dietro uno sfondo chiaro (classe foto-bianca), come su UFC.com.
+export function fotoDi(r) {
+  return (r && (r.foto_espn || r.foto)) || null;
+}
+export function classeFoto(url) {
+  return url && url.includes("espncdn.com") ? " foto-bianca" : "";
+}
+
 // Email pubblica: resta nascosta finche' l'inoltro del dominio non funziona
 // (EMAIL_ATTIVA = true quando redazione@mmaoggi.it arriva davvero).
 export const EMAIL = "redazione@mmaoggi.it";

@@ -6,8 +6,8 @@
 //   - allenamento:  griglie casuali senza limiti
 // I dati (data/griglia.json) li prepara build_griglia.py.
 
-import { renderChrome, fetchJSON, SOCIAL } from "./common.js?v=202609250748";
-import { leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609250748";
+import { renderChrome, fetchJSON, SOCIAL } from "./common.js?v=202609250816";
+import { leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609250816";
 
 renderChrome("giochi");
 
@@ -116,14 +116,14 @@ function intestazione(c) {
 
 function fotoDi(dati, id) {
   const f = dati.l[id][2];
-  return f ? PREFISSO_FOTO + f : "";
+  return !f ? "" : f.startsWith("http") ? f : PREFISSO_FOTO + f; // ESPN: indirizzo completo
 }
 
 function avatar(dati, id, classe = "gr-av") {
   const f = fotoDi(dati, id);
   const nome = dati.l[id][0];
   return f
-    ? `<img class="${classe}" src="${f}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'${classe} vuoto',textContent:'${iniziali(nome).replace(/'/g, "")}'}))">`
+    ? `<img class="${classe}${f.includes("espncdn.com") ? " foto-bianca" : ""}" src="${f}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'${classe} vuoto',textContent:'${iniziali(nome).replace(/'/g, "")}'}))">`
     : `<span class="${classe} vuoto">${iniziali(nome)}</span>`;
 }
 

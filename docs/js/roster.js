@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, debounce } from "./common.js?v=202609250748";
+import { fetchJSON, renderChrome, icon, debounce, fotoDi, classeFoto } from "./common.js?v=202609250816";
 
 renderChrome("database");
 document.getElementById("search-icon").innerHTML = icon("search");
@@ -36,9 +36,10 @@ function renderStatStrip() {
 
 function cardEvidenza(r) {
   const href = r.slug ? `lottatore.html?slug=${r.slug}` : "#";
-  const foto = r.foto ? `<img src="${r.foto}" alt="" onerror="this.parentElement.classList.add('senza-foto')" class="champ-foto">` : "";
+  const url = fotoDi(r);
+  const foto = url ? `<img src="${url}" alt="" onerror="this.parentElement.classList.add('senza-foto')" class="champ-foto${classeFoto(url)}">` : "";
   return `
-    <a href="${href}" class="champ-card${r.foto ? "" : " senza-foto"}" style="aspect-ratio:3/4;">
+    <a href="${href}" class="champ-card${url ? "" : " senza-foto"}" style="aspect-ratio:3/4;">
       ${foto}
       <div class="champ-overlay">
         <span class="champ-div">${nomeBreveCategoria(r.categoria)}</span>
@@ -75,8 +76,9 @@ function cardLottatore(r) {
     : r.ex_campione
     ? `<span class="tag numerato">🥊 Ex campione</span>`
     : "";
-  const foto = r.foto
-    ? `<img src="${r.foto}" alt="" onerror="this.style.display='none'" class="card-foto">`
+  const urlFoto = fotoDi(r);
+  const foto = urlFoto
+    ? `<img src="${urlFoto}" alt="" onerror="this.style.display='none'" class="card-foto${classeFoto(urlFoto)}">`
     : `<div class="card-foto card-foto-placeholder">${(r.nome || "?").charAt(0)}</div>`;
   return `
     <div class="fighter-card">

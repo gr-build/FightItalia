@@ -256,6 +256,15 @@ def genera():
                 voce["b"] = "".join(chr(97 + n) for n in lettere)
         lista.append(voce)
 
+    # ritratti ESPN (sfondo chiaro, uguali per tutti) dove ci sono: indirizzo completo
+    try:
+        roster = json.loads((DOCS / "data" / "roster.json").read_text(encoding="utf-8"))
+        espn = {r["slug"]: r["foto_espn"] for r in roster if r.get("slug") and r.get("foto_espn")}
+    except (OSError, ValueError):
+        espn = {}
+    for x in lottatori:
+        if espn.get(x[1]):
+            x[2:] = [espn[x[1]]]
     out = {"l": lottatori, "u": incontri_ufc, "c": lista, "g": griglie_del_giorno(lista)}
     (DOCS / "data" / "griglia.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     per_famiglia = defaultdict(int)

@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina } from "./common.js?v=202609250748";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609250816";
 
 renderChrome(null);
 
@@ -31,7 +31,7 @@ function blocoOrari(orari) {
       <p style="margin-top:8px; font-size:11.5px; color:var(--text-muted);">
         ${orari.indicativo
           ? `Orario indicativo: è l'orario tipico UFC per questa sede, quello ufficiale non è ancora pubblicato. Fuso sede: ${orari.fuso_sede}.`
-          : `Fuso sede: ${orari.fuso_sede}. Orario Italia calcolato automaticamente (cambio ora legale incluso). Fonte: ufc.com.`}
+          : `Fuso sede: ${orari.fuso_sede}. Orario Italia calcolato automaticamente (cambio ora legale incluso). Fonte: ${orari.fonte || "orari tipici"}.`}
       </p>
     </div>`;
 }
@@ -83,8 +83,9 @@ function latoIncontro(nome, riga, slugLink, lato, vincitore) {
   const vuoto = `<span class="bout-avatar bout-avatar-vuoto" aria-hidden="true">${iniziali(nome)}</span>`;
   // Se la foto Wikimedia non carica, al suo posto le iniziali come per
   // chi la foto non ce l'ha.
-  const avatar = riga?.foto
-    ? `<img class="bout-avatar" src="${riga.foto}" alt="" loading="lazy" onerror="this.outerHTML=this.dataset.vuoto" data-vuoto='${vuoto}'>`
+  const urlFoto = fotoDi(riga);
+  const avatar = urlFoto
+    ? `<img class="bout-avatar${classeFoto(urlFoto)}" src="${urlFoto}" alt="" loading="lazy" onerror="this.outerHTML=this.dataset.vuoto" data-vuoto='${vuoto}'>`
     : vuoto;
   const meta = `<div class="bout-meta">${riga?.record_mma || "—"}</div><div class="bout-meta k">${riga?.eta ? `${riga.eta} anni` : "—"}</div>`;
   return `

@@ -1,5 +1,5 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, newsSu, cardNewsBreve } from "./common.js?v=202609250748";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202609250748";
+import { fetchJSON, renderChrome, icon, slugDaLink, newsSu, cardNewsBreve, fotoDi, classeFoto } from "./common.js?v=202609250816";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202609250816";
 
 renderChrome("campioni");
 
@@ -23,12 +23,13 @@ function nomeBreveCategoria(cat) {
 
 function cardCampione(r) {
   const href = r.slug ? `lottatore.html?slug=${r.slug}` : "#";
-  const foto = r.foto
-    ? `<img src="${r.foto}" alt="" onerror="this.parentElement.classList.add('senza-foto')" class="champ-foto">`
+  const url = fotoDi(r);
+  const foto = url
+    ? `<img src="${url}" alt="" onerror="this.parentElement.classList.add('senza-foto')" class="champ-foto${classeFoto(url)}">`
     : "";
   const iniziali = (r.nome || "?").split(/\s+/).slice(0, 2).map((p) => p[0]).join("");
   return `
-    <a href="${href}" class="champ-card${r.foto ? "" : " senza-foto"}">
+    <a href="${href}" class="champ-card${url ? "" : " senza-foto"}">
       ${foto}
       <span class="champ-iniziali" aria-hidden="true">${iniziali}</span>
       <div class="champ-overlay">
@@ -59,8 +60,9 @@ function cardVacante(t) {
 
 function cardLeggenda(r) {
   const href = r.slug ? `lottatore.html?slug=${r.slug}` : null;
-  const foto = r.foto
-    ? `<img src="${r.foto}" alt="" onerror="this.style.display='none'" class="card-foto">`
+  const urlFoto = fotoDi(r);
+  const foto = urlFoto
+    ? `<img src="${urlFoto}" alt="" onerror="this.style.display='none'" class="card-foto${classeFoto(urlFoto)}">`
     : `<div class="card-foto card-foto-placeholder">${(r.nome || "?").charAt(0)}</div>`;
   return `
     <div class="fighter-card">
