@@ -105,7 +105,7 @@ export function renderChrome(active) {
   if (header) {
     header.innerHTML = `
       <div class="container nav">
-        <a href="index.html" class="brand" aria-label="MMA Oggi, home"><img src="img/logo-128.png" alt="" class="brand-logo" width="56" height="56"><span class="brand-testo">MMA<span class="dot">•</span>Oggi</span></a>
+        <a href="index.html" class="brand" aria-label="MMA Oggi, home"><img src="img/logo-128.png?v=2" alt="" class="brand-logo" width="56" height="56"><span class="brand-testo">MMA<span class="dot">•</span>Oggi</span></a>
         <ul class="nav-links">
           <li><a href="index.html" class="${active === "database" ? "active" : ""}">Lottatori</a></li>
           <li><a href="confronto.html" class="${active === "confronto" ? "active" : ""}">Confronto</a></li>

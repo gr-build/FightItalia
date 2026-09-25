@@ -6,8 +6,8 @@
 //   - allenamento:  griglie casuali senza limiti
 // I dati (data/griglia.json) li prepara build_griglia.py.
 
-import { renderChrome, fetchJSON } from "./common.js?v=202609242322";
-import { leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609242322";
+import { renderChrome, fetchJSON } from "./common.js?v=202609250011";
+import { leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609250011";
 
 renderChrome("giochi");
 
@@ -267,7 +267,7 @@ async function init() {
       celle.push(`<button type="button" class="gr-cella ${c.classe || ""}" data-k="${k}" ${cliccabile(k) ? "" : "disabled"} aria-label="${griglia.righe[Math.floor(k / 3)].t} e ${griglia.colonne[k % 3].t}">${c.html}</button>`);
     }
     return `<div class="gr-tab">
-      <div class="gr-angolo"><img src="img/logo-128.png" alt="" width="54" height="54"></div>
+      <div class="gr-angolo"><img src="img/logo-128.png?v=2" alt="" width="54" height="54"></div>
       ${griglia.colonne.map((c) => `<div class="gr-int gr-col">${intestazione(c)}</div>`).join("")}
       ${[0, 1, 2].map((r) => `<div class="gr-int gr-riga">${intestazione(griglia.righe[r])}</div>${celle.slice(r * 3, r * 3 + 3).join("")}`).join("")}
     </div>`;
