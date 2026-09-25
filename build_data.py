@@ -16,6 +16,8 @@ import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
+GIORNI_IT = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"]  # datetime.weekday(): 0=lunedi
+
 import pandas as pd
 
 from scraper_ufc import (
@@ -231,6 +233,7 @@ def _orari_evento_italia(nome_evento, luogo, data_evento):
             "locale": istante_sede.strftime("%H:%M"),
             "italia": istante_italia.strftime("%H:%M"),
             "giorno_dopo": istante_italia.date() != istante_sede.date(),
+            "giorno_it": GIORNI_IT[istante_italia.weekday()],
         }
     return risultato if any(risultato[k] for k in ("early_prelims", "prelims", "main_card")) else None
 
@@ -875,7 +878,7 @@ def aggiorna_da_espn():
         chiavi = {"Early preliminary card": "early_prelims", "Preliminary card": "prelims", "Main card": "main_card"}
         for sezione, ora, _ in dati["sezioni"]:
             locale, ita = ora.astimezone(fuso_sede), ora.astimezone(italia)
-            orari[chiavi[sezione]] = {"locale": locale.strftime("%H:%M"), "italia": ita.strftime("%H:%M"), "giorno_dopo": ita.date() != locale.date()}
+            orari[chiavi[sezione]] = {"locale": locale.strftime("%H:%M"), "italia": ita.strftime("%H:%M"), "giorno_dopo": ita.date() != locale.date(), "giorno_it": GIORNI_IT[ita.weekday()]}
         ev["orari"] = orari
         aggiornati += 1
         print(f"  [espn] {ev['evento']}: " + (f"card ESPN ({n_espn} incontri)" if usa_card else f"card Wikipedia ({len(vecchia)}), solo orari ESPN") + ", " + ", ".join(f"{k} {v['italia']}" for k, v in orari.items() if isinstance(v, dict)))
