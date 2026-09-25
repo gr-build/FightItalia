@@ -6,8 +6,8 @@
 //   - allenamento:  griglie casuali senza limiti
 // I dati (data/griglia.json) li prepara build_griglia.py.
 
-import { renderChrome, fetchJSON } from "./common.js?v=202609250011";
-import { leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609250011";
+import { renderChrome, fetchJSON } from "./common.js?v=202609250116";
+import { leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609250116";
 
 renderChrome("giochi");
 
@@ -28,6 +28,10 @@ const LINEE = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8],
 const box = document.getElementById("griglia");
 const params = new URLSearchParams(location.search);
 let modo = ["sfida", "allenamento"].includes(params.get("modo")) ? params.get("modo") : "giorno";
+// Sfida con link: ?s=<6 id delle condizioni separati da ~>&p=<indovinate>-<rarita'>
+// L'amico gioca la stessa griglia e vede il punteggio da battere. Niente server:
+// la griglia sta tutta nel link.
+let sfidaLink = params.get("s") ? { ids: params.get("s").split("~"), punti: (params.get("p") || "").split("-").map(Number) } : null;
 
 const normalizza = (t) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 const numeroGriglia = (oggi) => Math.round((Date.parse(oggi) - Date.parse(INIZIO)) / 86400000) + 1;
@@ -278,19 +282,27 @@ async function init() {
   }
 
   // ================================================== modo giorno / allenamento
-  function giocaSolo(allenamento) {
+  function giocaSolo(allenamento, sfida = null) {
     const rnd = casualeConSeme(allenamento ? Math.floor(Math.random() * 2 ** 31) : semeDaTesto(`griglia-${oggi}`));
     // la griglia del giorno e' fissata in anticipo da build_griglia.py (campo g)
-    const fissata = !allenamento && dati.g && dati.g[oggi] ? grigliaDaId(dati, dati.g[oggi]) : null;
-    const griglia = fissata || creaGriglia(dati, rnd, allenamento ? 3 : 4, !allenamento);
-    const chiave = `griglia-${oggi}`;
+    const delGiorno = dati.g && dati.g[oggi];
+    const daLink = sfida ? grigliaDaId(dati, sfida.ids) : null;
+    if (sfida && !daLink) sfida = null; // link rotto o condizioni cambiate: si gioca la griglia normale
+    // il link con la griglia di oggi vale come griglia del giorno
+    if (sfida && delGiorno && sfida.ids.join(",") === delGiorno.join(",")) allenamento = false;
+    else if (sfida) allenamento = true;
+    const fissata = !allenamento && delGiorno ? grigliaDaId(dati, delGiorno) : null;
+    const griglia = daLink || fissata || creaGriglia(dati, rnd, allenamento ? 3 : 4, !allenamento);
     const firma = [...griglia.righe, ...griglia.colonne].map((c) => c.id).join(",");
-    const salvato = !allenamento && leggi(chiave, null);
+    // le griglie arrivate da un link si ricordano anche in allenamento
+    const chiave = allenamento && sfida ? `griglia-link-${semeDaTesto(firma)}` : `griglia-${oggi}`;
+    const salvaSempre = !allenamento || !!sfida;
+    const salvato = salvaSempre && leggi(chiave, null);
     const stato = salvato && salvato.firma === firma ? salvato : { firma, celle: {}, usati: 0, finito: false };
     const aggiornaUsati = () => (usati = new Set(Object.values(stato.celle)));
 
     function salva() {
-      if (!allenamento) scrivi(chiave, stato);
+      if (salvaSempre) scrivi(chiave, stato);
     }
 
     function disegna() {
@@ -303,9 +315,11 @@ async function init() {
         if (!allenamento) aggiornaSerie(indovinate);
       }
       const punti = Object.entries(stato.celle).reduce((s, [k, id]) => s + rarita(dati, griglia.celle[k], id), 0);
+      const [amicoN, amicoR] = sfida ? sfida.punti : [];
       partita.innerHTML = `
+        ${sfida && Number.isFinite(amicoN) ? `<div class="gr-sfida-banner">🥊 Un amico ti sfida: ha fatto <b>${amicoN}/9</b>${Number.isFinite(amicoR) ? ` con rarità <b>${amicoR}</b>` : ""}. Riesci a fare meglio?</div>` : ""}
         <div class="gr-barra">
-          <div><b>${allenamento ? "Allenamento" : `Griglia #${numero}`}</b> · ${indovinate}/9</div>
+          <div><b>${allenamento ? (sfida ? "Griglia della sfida" : "Allenamento") : `Griglia #${numero}`}</b> · ${indovinate}/9</div>
           <div class="gr-tentativi" aria-label="Tentativi rimasti">${"●".repeat(Math.max(0, rimasti))}${"○".repeat(Math.min(TENTATIVI, stato.usati))} <span>${Math.max(0, rimasti)} tentativi</span></div>
         </div>
         ${tabellone(griglia, (k) => {
@@ -348,24 +362,35 @@ async function init() {
 
       if (stato.finito) {
         const quadrati = [0, 1, 2].map((r) => [0, 1, 2].map((c) => (stato.celle[r * 3 + c] !== undefined ? "🟩" : "⬛")).join("")).join("\n");
+        const link = `${SITO}griglia.html?s=${encodeURIComponent(firma.split(",").join("~"))}&p=${indovinate}-${punti}`;
         const testo = `MMA Oggi · Griglia ${allenamento ? "(allenamento)" : `#${numero}`} · ${indovinate}/9\n${quadrati}\nRarità: ${punti}\n${SITO}griglia.html`;
+        const testoSfida = `Ho fatto ${indovinate}/9 alla Griglia MMA${allenamento ? "" : ` #${numero}`} (rarità ${punti}). Riesci a battermi? 🥊\n${link}`;
+        let confronto = "";
+        if (sfida && Number.isFinite(amicoN)) {
+          const meglio = indovinate > amicoN || (indovinate === amicoN && punti > (amicoR || 0));
+          const pari = indovinate === amicoN && punti === (amicoR || 0);
+          confronto = `<div class="chie-fine-sub gr-confronto">Tu ${indovinate}/9 · rarità ${punti} — Amico ${amicoN}/9${Number.isFinite(amicoR) ? ` · rarità ${amicoR}` : ""}<br><b>${pari ? "Pareggio!" : meglio ? "Hai vinto la sfida!" : "Ha vinto il tuo amico"}</b></div>`;
+        }
         const serie = allenamento ? null : leggi("griglia-serie", { attuale: 0, migliore: 0 });
         document.getElementById("gr-fine").innerHTML = `
           <div class="chie-fine ${indovinate >= 6 ? "vinto" : "perso"}">
             <div class="chie-fine-titolo">${indovinate === 9 ? "Griglia completa!" : "Fine dei tentativi"}</div>
             <div class="chie-fine-nome">${indovinate}/9 · rarità ${punti}</div>
+            ${confronto}
             ${serie ? `<div class="chie-fine-sub">Serie di griglie complete: ${serie.attuale} · Migliore: ${serie.migliore}</div>` : ""}
             <div class="finale-azioni">
-              <button type="button" class="btn-gioco" id="gr-condividi">Condividi il risultato</button>
-              ${allenamento ? `<button type="button" class="btn-gioco secondario" id="gr-nuova">Nuova griglia</button>` : `<a class="btn-gioco secondario" href="griglia.html?modo=sfida">Sfida un amico</a>`}
+              <button type="button" class="btn-gioco" id="gr-sfida-link">Sfida un amico con un link</button>
+              <button type="button" class="btn-gioco secondario" id="gr-condividi">Condividi il risultato</button>
+              ${allenamento ? `<button type="button" class="btn-gioco secondario" id="gr-nuova">Nuova griglia</button>` : `<a class="btn-gioco secondario" href="griglia.html?modo=sfida">Gioca a 2 sullo stesso telefono</a>`}
             </div>
             ${allenamento ? "" : `<p class="chie-fine-sub">Nuova griglia domani a mezzanotte.</p>`}
           </div>`;
         document.getElementById("gr-condividi").addEventListener("click", (e) => condividi(testo, e.currentTarget));
-        document.getElementById("gr-nuova")?.addEventListener("click", () => giocaSolo(true));
+        document.getElementById("gr-sfida-link").addEventListener("click", (e) => condividi(testoSfida, e.currentTarget));
+        document.getElementById("gr-nuova")?.addEventListener("click", () => giocaSolo(true, null));
       } else if (allenamento) {
         document.getElementById("gr-fine").innerHTML = `<div class="finale-azioni"><button type="button" class="btn-gioco secondario" id="gr-nuova">Nuova griglia</button></div>`;
-        document.getElementById("gr-nuova").addEventListener("click", () => giocaSolo(true));
+        document.getElementById("gr-nuova").addEventListener("click", () => giocaSolo(true, null));
       }
     }
 
@@ -518,11 +543,12 @@ async function init() {
     if (dialog.open) dialog.close();
     box.querySelectorAll(".gr-modi button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.modo === modo)));
     if (modo === "sfida") giocaSfida();
-    else giocaSolo(modo === "allenamento");
+    else giocaSolo(modo === "allenamento", sfidaLink);
   }
   box.querySelectorAll(".gr-modi button").forEach((b) =>
     b.addEventListener("click", () => {
       modo = b.dataset.modo;
+      sfidaLink = null; // cambiando modo si lascia la griglia del link
       history.replaceState(null, "", modo === "giorno" ? "griglia.html" : `griglia.html?modo=${modo}`);
       avvia();
     })
