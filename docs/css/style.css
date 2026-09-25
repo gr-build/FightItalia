@@ -917,23 +917,20 @@ h1, h2, h3, h4 {
 }
 
 /* ---------- Home: griglia lottatori con riquadro eventi a destra ---------- */
-/* Parte dall'alto (accanto all'hero) e non solo accanto alla griglia,
-   cosi' il riquadro eventi resta visibile scendendo nella pagina. */
+/* Statico (non sticky: appiccicato al viewport finiva tagliato dall'header
+   in alto quando si scorreva) e allineato alle foto di "In evidenza", non
+   al titolo sopra di esse. */
 
 .home-layout {
   display: grid;
-  grid-template-columns: 1fr 280px;
+  grid-template-columns: 1fr 320px;
   gap: 32px;
   align-items: start;
 }
 
 .home-aside {
   min-width: 0;
-  position: sticky;
-  /* allineato a "In evidenza": scende sotto l'altezza dell'hero invece di
-     partire appiccicato al titolo. */
-  top: 132px;
-  margin-top: 132px;
+  margin-top: 210px;
 }
 
 .evento-widget {
