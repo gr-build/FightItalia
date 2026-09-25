@@ -622,11 +622,17 @@ def aggiorna_risultati_europa():
         for ev in eventi:
             if ev.get("risultati"):
                 continue
-            try:
-                giorno = datetime.strptime(ev["data"], "%b %d, %Y").date()
-            except (KeyError, ValueError):
-                continue
-            if giorno >= oggi:
+            # KSW usa il mese per esteso ("January 25, 2025"), Cage Warriors
+            # abbreviato ("Mar 8, 2025"): a differenza di eventi.json (UFC,
+            # sempre abbreviato) qui il formato non e' uniforme tra org.
+            giorno = None
+            for formato in ("%b %d, %Y", "%B %d, %Y"):
+                try:
+                    giorno = datetime.strptime(ev["data"], formato).date()
+                    break
+                except (KeyError, ValueError):
+                    continue
+            if not giorno or giorno >= oggi:
                 continue
             risultati = _risultati_espn_europa(lega, giorno)
             if risultati:
