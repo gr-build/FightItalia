@@ -1,5 +1,5 @@
-import { fetchJSON, renderChrome, debounce } from "./common.js?v=202609251309";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202609251309";
+import { fetchJSON, renderChrome, debounce } from "./common.js?v=202609251313";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202609251313";
 
 renderChrome("europa");
 
@@ -30,17 +30,29 @@ function cardLottatoreOrg(r) {
     </div>`;
 }
 
+// Solo Cage Warriors ha risultati (da ESPN, vedi build_data.py), e solo per
+// gli eventi che ESPN copre davvero: una parte degli eventi passati resta
+// senza, la riga in quel caso non ha il blocco risultati.
+function rigaRisultato(r) {
+  if (r.vincitore == null) return "";
+  const vincitore = r.vincitore === 1 ? r.fighter1 : r.fighter2;
+  const perdente = r.vincitore === 1 ? r.fighter2 : r.fighter1;
+  const tempo = r.round && r.tempo ? ` — R${r.round} ${r.tempo}` : "";
+  return `<div class="risultato-riga"><b>${vincitore}</b> batte ${perdente}${tempo}</div>`;
+}
+
 function rigaEventoOrg(ev) {
   const luogo = [ev.sede, ev.luogo].filter(Boolean).join(" — ");
   const d = new Date(ev.data);
   const giorno = isNaN(d) ? "?" : d.getDate();
   const mese = isNaN(d) ? "" : d.toLocaleDateString("it-IT", { month: "short", year: "numeric" });
   return `
-    <div class="event-row">
+    <div class="event-row" style="align-items:start;">
       <div class="event-date"><span class="day">${giorno}</span><span class="month">${mese}</span></div>
       <div class="event-main">
         <div class="name">${ev.evento}${/italy/i.test(ev.luogo || "") ? ` <span class="tag numerato">In Italia</span>` : ""}</div>
         ${luogo ? `<div class="venue">${luogo.replace(/Italy/, "Italia")}</div>` : ""}
+        ${ev.risultati?.length ? `<div class="risultati-org">${ev.risultati.map(rigaRisultato).join("")}</div>` : ""}
       </div>
       <span></span>
     </div>`;
@@ -102,10 +114,13 @@ async function init() {
     </div>
 
     <div id="tab-eventi">
-      <div class="section-title" style="margin-top:24px;">Prossimi eventi</div>
-      <div id="eventi-org-prossimi">${prossimiOrg.length ? prossimiOrg.map(rigaEventoOrg).join("") : `<div class="empty-state">Nessun evento programmato trovato.</div>`}</div>
-      <div class="section-title" style="margin-top:24px;">Eventi passati</div>
-      <div id="eventi-org-passati">${passatiOrg.length ? passatiOrg.map(rigaEventoOrg).join("") : `<div class="empty-state">Nessun evento passato trovato.</div>`}</div>
+      <div class="filter-bar">
+        <div class="search-input"><input id="ricerca-eventi-org" type="text" placeholder="Cerca un evento o una città..."></div>
+      </div>
+      <div class="section-title" style="margin-top:24px;">Prossimi eventi <span class="count" id="count-eventi-prossimi"></span></div>
+      <div id="eventi-org-prossimi"></div>
+      <div class="section-title" style="margin-top:24px;">Eventi passati <span class="count" id="count-eventi-passati"></span></div>
+      <div id="eventi-org-passati"></div>
     </div>
 
     <p style="margin:14px 0 60px; font-size:12px; color:var(--text-muted);">Roster ed eventi da Wikipedia. Scheda di dettaglio per singolo lottatore/evento non ancora disponibile per questa organizzazione (solo per UFC per ora).</p>
@@ -123,6 +138,21 @@ async function init() {
 
   renderGrid();
   document.getElementById("ricerca-org").addEventListener("input", debounce(renderGrid, 120));
+
+  // Ricerca senza accenti e maiuscole, come in eventi.js: cerca nel nome
+  // dell'evento, nella sede e nella città.
+  const normalizza = (t) => (t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  function renderEventiOrg() {
+    const q = normalizza(document.getElementById("ricerca-eventi-org").value.trim());
+    const filtra = (lista) => (q ? lista.filter((e) => normalizza([e.evento, e.sede, e.luogo].join(" ")).includes(q)) : lista);
+    const fProssimi = filtra(prossimiOrg), fPassati = filtra(passatiOrg);
+    document.getElementById("eventi-org-prossimi").innerHTML = fProssimi.length ? fProssimi.map(rigaEventoOrg).join("") : `<div class="empty-state">Nessun evento programmato trovato.</div>`;
+    document.getElementById("eventi-org-passati").innerHTML = fPassati.length ? fPassati.map(rigaEventoOrg).join("") : `<div class="empty-state">Nessun evento trovato.</div>`;
+    document.getElementById("count-eventi-prossimi").textContent = `(${fProssimi.length})`;
+    document.getElementById("count-eventi-passati").textContent = `(${fPassati.length})`;
+  }
+  renderEventiOrg();
+  document.getElementById("ricerca-eventi-org").addEventListener("input", debounce(renderEventiOrg, 120));
 
   document.querySelectorAll(".org-tab").forEach((btn) => {
     btn.addEventListener("click", () => {

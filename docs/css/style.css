@@ -1035,6 +1035,22 @@ h1, h2, h3, h4 {
   gap: 6px;
 }
 
+.risultati-org {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.risultato-riga {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.risultato-riga b { color: var(--text); font-weight: 600; }
+
 .event-link {
   color: var(--text-muted);
   font-size: 13px;

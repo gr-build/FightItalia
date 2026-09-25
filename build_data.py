@@ -564,11 +564,14 @@ def genera_europa():
     aggiorna_risultati_europa()
 
 
-# Solo Cage Warriors e KSW sono coperte dall'API pubblica di ESPN (verificato
-# a mano su sports.core.api.espn.com/v2/sports/mma/leagues): Oktagon non
-# c'e'. Stessa API dello scoreboard UFC (vedi ESPN_SCOREBOARD/evento_espn),
-# solo con la lega nell'URL al posto di "ufc".
-ESPN_LEGA_EUROPA = {"cagewarriors": "cage-warriors", "ksw": "ksw"}
+# Solo Cage Warriors e' coperta per davvero dall'API pubblica di ESPN.
+# "ksw" esiste come voce in sports.core.api.espn.com/v2/sports/mma/leagues,
+# ma con un solo evento indicizzato in tutto (dicembre 2024): comparire
+# nell'elenco delle leghe non vuol dire avere i dati degli eventi, ed e'
+# stato un errore di verifica scambiare l'una per l'altra. Oktagon non
+# compare nemmeno nell'elenco. Stessa API dello scoreboard UFC (vedi
+# ESPN_SCOREBOARD/evento_espn), solo con la lega nell'URL al posto di "ufc".
+ESPN_LEGA_EUROPA = {"cagewarriors": "cage-warriors"}
 
 
 def _risultati_espn_europa(lega, giorno):
