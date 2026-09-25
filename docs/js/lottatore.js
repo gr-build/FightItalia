@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve } from "./common.js?v=202609250738";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve } from "./common.js?v=202609250748";
 
 renderChrome(null);
 
@@ -183,7 +183,7 @@ async function init() {
           <h1 class="notranslate" translate="no" style="font-size:clamp(28px,4vw,42px);">${dett.nome}</h1>
           ${inf["Other names"] || rigaRoster.soprannome ? `<p style="margin-top:6px; font-style:italic; color:var(--text-secondary);">"${inf["Other names"] || rigaRoster.soprannome}"</p>` : ""}
           ${badge ? `<div style="margin-top:8px;">${badge}</div>` : ""}
-          ${dataAgg ? `<p style="margin-top:10px; font-size:12px; color:var(--text-muted);">Dati aggiornati al: ${dataAgg}</p>` : ""}
+          ${dataAgg ? `<p style="margin-top:10px; font-size:12px; color:var(--text-muted);">Dati aggiornati al: ${dataAgg}${dett.fonte === "ESPN" ? ` · Fonte: <a href="${dett.link}" target="_blank" rel="noopener" style="text-decoration:underline;">ESPN</a>` : ""}</p>` : ""}
         </div>
         <div style="text-align:right;">
           <div style="font-family:var(--font-display); font-size:34px; color:var(--accent);">${rigaRoster.record_mma || "—"}</div>

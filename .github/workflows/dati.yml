@@ -40,6 +40,21 @@ jobs:
       - name: Genera roster/eventi/card UFC
         run: python build_data.py
 
+      # Schede da ESPN per i lottatori del roster senza pagina Wikipedia (~300):
+      # la cache tiene i nomi di avversari ed eventi gia' scaricati.
+      - name: Ripristina la cache ESPN
+        uses: actions/cache@v4
+        with:
+          path: cache/espn_cache.json
+          key: espn-cache-${{ github.run_id }}
+          restore-keys: |
+            espn-cache-
+
+      - name: Schede ESPN per chi non ha Wikipedia
+        env:
+          ESPN_MAX: "60"
+        run: python build_espn.py
+
       - name: Genera i dati della Griglia MMA
         run: python build_griglia.py
 
