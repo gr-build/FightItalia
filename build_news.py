@@ -35,8 +35,7 @@ FEEDS = {
 MAX_PER_FEED = 15
 MAX_TOTALE = 40
 CACHE_GIORNI = 21
-PAUSA_GEMINI = 4.5  # il piano gratuito Gemini ha un limite di richieste al minuto basso
-NUOVI_MAX_PER_RUN = 20  # tiene una singola run breve; il resto lo prende la run successiva (ogni 2-3h)
+NUOVI_MAX_PER_RUN = 25  # notizie riscritte in un'unica richiesta; il resto lo prende la run successiva
 TENTATIVI_MAX = 4
 
 HEADERS = {
@@ -160,31 +159,37 @@ def _chiama_modello(body, api_key, modello):
     raise LimiteRaggiunto("rate limit Gemini")
 
 
-def _riscrivi_con_gemini(api_key, titolo, estratto, fonte):
+def _riscrivi_in_blocco(api_key, voci):
+    """Tutte le notizie nuove della run in UNA sola richiesta a Gemini.
+    Prima era una richiesta per notizia (~20 a run, 8 run al giorno) e il
+    piano gratuito finiva in poche ore: 29 news su 35 restavano in inglese.
+    voci: [{"id", "titolo", "estratto", "fonte"}] -> {id: (titolo, riassunto)}"""
+    elenco = "\n\n".join(
+        f"[{v['id']}] Fonte: {v['fonte']}\nTitolo: {v['titolo']}\nEstratto: {v['estratto'][:700]}" for v in voci
+    )
     prompt = (
         "Sei un redattore sportivo italiano che scrive per un sito di MMA/UFC. "
-        "Ti do il titolo e l'estratto (in inglese) di una notizia presa da "
-        f"{fonte}. Scrivi DA ZERO in italiano, senza tradurre parola per parola "
-        "e senza copiare frasi dell'originale:\n"
-        "1. Un titolo riassuntivo su una riga (max ~90 caratteri)\n"
-        "2. Un riassunto di 2-3 frasi\n\n"
-        f"Titolo originale: {titolo}\n"
-        f"Estratto originale: {estratto}\n\n"
-        "Rispondi SOLO in JSON valido, senza markdown, con questo formato "
-        'esatto: {"titolo": "...", "riassunto": "..."}'
+        "Per OGNUNA delle notizie qui sotto (titolo ed estratto in inglese) scrivi DA ZERO in italiano, "
+        "senza tradurre parola per parola e senza copiare frasi dell'originale: un titolo su una riga "
+        "(max ~90 caratteri) e un riassunto di 2-3 frasi. Non aggiungere fatti che non ci sono.\n\n"
+        + elenco
+        + '\n\nRispondi SOLO in JSON valido: {"notizie": [{"id": <numero>, "titolo": "...", "riassunto": "..."}]} '
+        "con una voce per ogni notizia, stesso id."
     )
     body = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {
-            "temperature": 0.4,
-            "responseMimeType": "application/json",
-            "thinkingConfig": {"thinkingBudget": 0},
-        },
+        "generationConfig": {"temperature": 0.4, "responseMimeType": "application/json", "thinkingConfig": {"thinkingBudget": 0}},
     }
     r = _chiama_gemini_con_retry(body, api_key)
-    testo = r.json()["candidates"][0]["content"]["parts"][0]["text"]
-    dati = json.loads(testo)
-    return dati["titolo"].strip(), dati["riassunto"].strip()
+    dati = json.loads(r.json()["candidates"][0]["content"]["parts"][0]["text"])
+    out = {}
+    for x in dati.get("notizie") or []:
+        try:
+            if x.get("titolo") and x.get("riassunto"):
+                out[int(x["id"])] = (x["titolo"].strip(), x["riassunto"].strip())
+        except (TypeError, ValueError):
+            continue
+    return out
 
 
 def _voce_originale(titolo, estratto, fonte, link, pubblicato):
@@ -212,7 +217,7 @@ def genera_news():
     articoli = []
     nuovi, da_cache, falliti = 0, 0, 0
 
-    limite_raggiunto = False
+    da_scrivere = []  # notizie nuove: si riscrivono tutte insieme dopo il giro dei feed
     for fonte, url_feed in FEEDS.items():
         try:
             feed = feedparser.parse(url_feed, agent=HEADERS["User-Agent"])
@@ -237,35 +242,28 @@ def genera_news():
             pubblicato = _data_iso(entry)
             if not titolo_orig:
                 continue
+            da_scrivere.append({"titolo": titolo_orig, "estratto": estratto, "fonte": fonte, "url": link, "pubblicato": pubblicato})
 
-            if nuovi >= NUOVI_MAX_PER_RUN or limite_raggiunto:
-                articoli.append(_voce_originale(titolo_orig, estratto, fonte, link, pubblicato))
-                continue
-
-            try:
-                titolo_it, riassunto_it = _riscrivi_con_gemini(api_key, titolo_orig, estratto, fonte)
-            except LimiteRaggiunto as errore:
-                print(f"  [news] {errore}: niente piu' Gemini in questa run, il resto resta in inglese")
-                limite_raggiunto = True
-                articoli.append(_voce_originale(titolo_orig, estratto, fonte, link, pubblicato))
-                continue
-            except Exception as errore:
-                print(f"  [news] Gemini fallito per '{titolo_orig[:60]}': {errore}")
-                falliti += 1
-                articoli.append(_voce_originale(titolo_orig, estratto, fonte, link, pubblicato))
-                continue
-
-            voce = {
-                "titolo": titolo_it,
-                "riassunto": riassunto_it,
-                "fonte": fonte,
-                "url": link,
-                "pubblicato": pubblicato,
-            }
-            cache[link] = voce
+    # le piu' recenti per prime: se il blocco e' pieno, le vecchie aspettano la run dopo
+    da_scrivere.sort(key=lambda v: v["pubblicato"] or "", reverse=True)
+    blocco = da_scrivere[:NUOVI_MAX_PER_RUN]
+    riscritte = {}
+    if blocco:
+        try:
+            riscritte = _riscrivi_in_blocco(api_key, [{**v, "id": i} for i, v in enumerate(blocco)])
+        except Exception as errore:
+            print(f"  [news] Gemini non disponibile ({errore}): le notizie nuove restano in inglese per ora")
+    for i, v in enumerate(da_scrivere):
+        if i in riscritte:
+            titolo_it, riassunto_it = riscritte[i]
+            voce = {"titolo": titolo_it, "riassunto": riassunto_it, "fonte": v["fonte"], "url": v["url"], "pubblicato": v["pubblicato"]}
+            cache[v["url"]] = voce
             articoli.append(voce)
             nuovi += 1
-            time.sleep(PAUSA_GEMINI)
+        else:
+            if i < len(blocco):
+                falliti += 1
+            articoli.append(_voce_originale(v["titolo"], v["estratto"], v["fonte"], v["url"], v["pubblicato"]))
 
     # Pota la cache: solo articoli visti negli ultimi CACHE_GIORNI (o senza
     # data leggibile, per sicurezza) — i feed espongono solo il recente, la
