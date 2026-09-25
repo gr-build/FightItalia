@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609251318";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609251321";
 
 renderChrome(null);
 
@@ -12,23 +12,32 @@ function dataEstesa(dataStr) {
 
 const ETICHETTE_ORARI = { early_prelims: "Early Prelims", prelims: "Prelims", main_card: "Main Card" };
 
-function rigaOrario(etichetta, o) {
+const CLASSE_FASE = { early_prelims: "early", prelims: "prelims", main_card: "main" };
+
+function rigaOrario(chiave, etichetta, o) {
   if (!o) return "";
-  const italia = o.giorno_dopo ? `${o.italia} (giorno dopo)` : o.italia;
-  return `<div class="row"><span class="k">${etichetta}</span><span class="v">${o.locale} sede — ${italia} Italia</span></div>`;
+  const italia = o.giorno_dopo ? `${o.italia} <span class="fase-giorno-dopo">giorno dopo</span>` : o.italia;
+  return `
+    <div class="orario-fase ${CLASSE_FASE[chiave]}">
+      <div class="fase-label"><span class="fase-dot"></span>${etichetta}</div>
+      <div class="fase-orari">
+        <div class="fase-italia">${italia}</div>
+        <div class="fase-sede">${o.locale} ora sede</div>
+      </div>
+    </div>`;
 }
 
 function blocoOrari(orari) {
   if (!orari) return "";
   const righe = Object.entries(ETICHETTE_ORARI)
-    .map(([chiave, etichetta]) => rigaOrario(etichetta, orari[chiave]))
+    .map(([chiave, etichetta]) => rigaOrario(chiave, etichetta, orari[chiave]))
     .join("");
   if (!righe) return "";
   return `
-    <div style="margin-top:20px; max-width:420px;">
+    <div style="margin-top:24px; max-width:440px;">
       <div class="section-title" style="margin-top:0;">Orario di inizio${orari.indicativo ? " (indicativo)" : ""}</div>
-      <div class="compare-col a">${righe}</div>
-      <p style="margin-top:8px; font-size:11.5px; color:var(--text-muted);">
+      <div class="orari-card">${righe}</div>
+      <p style="margin-top:10px; font-size:11.5px; color:var(--text-muted);">
         ${orari.indicativo
           ? `Orario indicativo: è l'orario tipico UFC per questa sede, quello ufficiale non è ancora pubblicato. Fuso sede: ${orari.fuso_sede}.`
           : `Fuso sede: ${orari.fuso_sede}. Orario Italia calcolato automaticamente (cambio ora legale incluso). Fonte: ${orari.fonte || "orari tipici"}.`}

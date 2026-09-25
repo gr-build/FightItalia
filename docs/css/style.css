@@ -998,6 +998,66 @@ h1, h2, h3, h4 {
   .hero-sub-mobile { display: block; font-size: 13px; color: var(--text-muted); margin: -6px 0 14px; }
 }
 
+/* ---------- Orario di inizio (scheda evento) ---------- */
+
+.orari-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.orario-fase {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.orario-fase:last-child { border-bottom: none; }
+
+.fase-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.fase-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); flex: none; }
+.orario-fase.prelims .fase-dot { background: var(--gold); }
+.orario-fase.main .fase-dot { background: var(--accent); }
+
+.orario-fase.main .fase-label { color: var(--text); font-weight: 600; }
+
+.fase-orari { text-align: right; }
+
+.fase-italia {
+  font-family: var(--font-display);
+  font-size: 17px;
+  color: var(--text);
+}
+
+.orario-fase.main .fase-italia { font-size: 20px; color: var(--accent); }
+
+.fase-giorno-dopo {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  letter-spacing: 0.04em;
+  margin-left: 4px;
+}
+
+.fase-sede {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
 /* ---------- Eventi ---------- */
 
 .event-row {

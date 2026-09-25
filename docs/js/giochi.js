@@ -1,3 +1,3 @@
-import { renderChrome } from "./common.js?v=202609251318";
+import { renderChrome } from "./common.js?v=202609251321";
 
 renderChrome("giochi");
