@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto } from "./common.js?v=202609251300";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto } from "./common.js?v=202609251306";
 
 renderChrome(null);
 
@@ -147,7 +147,7 @@ async function init() {
   const out = document.getElementById("profilo");
 
   if (!slug) {
-    out.innerHTML = `<div class="empty-state">Lottatore non specificato. <a href="index.html">Torna al database</a>.</div>`;
+    out.innerHTML = `<div class="empty-state">Lottatore non specificato. <a href="/">Torna al database</a>.</div>`;
     return;
   }
 
@@ -157,7 +157,7 @@ async function init() {
     dett = risultato.dett;
     rigaRoster = risultato.riga;
   } catch (e) {
-    out.innerHTML = `<div class="empty-state">Scheda non trovata. <a href="index.html">Torna al database</a>.</div>`;
+    out.innerHTML = `<div class="empty-state">Scheda non trovata. <a href="/">Torna al database</a>.</div>`;
     return;
   }
 
