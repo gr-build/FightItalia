@@ -1,7 +1,7 @@
 // MMA Gauntlet — minigioco a scelte multiple: arrivare a 30-0 senza
 // finire KO, senza farsi tagliare dal roster e senza squalifiche.
 
-import { renderChrome } from "./common.js?v=202609250824";
+import { renderChrome } from "./common.js?v=202609251222";
 
 // Una carriera vera dura un numero finito di turni, non un numero di vittorie:
 // arrivare in fondo imbattuto e' il vero obiettivo del 30-0.
@@ -9,7 +9,7 @@ const MAX_TURNI = 30;
 // Sopra questa soglia di Aura si sbloccano le scelte speciali di alcuni scenari.
 const SOGLIA_AURA = 60;
 
-const URL_GIOCO = "https://gr-build.github.io/FightItalia/gauntlet.html";
+const URL_GIOCO = "https://mmaoggi.it/gauntlet.html";
 
 const PERSONAGGI = [
   {

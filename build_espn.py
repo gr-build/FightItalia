@@ -56,7 +56,7 @@ PAESI = {
 }
 
 sessione = requests.Session()
-sessione.headers["User-Agent"] = "MMAOggi/1.0 (+https://gr-build.github.io/FightItalia/)"
+sessione.headers["User-Agent"] = "MMAOggi/1.0 (+https://mmaoggi.it/)"
 
 
 def _norm(t):

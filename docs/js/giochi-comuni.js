@@ -1,7 +1,7 @@
 // Utility condivise dai giochi (Chi e'?, Piu' o meno).
 // Versione negli import: vedi bump_versione.py.
 
-import { fetchJSON } from "./common.js?v=202609250824";
+import { fetchJSON } from "./common.js?v=202609251222";
 
 let cacheLottatori = null;
 
@@ -75,8 +75,8 @@ export async function condividi(testo, bottone) {
 }
 
 // Indirizzo pubblico da mettere nei risultati condivisi (come URL_GIOCO in
-// gauntlet.js): da aggiornare al passaggio a fightitalia.it.
-export const SITO = "https://gr-build.github.io/FightItalia/";
+// gauntlet.js).
+export const SITO = "https://mmaoggi.it/";
 
 // Windows non disegna le bandiere emoji (mostra "US", "BR"...): dalla
 // bandiera emoji si ricava il codice paese e si usa un'immagine.

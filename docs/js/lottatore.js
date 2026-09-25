@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto } from "./common.js?v=202609250824";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto } from "./common.js?v=202609251222";
 
 renderChrome(null);
 
@@ -231,7 +231,7 @@ async function init() {
       "@context": "https://schema.org",
       "@type": "Person",
       name: dett.nome,
-      url: `https://gr-build.github.io/FightItalia/lottatore.html?slug=${slug}`,
+      url: `https://mmaoggi.it/lottatore.html?slug=${slug}`,
       image: foto || undefined,
       nationality: inf["Nationality"] || undefined,
       knowsAbout: "Mixed Martial Arts",

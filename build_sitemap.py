@@ -17,7 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 DOCS = ROOT / "docs"
-BASE_URL = "https://gr-build.github.io/FightItalia"
+BASE_URL = "https://mmaoggi.it"
 OGGI = date.today().isoformat()
 
 # Deve restare identico a slugDaLink() in docs/js/common.js, altrimenti gli

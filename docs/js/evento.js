@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609250824";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609251222";
 
 renderChrome(null);
 
@@ -186,7 +186,7 @@ async function init() {
       name: ev.evento,
       startDate: isNaN(dataParsata) ? undefined : dataParsata.toISOString().slice(0, 10),
       location: luogo ? { "@type": "Place", name: luogo } : undefined,
-      url: `https://gr-build.github.io/FightItalia/evento.html?slug=${slug}`,
+      url: `https://mmaoggi.it/evento.html?slug=${slug}`,
       sport: "Mixed Martial Arts",
     },
   });
