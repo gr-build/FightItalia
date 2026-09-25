@@ -41,6 +41,7 @@ PAGINE_STATICHE = [
     ("europa.html", "monthly", "0.6"),
     ("giochi.html", "weekly", "0.7"),
     ("griglia.html", "daily", "0.8"),
+    ("seguici.html", "monthly", "0.4"),
     ("chi-e.html", "daily", "0.7"),
     ("piu-o-meno.html", "monthly", "0.6"),
     ("gauntlet.html", "monthly", "0.6"),

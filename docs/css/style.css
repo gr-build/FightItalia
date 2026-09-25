@@ -2004,3 +2004,20 @@ h1, h2, h3, h4 {
 .gr-sfida-banner { background: var(--accent-soft); border: 1px solid rgba(232, 53, 47, 0.45); border-radius: var(--radius); padding: 12px 14px; font-size: 14px; text-align: center; }
 .gr-confronto { line-height: 1.6; }
 .gr-confronto b { color: var(--text); font-size: 15px; }
+
+/* ---------- Social ---------- */
+.footer-social { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 14px; }
+.footer-social > span { font: 600 11px var(--font-body); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-right: 4px; }
+.social-link { display: inline-flex; gap: 6px; align-items: baseline; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg-elevated); font-size: 13px; color: var(--text); }
+.social-link:hover { border-color: var(--accent); }
+.social-nome { font-weight: 600; }
+.social-testo { color: var(--text-muted); }
+.social-link.whatsapp .social-nome, .seguici-card.whatsapp .gioco-tag { color: #25d366; }
+.seguici-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; padding: 28px 0 70px; }
+.seguici-card { background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 22px; display: flex; flex-direction: column; gap: 10px; transition: transform .15s ease, border-color .15s ease; }
+.seguici-card:hover { transform: translateY(-3px); border-color: var(--border); }
+.seguici-card.whatsapp { border-color: rgba(37, 211, 102, 0.45); }
+.seguici-card h2 { font-family: var(--font-display); font-size: 26px; text-transform: uppercase; letter-spacing: 0.03em; margin: 0; }
+.seguici-card p { color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin: 0; flex: 1; }
+.gr-whatsapp { font-size: 13.5px; color: var(--text-secondary); margin: 4px 0 0; }
+.gr-whatsapp a { color: #25d366; font-weight: 600; }

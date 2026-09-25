@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink } from "./common.js?v=202609250116";
+import { fetchJSON, renderChrome, icon, slugDaLink } from "./common.js?v=202609250714";
 
 renderChrome("eventi");
 

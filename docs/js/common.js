@@ -100,6 +100,17 @@ function selettoreLingua() {
     </label>`;
 }
 
+// Profili social di MMA Oggi (pagina seguici.html, piede del sito, fine dei giochi).
+export const SOCIAL = [
+  { id: "whatsapp", nome: "WhatsApp", testo: "Canale WhatsApp", url: "https://whatsapp.com/channel/0029VbDcULiDzgTDwuzpGR46", desc: "Le notizie appena escono, la card di ogni evento, i risultati la domenica mattina." },
+  { id: "instagram", nome: "Instagram", testo: "@mmaoggi", url: "https://www.instagram.com/mmaoggi/", desc: "Card, analisi e numeri degli incontri in grafica." },
+  { id: "tiktok", nome: "TikTok", testo: "@mmaoggi", url: "https://www.tiktok.com/@mmaoggi", desc: "La Griglia del giorno, i risultati in 60 secondi, le notizie in video." },
+];
+
+export function linkSocial(classe = "social-link") {
+  return SOCIAL.map((x) => `<a class="${classe} ${x.id}" href="${x.url}" target="_blank" rel="noopener"><span class="social-nome">${x.nome}</span><span class="social-testo">${x.testo}</span></a>`).join("");
+}
+
 export function renderChrome(active) {
   const header = document.getElementById("site-header");
   if (header) {
@@ -124,6 +135,7 @@ export function renderChrome(active) {
   if (footer) {
     footer.innerHTML = `
       <div class="container">
+        <div class="footer-social"><span>Segui MMA Oggi</span>${linkSocial()}</div>
         <p style="margin:0 0 6px;">I dati riportati hanno scopo informativo e statistico; non costituiscono consiglio di scommessa. Gioca responsabilmente.</p>
         <p style="margin:0 0 6px;">MMA Oggi — statistiche e confronti sugli sport da combattimento. Dati e immagini da Wikipedia (licenza CC BY-SA), aggiornati periodicamente. In Italia gli eventi UFC si seguono in streaming legale su discovery+ (e in parte su Eurosport).</p>
         <p style="margin:0; font-size:11.5px; color:var(--text-muted);">MMA Oggi è un progetto indipendente, non affiliato né sponsorizzato da UFC o Zuffa, LLC.</p>

@@ -6,8 +6,8 @@
 //   - allenamento:  griglie casuali senza limiti
 // I dati (data/griglia.json) li prepara build_griglia.py.
 
-import { renderChrome, fetchJSON } from "./common.js?v=202609250116";
-import { leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609250116";
+import { renderChrome, fetchJSON, SOCIAL } from "./common.js?v=202609250714";
+import { leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609250714";
 
 renderChrome("giochi");
 
@@ -384,6 +384,7 @@ async function init() {
               ${allenamento ? `<button type="button" class="btn-gioco secondario" id="gr-nuova">Nuova griglia</button>` : `<a class="btn-gioco secondario" href="griglia.html?modo=sfida">Gioca a 2 sullo stesso telefono</a>`}
             </div>
             ${allenamento ? "" : `<p class="chie-fine-sub">Nuova griglia domani a mezzanotte.</p>`}
+            <p class="gr-whatsapp">Ogni mattina la griglia nuova sul <a href="${SOCIAL[0].url}" target="_blank" rel="noopener">canale WhatsApp di MMA Oggi</a></p>
           </div>`;
         document.getElementById("gr-condividi").addEventListener("click", (e) => condividi(testo, e.currentTarget));
         document.getElementById("gr-sfida-link").addEventListener("click", (e) => condividi(testoSfida, e.currentTarget));
