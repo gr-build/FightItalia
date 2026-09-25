@@ -561,6 +561,81 @@ def genera_europa():
             )
         print(f"{org}: {len(eventi)} eventi")
 
+    aggiorna_risultati_europa()
+
+
+# Solo Cage Warriors e KSW sono coperte dall'API pubblica di ESPN (verificato
+# a mano su sports.core.api.espn.com/v2/sports/mma/leagues): Oktagon non
+# c'e'. Stessa API dello scoreboard UFC (vedi ESPN_SCOREBOARD/evento_espn),
+# solo con la lega nell'URL al posto di "ufc".
+ESPN_LEGA_EUROPA = {"cagewarriors": "cage-warriors", "ksw": "ksw"}
+
+
+def _risultati_espn_europa(lega, giorno):
+    """Risultati (vincitore, round, tempo) dei bout di un evento europeo in
+    quella data, dallo scoreboard ESPN — niente metodo (KO/Sub/Decisione)
+    esplicito: l'API non lo espone a questo livello, solo round e clock."""
+    import requests
+
+    url = f"https://site.api.espn.com/apis/site/v2/sports/mma/{lega}/scoreboard"
+    try:
+        r = requests.get(url, params={"dates": giorno.strftime("%Y%m%d")}, timeout=20)
+        r.raise_for_status()
+        eventi = r.json().get("events") or []
+    except Exception as errore:
+        print(f"  [espn-europa] {lega} {giorno}: non raggiungibile ({errore})")
+        return None
+    if not eventi:
+        return None
+    risultati = []
+    for c in eventi[0].get("competitions") or []:
+        atleti = sorted(c.get("competitors") or [], key=lambda x: x.get("order", 9))
+        if len(atleti) != 2:
+            continue
+        stato = (c.get("status") or {}).get("type") or {}
+        if not stato.get("completed"):
+            continue
+        vincitore = next((i + 1 for i, a in enumerate(atleti) if a.get("winner")), None)
+        risultati.append({
+            "fighter1": (atleti[0].get("athlete") or {}).get("displayName"),
+            "fighter2": (atleti[1].get("athlete") or {}).get("displayName"),
+            "vincitore": vincitore,
+            "categoria": (c.get("type") or {}).get("abbreviation") or "",
+            "round": (c.get("status") or {}).get("period"),
+            "tempo": (c.get("status") or {}).get("displayClock"),
+        })
+    return risultati or None
+
+
+def aggiorna_risultati_europa():
+    """Aggiunge ev['risultati'] agli eventi passati di Cage Warriors e KSW,
+    presi dall'API ESPN — non tocca gli eventi che ce l'hanno gia' (evita di
+    richiamare ESPN ogni run per gli stessi ~60 eventi storici)."""
+    oggi = date.today()
+    for org, lega in ESPN_LEGA_EUROPA.items():
+        file = WEB_DATA_EUROPA / f"{org}-eventi.json"
+        try:
+            eventi = json.loads(file.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        aggiornati = 0
+        for ev in eventi:
+            if ev.get("risultati"):
+                continue
+            try:
+                giorno = datetime.strptime(ev["data"], "%b %d, %Y").date()
+            except (KeyError, ValueError):
+                continue
+            if giorno >= oggi:
+                continue
+            risultati = _risultati_espn_europa(lega, giorno)
+            if risultati:
+                ev["risultati"] = risultati
+                aggiornati += 1
+        if aggiornati:
+            file.write_text(json.dumps(eventi, ensure_ascii=False), encoding="utf-8")
+        print(f"{org}: {aggiornati} eventi con risultati aggiunti da ESPN")
+
 
 
 # ---------- Dati per i giochi (Chi e'?, Piu' o meno) ----------
