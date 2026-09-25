@@ -2021,3 +2021,11 @@ h1, h2, h3, h4 {
 .seguici-card p { color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin: 0; flex: 1; }
 .gr-whatsapp { font-size: 13.5px; color: var(--text-secondary); margin: 4px 0 0; }
 .gr-whatsapp a { color: #25d366; font-weight: 600; }
+.contatti { padding: 0 0 70px; display: flex; flex-direction: column; gap: 14px; }
+.contatti h2 { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.03em; margin: 0; }
+.contatti-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.contatto { background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 18px; }
+.contatto h3 { margin: 0 0 6px; font-size: 16px; }
+.contatto p { margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+.contatti-email { font-size: 15px; margin: 0; }
+.contatti-email a { color: var(--accent); font-weight: 600; }

@@ -100,6 +100,11 @@ function selettoreLingua() {
     </label>`;
 }
 
+// Email pubblica: resta nascosta finche' l'inoltro del dominio non funziona
+// (EMAIL_ATTIVA = true quando redazione@mmaoggi.it arriva davvero).
+export const EMAIL = "redazione@mmaoggi.it";
+export const EMAIL_ATTIVA = false;
+
 // Profili social di MMA Oggi (pagina seguici.html, piede del sito, fine dei giochi).
 export const SOCIAL = [
   { id: "whatsapp", nome: "WhatsApp", testo: "Canale WhatsApp", url: "https://whatsapp.com/channel/0029VbDcULiDzgTDwuzpGR46", desc: "Le notizie appena escono, la card di ogni evento, i risultati la domenica mattina." },
@@ -135,7 +140,7 @@ export function renderChrome(active) {
   if (footer) {
     footer.innerHTML = `
       <div class="container">
-        <div class="footer-social"><span>Segui MMA Oggi</span>${linkSocial()}</div>
+        <div class="footer-social"><span>Segui MMA Oggi</span>${linkSocial()}<a class="social-link" href="seguici.html"><span class="social-nome">Contatti</span></a></div>
         <p style="margin:0 0 6px;">I dati riportati hanno scopo informativo e statistico; non costituiscono consiglio di scommessa. Gioca responsabilmente.</p>
         <p style="margin:0 0 6px;">MMA Oggi — statistiche e confronti sugli sport da combattimento. Dati e immagini da Wikipedia (licenza CC BY-SA), aggiornati periodicamente. In Italia gli eventi UFC si seguono in streaming legale su discovery+ (e in parte su Eurosport).</p>
         <p style="margin:0; font-size:11.5px; color:var(--text-muted);">MMA Oggi è un progetto indipendente, non affiliato né sponsorizzato da UFC o Zuffa, LLC.</p>
