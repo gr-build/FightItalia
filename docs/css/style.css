@@ -916,6 +916,37 @@ h1, h2, h3, h4 {
   .bout-meta { font-size: 11px; }
 }
 
+/* ---------- Home: vista Lottatori con riquadro eventi a lato ---------- */
+
+.lottatori-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 32px;
+  align-items: start;
+}
+
+.lottatori-aside { min-width: 0; }
+
+.mini-evento {
+  display: block;
+  padding: 10px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease;
+}
+
+.mini-evento:hover { border-color: #35353f; }
+.mini-evento .mini-data { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+.mini-evento .mini-nome { font-size: 13.5px; margin-top: 2px; }
+
+@media (max-width: 900px) {
+  .lottatori-layout { grid-template-columns: 1fr; }
+}
+
 /* ---------- Eventi ---------- */
 
 .event-row {
