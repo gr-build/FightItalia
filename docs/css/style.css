@@ -2203,6 +2203,7 @@ img.foto-bianca { background: linear-gradient(180deg, #ffffff 0%, #e9e9ee 100%);
 .rank-card { background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 14px 16px; }
 .rank-card-p4p { border-color: var(--gold); }
 .rank-card-titolo { font-family: var(--font-display); font-size: 15px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-secondary); margin-bottom: 8px; }
+.rank-peso { font-family: Inter, sans-serif; font-size: 12px; text-transform: none; letter-spacing: 0; color: var(--text-muted); }
 .rank-row { display: flex; align-items: center; gap: 12px; padding: 6px 0; border-top: 1px solid var(--border-soft); color: var(--text); text-decoration: none; font-size: 13.5px; }
 a.rank-row:hover { color: var(--accent); }
 .rank-row:first-child { border-top: none; }
