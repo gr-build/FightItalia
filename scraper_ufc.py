@@ -797,6 +797,70 @@ def scarica_orari_evento(nome_evento, luogo, usa_cache=True):
     return {**risultato, "fuso_sede": fuso}
 
 
+def scarica_classifiche():
+    """Classifiche ufficiali UFC (uomini, donne, pound-for-pound) da
+    ufc.com/rankings. Richiede Selenium + Edge (vedi scarica_orari_evento):
+    ufc.com blocca le richieste dirette con un WAF (403), un browser vero
+    passa. Ritorna None se il sito non e' raggiungibile: mai una classifica
+    indovinata o vecchia.
+
+    La pagina ripete ogni divisione due volte: una scheda "solo campione"
+    (senza classifica) e una con il campione e i 15 sfidanti numerati.
+    Prendiamo solo la seconda (quella con le righe numerate)."""
+    try:
+        from selenium import webdriver
+        from selenium.common.exceptions import WebDriverException
+    except ImportError:
+        return None
+    import time as _time
+
+    options = webdriver.EdgeOptions()
+    options.add_argument("--headless=new")
+    options.add_argument("--window-size=1400,1000")
+    try:
+        driver = webdriver.Edge(options=options)
+    except WebDriverException:
+        return None
+    try:
+        driver.get("https://www.ufc.com/rankings")
+        _time.sleep(5)
+        html = driver.page_source
+    except WebDriverException:
+        return None
+    finally:
+        driver.quit()
+
+    soup = BeautifulSoup(html, "lxml")
+    divisioni = []
+    for gruppo in soup.select(".view-grouping"):
+        righe = [tr for tr in gruppo.select("tr") if tr.select_one(".views-field-weight-class-rank") and tr.select_one(".views-field-title a")]
+        if not righe:
+            continue  # scheda "solo campione", senza classifica: salta
+        header = gruppo.select_one(".view-grouping-header")
+        # il testo del titolo e' seguito da uno <span>Top Rank</span> senza
+        # spazio per il P4P: prendo solo il primo nodo di testo, non tutto
+        # il contenuto del div.
+        titolo = (header.find(string=True, recursive=False) or "").strip() if header else ""
+        if titolo.startswith("Women's Pound-for-Pound"):
+            tipo, categoria = "p4p_donne", None
+        elif titolo.startswith("Men's Pound-for-Pound"):
+            tipo, categoria = "p4p_uomini", None
+        elif titolo.startswith("Women's"):
+            tipo, categoria = "donne", titolo[len("Women's "):]
+        else:
+            tipo, categoria = "uomini", titolo
+        campione_a = gruppo.select_one(".rankings--athlete--champion a")
+        campione = {"nome": campione_a.get_text(strip=True), "link_ufc": campione_a["href"]} if campione_a else None
+        classifica = []
+        for tr in righe:
+            pos = tr.select_one(".views-field-weight-class-rank").get_text(strip=True)
+            a = tr.select_one(".views-field-title a")
+            if pos.isdigit():
+                classifica.append({"pos": int(pos), "nome": a.get_text(strip=True), "link_ufc": a["href"]})
+        divisioni.append({"tipo": tipo, "categoria": categoria, "campione": campione, "classifica": classifica})
+    return divisioni or None
+
+
 if __name__ == "__main__":
     print("Scarico roster...")
     roster = scarica_roster(usa_cache=False)
