@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome } from "./common.js?v=202609261132";
+import { fetchJSON, renderChrome } from "./common.js?v=202609261139";
 
 renderChrome("ranking");
 
@@ -7,6 +7,15 @@ renderChrome("ranking");
 // stesso criterio per le donne.
 const ORDINE_UOMINI = ["Flyweight", "Bantamweight", "Featherweight", "Lightweight", "Welterweight", "Middleweight", "Light Heavyweight", "Heavyweight"];
 const ORDINE_DONNE = ["Strawweight", "Flyweight", "Bantamweight"];
+
+// Stesso peso, stesso formato usato altrove sul sito (confronto.js,
+// campioni.js): libbre e chili, cosi' si capisce la categoria anche senza
+// conoscere i nomi inglesi a memoria.
+const PESO = {
+  "Heavyweight": "265 lb, 120 kg", "Light Heavyweight": "205 lb, 93 kg", "Middleweight": "185 lb, 84 kg",
+  "Welterweight": "170 lb, 77 kg", "Lightweight": "155 lb, 70 kg", "Featherweight": "145 lb, 65 kg",
+  "Bantamweight": "135 lb, 61 kg", "Flyweight": "125 lb, 56 kg", "Strawweight": "115 lb, 52 kg",
+};
 
 function rigaAtleta(x, principale = false) {
   const nome = x.nome || "";
@@ -18,9 +27,10 @@ function rigaAtleta(x, principale = false) {
 
 function cardDivisione(d) {
   const titolo = d.categoria || "Pound-for-Pound";
+  const peso = d.categoria && PESO[d.categoria] ? ` <span class="rank-peso">(${PESO[d.categoria]})</span>` : "";
   return `
     <div class="rank-card${d.categoria ? "" : " rank-card-p4p"}">
-      <div class="rank-card-titolo">${titolo}</div>
+      <div class="rank-card-titolo">${titolo}${peso}</div>
       ${d.campione ? rigaAtleta(d.campione, true) : ""}
       ${(d.classifica || []).map((x) => rigaAtleta(x)).join("")}
     </div>`;
@@ -28,7 +38,8 @@ function cardDivisione(d) {
 
 function etichetta(d) {
   if (!d.categoria) return d.tipo === "p4p_donne" ? "Pound-for-Pound · Donne" : "Pound-for-Pound · Uomini";
-  return `${d.categoria}${d.tipo === "donne" ? " · Donne" : ""}`;
+  const peso = PESO[d.categoria] ? ` (${PESO[d.categoria]})` : "";
+  return `${d.categoria}${peso}${d.tipo === "donne" ? " · Donne" : ""}`;
 }
 
 function chiave(d) {
