@@ -187,7 +187,7 @@ export function renderChrome(active) {
           <li><a href="eventi.html" class="${active === "eventi" ? "active" : ""}">Eventi</a></li>
           <li><a href="europa.html" class="${active === "europa" ? "active" : ""}">Europa</a></li>
           <li><a href="campioni.html" class="${active === "campioni" ? "active" : ""}">Campioni</a></li>
-          <li><a href="classifiche.html" class="${active === "classifiche" ? "active" : ""}">Classifiche</a></li>
+          <li><a href="ranking.html" class="${active === "ranking" ? "active" : ""}">Ranking</a></li>
           <li><a href="news.html" class="${active === "news" ? "active" : ""}">News</a></li>
           <li><a href="giochi.html" class="nav-gauntlet ${active === "giochi" || active === "gauntlet" ? "active" : ""}">Giochi</a></li>
         </ul>
