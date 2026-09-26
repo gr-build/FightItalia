@@ -2197,7 +2197,9 @@ font { background: none !important; box-shadow: none !important; }
 img.foto-bianca { background: linear-gradient(180deg, #ffffff 0%, #e9e9ee 100%); object-position: top; }
 
 /* ---------- Classifiche UFC ---------- */
-.rank-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 16px; padding-bottom: 60px; }
+.rank-picker { max-width: 360px; }
+.rank-picker select { width: 100%; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 999px; padding: 10px 16px; font: 600 14px var(--font-display); letter-spacing: 0.02em; text-transform: uppercase; color: var(--text); }
+.rank-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 16px; padding-bottom: 60px; max-width: 420px; }
 .rank-card { background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 14px 16px; }
 .rank-card-p4p { border-color: var(--gold); }
 .rank-card-titolo { font-family: var(--font-display); font-size: 15px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-secondary); margin-bottom: 8px; }
