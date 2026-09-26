@@ -22,6 +22,7 @@ import pandas as pd
 
 from scraper_ufc import (
     scarica_card_evento,
+    scarica_classifiche,
     scarica_dettaglio_lottatore,
     scarica_eventi,
     scarica_eventi_organizzazione_anno,
@@ -567,6 +568,35 @@ def genera_europa():
     aggiorna_risultati_europa()
 
 
+def genera_classifiche(roster):
+    """docs/data/classifiche.json: classifiche ufficiali UFC (uomini, donne,
+    pound-for-pound) da ufc.com. Il sito UFC usa i suoi slug (es.
+    "raul-rosas-jr"), non i nostri (derivati dal link Wikipedia): colleghiamo
+    ogni nome del roster per confronto testuale, non per slug."""
+    divisioni = scarica_classifiche()
+    if not divisioni:
+        print("[classifiche] ufc.com non raggiungibile (o Selenium/Edge non disponibile): classifiche non aggiornate")
+        return
+    per_nome = {_norm_nome(r.get("nome")): r.get("slug") for r in roster.to_dict("records") if r.get("nome")}
+
+    def _con_slug(x):
+        return {**x, "slug": per_nome.get(_norm_nome(x["nome"]))}
+
+    out = []
+    for d in divisioni:
+        out.append({
+            "tipo": d["tipo"], "categoria": d["categoria"],
+            "campione": _con_slug(d["campione"]) if d["campione"] else None,
+            "classifica": [_con_slug(x) for x in d["classifica"]],
+        })
+    (WEB_DATA / "classifiche.json").write_text(
+        json.dumps({"generato_il": datetime.now().isoformat(), "divisioni": out}, ensure_ascii=False), encoding="utf-8"
+    )
+    con_slug = sum(x["slug"] is not None for d in out for x in d["classifica"]) + sum(1 for d in out if d["campione"] and d["campione"]["slug"])
+    totale = sum(len(d["classifica"]) for d in out) + sum(1 for d in out if d["campione"])
+    print(f"Classifiche UFC: {len(out)} divisioni, {con_slug}/{totale} lottatori collegati a una scheda del sito")
+
+
 # Solo Cage Warriors e' coperta per davvero dall'API pubblica di ESPN.
 # "ksw" esiste come voce in sports.core.api.espn.com/v2/sports/mma/leagues,
 # ma con un solo evento indicizzato in tutto (dicembre 2024): comparire
@@ -890,6 +920,7 @@ if __name__ == "__main__":
     roster = genera_roster_e_eventi()
     genera_dettagli_lottatori(roster)
     scrivi_roster_json(roster)
+    genera_classifiche(roster)
 
     eventi = pd.read_json(WEB_DATA / "eventi.json")
     genera_card_eventi(eventi)

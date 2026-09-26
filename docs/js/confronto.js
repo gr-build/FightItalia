@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, cmDaStringa, numeroDaRecord, classeRisultato, letteraRisultato, debounce, slugDaLink, formDots, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, fotoDi, classeFoto } from "./common.js?v=202609251357";
+import { fetchJSON, renderChrome, cmDaStringa, numeroDaRecord, classeRisultato, letteraRisultato, debounce, slugDaLink, formDots, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, fotoDi, classeFoto } from "./common.js?v=202609260950";
 
 renderChrome("confronto");
 

@@ -102,7 +102,7 @@ function applicaGlossario(radice) {
 }
 
 // Nomi di lottatori ed eventi: il traduttore li storpiava ("Ciryl" -> "Cyryl").
-const SELETTORE_NOMI = ".name, .nickname, .champ-nome, .champ-nome-grande, .pom-nome, .gr-nome, .ac-nome, .chie-fine-nome, .tent-nome, .personaggio-nome, .bout-nome";
+const SELETTORE_NOMI = ".name, .nickname, .champ-nome, .champ-nome-grande, .pom-nome, .gr-nome, .ac-nome, .chie-fine-nome, .tent-nome, .personaggio-nome, .bout-nome, .rank-nome";
 
 function proteggiNomi(radice) {
   const elementi = radice.matches && radice.matches(SELETTORE_NOMI) ? [radice] : [];
@@ -187,6 +187,7 @@ export function renderChrome(active) {
           <li><a href="eventi.html" class="${active === "eventi" ? "active" : ""}">Eventi</a></li>
           <li><a href="europa.html" class="${active === "europa" ? "active" : ""}">Europa</a></li>
           <li><a href="campioni.html" class="${active === "campioni" ? "active" : ""}">Campioni</a></li>
+          <li><a href="classifiche.html" class="${active === "classifiche" ? "active" : ""}">Classifiche</a></li>
           <li><a href="news.html" class="${active === "news" ? "active" : ""}">News</a></li>
           <li><a href="giochi.html" class="nav-gauntlet ${active === "giochi" || active === "gauntlet" ? "active" : ""}">Giochi</a></li>
         </ul>

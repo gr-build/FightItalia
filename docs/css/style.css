@@ -2195,3 +2195,17 @@ html.tradotto body { top: 0 !important; position: static !important; }
 font { background: none !important; box-shadow: none !important; }
 /* ritratti ESPN: ritagliati su trasparente, sfondo chiaro come su UFC.com */
 img.foto-bianca { background: linear-gradient(180deg, #ffffff 0%, #e9e9ee 100%); object-position: top; }
+
+/* ---------- Classifiche UFC ---------- */
+.rank-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 16px; padding-bottom: 60px; }
+.rank-card { background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 14px 16px; }
+.rank-card-p4p { border-color: var(--gold); }
+.rank-card-titolo { font-family: var(--font-display); font-size: 15px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-secondary); margin-bottom: 8px; }
+.rank-row { display: flex; align-items: center; gap: 12px; padding: 6px 0; border-top: 1px solid var(--border-soft); color: var(--text); text-decoration: none; font-size: 13.5px; }
+a.rank-row:hover { color: var(--accent); }
+.rank-row:first-child { border-top: none; }
+.rank-pos { flex: none; width: 22px; text-align: center; font-family: var(--font-display); font-size: 13px; color: var(--text-muted); }
+.rank-row-c { font-weight: 600; }
+.rank-row-c .rank-pos { color: var(--gold); }
+.rank-c { font-size: 10px; color: var(--gold); border: 1px solid var(--gold); border-radius: 4px; padding: 1px 4px; margin-left: 4px; vertical-align: middle; }
+.rank-nome { flex: 1; }
