@@ -292,6 +292,18 @@ export function badgeStreak(storico) {
   return `<div class="streak-badge" style="color:${colore};">${streak.n} ${testo}</div>`;
 }
 
+// I pallini prendono :focus al tocco (niente :hover su telefono) e la
+// tooltip resta bloccata aperta perche' i browser mobile non tolgono il
+// focus da un div toccando altrove: un solo listener per pagina lo fa a
+// mano, cosi' un tocco fuori dal pallino la chiude subito.
+if (!window.__dotTooltipChiudi) {
+  window.__dotTooltipChiudi = true;
+  document.addEventListener("touchstart", (e) => {
+    const attivo = document.activeElement;
+    if (attivo?.classList?.contains("dot-result") && !attivo.contains(e.target)) attivo.blur();
+  });
+}
+
 export function formDots(storico, n = 5) {
   if (!storico || !storico.length) return "";
   const ultimi = storico.slice(0, n);

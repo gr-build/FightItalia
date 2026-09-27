@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609261139";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609270604";
 
 renderChrome(null);
 
@@ -66,6 +66,23 @@ async function riassuntoWikipedia(link) {
     const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${titolo}`);
     if (!res.ok) return null;
     return res.json();
+  } catch {
+    return null;
+  }
+}
+
+async function traduciInItaliano(testo) {
+  // Stesso endpoint gratuito di Google Traduttore gia' usato in
+  // build_news.py come rete di sicurezza quando Gemini non traduce: qui
+  // e' l'unica opzione, il riassunto arriva al volo nel browser, non in
+  // fase di build. Se fallisce (rete, limite), resta l'inglese originale.
+  try {
+    const res = await fetch(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=it&dt=t&q=${encodeURIComponent(testo)}`
+    );
+    if (!res.ok) return null;
+    const frasi = (await res.json())[0];
+    return frasi.map((f) => f[0]).join("");
   } catch {
     return null;
   }
@@ -253,13 +270,17 @@ async function init() {
   const dati = ev.link ? await riassuntoWikipedia(ev.link) : null;
 
   if (dati && dati.extract) {
+    const tradotto = await traduciInItaliano(dati.extract);
+    const nota = tradotto
+      ? "Riassunto automatico da Wikipedia, tradotto dall'inglese (fonte originale)."
+      : "Riassunto automatico da Wikipedia (in inglese, fonte originale: la traduzione non è riuscita).";
     riassuntoBox.innerHTML = `
       <div class="section-title">Riassunto</div>
       <div style="display:flex; gap:18px; align-items:flex-start;">
         ${dati.thumbnail ? `<img src="${dati.thumbnail.source}" alt="" style="width:120px; border-radius:var(--radius-sm); flex-shrink:0;">` : ""}
-        <p style="color:var(--text-secondary); line-height:1.7;">${dati.extract}</p>
+        <p style="color:var(--text-secondary); line-height:1.7;">${tradotto || dati.extract}</p>
       </div>
-      <p style="margin-top:14px; font-size:11.5px; color:var(--text-muted);">Riassunto automatico da Wikipedia (in inglese, fonte originale).</p>
+      <p style="margin-top:14px; font-size:11.5px; color:var(--text-muted);">${nota}</p>
     `;
   } else {
     riassuntoBox.innerHTML = "";
