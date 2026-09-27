@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto } from "./common.js?v=202609270604";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto } from "./common.js?v=202609270611";
 
 renderChrome(null);
 
@@ -25,6 +25,30 @@ function campoInfobox(k, v) {
   return `<div class="row"><span class="k">${k}</span><span class="v">${v}</span></div>`;
 }
 
+// Colori validati (script dataviz, contrasto su sfondo scuro + separazione
+// CVD): rosso/verde/blu, non i colori vittoria-sconfitta-pareggio del sito
+// (qui sono 3 METODI di vittoria, non esiti diversi).
+const METODI_COLORE = { ko: "#e8352f", sub: "#189055", dec: "#3987e5" };
+
+function barraMetodiVittoria(m, pct) {
+  const segmenti = [
+    { chiave: "ko", etichetta: "KO/TKO", n: m.ko },
+    { chiave: "sub", etichetta: "Sottomissione", n: m.sub },
+    { chiave: "dec", etichetta: "Decisione", n: m.dec },
+  ].filter((s) => s.n > 0);
+  return `
+    <div class="metodi-barra" role="img" aria-label="${segmenti.map((s) => `${s.etichetta} ${pct(s.n)}%`).join(", ")}">
+      ${segmenti
+        .map(
+          (s) => `<div class="metodi-segmento" style="width:${pct(s.n)}%; background:${METODI_COLORE[s.chiave]};" title="${s.etichetta}: ${s.n} (${pct(s.n)}%)">${pct(s.n) >= 12 ? `${pct(s.n)}%` : ""}</div>`
+        )
+        .join("")}
+    </div>
+    <div class="metodi-legenda">
+      ${segmenti.map((s) => `<span class="metodi-voce"><span class="metodi-pallino" style="background:${METODI_COLORE[s.chiave]};"></span>${s.etichetta} — ${s.n} (${pct(s.n)}%)</span>`).join("")}
+    </div>`;
+}
+
 function pannelloComeVince(storico) {
   const m = metodoVittorie(storico);
   if (!m.totale) return "";
@@ -32,9 +56,7 @@ function pannelloComeVince(storico) {
   return `
     <div class="section-title" style="margin-top:40px;">Metodi di vittoria</div>
     <div class="compare-col a" style="max-width:520px;">
-      ${campoInfobox("KO/TKO", `${m.ko} (${pct(m.ko)}%)`)}
-      ${campoInfobox("Sottomissione", `${m.sub} (${pct(m.sub)}%)`)}
-      ${campoInfobox("Decisione", `${m.dec} (${pct(m.dec)}%)`)}
+      ${barraMetodiVittoria(m, pct)}
     </div>`;
 }
 
