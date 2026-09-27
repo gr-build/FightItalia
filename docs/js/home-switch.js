@@ -1,8 +1,8 @@
-import { fetchJSON, slugDaLink } from "./common.js?v=202609271205";
+import { fetchJSON, slugDaLink } from "./common.js?v=202609271227";
 
 // Riquadro "Prossimi eventi" a destra della home: i prossimi 4 eventi
 // programmati, con link alla scheda o a "Vedi tutti gli eventi" (eventi.html).
-// In coda anche l'ultimo fight gia' disputato: senza, chi vuole i risultati
+// In cima anche l'ultimo fight gia' disputato: senza, chi vuole i risultati
 // di ieri sera non lo trova da qui (su richiesta di Giovanni).
 const MESI = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
 
@@ -28,7 +28,8 @@ fetchJSON("data/eventi.json")
       .filter((e) => e.stato === "passato")
       .sort((a, b) => new Date(b.data) - new Date(a.data));
     const box = document.getElementById("prossimi-mini");
-    box.innerHTML = prossimi.length ? prossimi.map(rigaMini).join("") : `<p style="font-size:12px; color:var(--text-muted);">Nessun evento programmato trovato.</p>`;
-    if (ultimoPassato) box.insertAdjacentHTML("beforeend", rigaMiniRisultato(ultimoPassato));
+    box.innerHTML =
+      (ultimoPassato ? rigaMiniRisultato(ultimoPassato) : "") +
+      (prossimi.length ? prossimi.map(rigaMini).join("") : `<p style="font-size:12px; color:var(--text-muted);">Nessun evento programmato trovato.</p>`);
   })
   .catch(() => {});
