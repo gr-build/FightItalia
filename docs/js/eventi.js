@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink } from "./common.js?v=202609271314";
+import { fetchJSON, renderChrome, icon, slugDaLink, debounce } from "./common.js?v=202609271335";
 
 renderChrome("eventi");
 
@@ -36,12 +36,53 @@ function ordinaData(lista, crescente) {
   });
 }
 
+let tutti = [];
 let passati = [];
 let filtrati = [];
 let mostrati = 15;
 
 // Ricerca senza accenti e maiuscole: "sao paulo" trova "São Paulo".
 const normalizza = (t) => (t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+// La ricerca in cima alla pagina copre anche i prossimi eventi (non solo i
+// passati, come i filtri anno/tipo/data qui sotto): senza, digitare un
+// evento futuro come "UFC 330" non mostrava niente finche' non si scorreva
+// fino ai passati \u2014 il suggerimento appare subito sotto il campo, su
+// segnalazione di Giovanni.
+function aggiornaSuggerimenti() {
+  const lista = document.getElementById("cerca-evento-suggerimenti");
+  const q = normalizza(document.getElementById("cerca-evento").value).trim();
+  if (!q) {
+    lista.classList.remove("open");
+    lista.innerHTML = "";
+    return;
+  }
+  const parole = q.split(/\s+/).filter(Boolean);
+  const risultati = tutti
+    .filter((ev) => {
+      const d = new Date(ev.data);
+      const testo = normalizza([ev.evento, ev.sede, ev.luogo, isNaN(d) ? "" : `${d.getDate()} ${MESI[d.getMonth()]} ${d.getFullYear()}`].join(" "));
+      return parole.every((p) => testo.includes(p));
+    })
+    .slice(0, 8);
+  if (!risultati.length) {
+    lista.innerHTML = `<div class="sub">Nessun evento trovato</div>`;
+    lista.classList.add("open");
+    return;
+  }
+  lista.innerHTML = risultati
+    .map((ev) => {
+      const d = new Date(ev.data);
+      const data = isNaN(d) ? "" : `${d.getDate()} ${MESI[d.getMonth()]} ${d.getFullYear()}`;
+      return `<div><div>${ev.evento}</div><div class="sub">${ev.stato === "passato" ? "Risultato \u00b7 " : ""}${data}</div></div>`;
+    })
+    .join("");
+  lista.classList.add("open");
+  [...lista.children].forEach((el, i) => {
+    const slug = risultati[i].link ? slugDaLink(risultati[i].link) : null;
+    if (slug) el.addEventListener("mousedown", () => { location.href = `evento.html?slug=${slug}`; });
+  });
+}
 
 function applicaFiltri() {
   const parole = normalizza(document.getElementById("cerca-evento").value).split(/\s+/).filter(Boolean);
@@ -77,6 +118,7 @@ function renderPassati() {
 
 async function init() {
   const eventi = await fetchJSON("data/eventi.json");
+  tutti = eventi;
   // Ordine cronologico crescente: il prossimo evento (il più vicino da
   // oggi) va per primo, non il più lontano nel tempo.
   const prossimi = ordinaData(eventi.filter((e) => e.stato === "programmato"), true);
@@ -89,6 +131,11 @@ async function init() {
   ["cerca-evento", "filtro-anno", "filtro-tipo", "filtro-data"].forEach((id) => {
     document.getElementById(id).addEventListener(id === "cerca-evento" ? "input" : "change", applicaFiltri);
   });
+  const campoCerca = document.getElementById("cerca-evento");
+  const suggerimenti = document.getElementById("cerca-evento-suggerimenti");
+  campoCerca.addEventListener("input", debounce(aggiornaSuggerimenti, 100));
+  campoCerca.addEventListener("focus", aggiornaSuggerimenti);
+  campoCerca.addEventListener("blur", () => setTimeout(() => suggerimenti.classList.remove("open"), 150));
   applicaFiltri();
   document.getElementById("load-more").addEventListener("click", () => {
     mostrati += 20;

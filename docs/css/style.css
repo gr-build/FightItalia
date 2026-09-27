@@ -2098,13 +2098,15 @@ h1, h2, h3, h4 {
   .pom-nome { font-size: 13.5px; }
 }
 
-/* ---------- Ricerca eventi passati ---------- */
+/* ---------- Ricerca eventi ---------- */
 .filtri-eventi {
   display: grid;
   grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin-bottom: 14px;
 }
+
+.filtro-cerca { position: relative; }
 
 .filtri-eventi input,
 .filtri-eventi select {
