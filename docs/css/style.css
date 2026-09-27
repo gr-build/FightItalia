@@ -2212,3 +2212,11 @@ a.rank-row:hover { color: var(--accent); }
 .rank-row-c .rank-pos { color: var(--gold); }
 .rank-c { font-size: 10px; color: var(--gold); border: 1px solid var(--gold); border-radius: 4px; padding: 1px 4px; margin-left: 4px; vertical-align: middle; }
 .rank-nome { flex: 1; }
+
+/* ---------- Metodi di vittoria: barra 100% impilata ---------- */
+.metodi-barra { display: flex; height: 28px; border-radius: 6px; overflow: hidden; background: var(--bg-elevated-2); margin-top: 6px; }
+.metodi-segmento { display: flex; align-items: center; justify-content: center; font: 600 12px var(--font-display); color: #fff; min-width: 2px; }
+.metodi-segmento:not(:last-child) { border-right: 2px solid var(--bg); }
+.metodi-legenda { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 13px; color: var(--text-secondary); }
+.metodi-voce { display: flex; align-items: center; gap: 6px; }
+.metodi-pallino { width: 10px; height: 10px; border-radius: 50%; flex: none; }
