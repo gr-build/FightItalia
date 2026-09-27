@@ -102,7 +102,7 @@ function applicaGlossario(radice) {
 }
 
 // Nomi di lottatori ed eventi: il traduttore li storpiava ("Ciryl" -> "Cyryl").
-const SELETTORE_NOMI = ".name, .nickname, .champ-nome, .champ-nome-grande, .pom-nome, .gr-nome, .ac-nome, .chie-fine-nome, .tent-nome, .personaggio-nome, .bout-nome, .rank-nome";
+const SELETTORE_NOMI = ".name, .nickname, .champ-nome, .champ-nome-grande, .pom-nome, .gr-nome, .ac-nome, .chie-fine-nome, .tent-nome, .personaggio-nome, .bout-nome, .rank-nome, .live-nome";
 
 function proteggiNomi(radice) {
   const elementi = radice.matches && radice.matches(SELETTORE_NOMI) ? [radice] : [];
@@ -191,10 +191,16 @@ export function renderChrome(active) {
           <li><a href="news.html" class="${active === "news" ? "active" : ""}">News</a></li>
           <li><a href="giochi.html" class="nav-gauntlet ${active === "giochi" || active === "gauntlet" ? "active" : ""}">Giochi</a></li>
         </ul>
+        <a href="eventi.html" id="live-badge" class="live-badge" hidden></a>
         ${selettoreLingua()}
       </div>`;
     const sel = header.querySelector("#lingua");
     if (sel) sel.addEventListener("change", () => cambiaLingua(sel.value));
+  }
+  if (!window.__liveAvviato) {
+    window.__liveAvviato = true;
+    aggiornaLive();
+    setInterval(aggiornaLive, 45000);
   }
   if (!window.__traduzioneAvviata) {
     window.__traduzioneAvviata = true;
@@ -210,6 +216,37 @@ export function renderChrome(active) {
         <p style="margin:0; font-size:11.5px; color:var(--text-muted);">MMA Oggi è un progetto indipendente, non affiliato né sponsorizzato da UFC o Zuffa, LLC.</p>
       </div>`;
   }
+}
+
+async function aggiornaLive() {
+  const el = document.getElementById("live-badge");
+  if (!el) return;
+  let d;
+  try {
+    d = await fetchJSON("data/live.json");
+  } catch {
+    return; // non tocca il badge: meglio tenere l'ultimo stato buono che nasconderlo per un errore di rete
+  }
+  if (!d || d.stato === "nessuno") {
+    el.hidden = true;
+    return;
+  }
+  let corpo;
+  if (d.stato === "in_corso" && d.incontro_corrente) {
+    const c = d.incontro_corrente;
+    const rt = c.round ? `R${c.round}${c.clock ? " · " + c.clock : ""}` : "";
+    corpo = `<span class="live-nome">${c.nomi[0]}</span> vs <span class="live-nome">${c.nomi[1]}</span>${rt ? ` <span class="live-round">${rt}</span>` : ""}`;
+  } else if (d.ultimo_risultato) {
+    const u = d.ultimo_risultato;
+    const altro = u.nomi.find((n) => n !== u.vincitore) || u.nomi[0];
+    corpo = `<span class="live-nome">${u.vincitore}</span> batte <span class="live-nome">${altro}</span>`;
+  } else {
+    el.hidden = true;
+    return;
+  }
+  el.hidden = false;
+  el.title = d.evento || "";
+  el.innerHTML = `<span class="live-dot" aria-hidden="true"></span><span class="live-stato">${d.stato === "in_corso" ? "In diretta" : "Appena finito"}</span><span class="live-testo">${corpo}</span>`;
 }
 
 export function cmDaStringa(testo) {
