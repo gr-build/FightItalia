@@ -577,7 +577,16 @@ def genera_classifiche(roster):
     if not divisioni:
         print("[classifiche] ufc.com non raggiungibile (o Playwright/Chromium non disponibile): classifiche non aggiornate")
         return
-    per_nome = {_norm_nome(r.get("nome")): r.get("slug") for r in roster.to_dict("records") if r.get("nome")}
+    # r.get("slug") su un DataFrame pandas ritorna NaN (non None) quando la
+    # cella e' vuota: senza il filtro isinstance, quel NaN finiva scritto
+    # cosi' com'e' nel JSON ("slug": NaN) — non valido per JSON.parse nel
+    # browser (Python lo accetta lo stesso, e' un'estensione non standard),
+    # quindi fetchJSON falliva in silenzio su ranking.html e ovunque altro
+    # leggesse questo file. Bug vero, trovato da Giovanni.
+    per_nome = {
+        _norm_nome(r.get("nome")): (r.get("slug") if isinstance(r.get("slug"), str) else None)
+        for r in roster.to_dict("records") if r.get("nome")
+    }
 
     def _con_slug(x):
         return {**x, "slug": per_nome.get(_norm_nome(x["nome"]))}
@@ -590,7 +599,10 @@ def genera_classifiche(roster):
             "classifica": [_con_slug(x) for x in d["classifica"]],
         })
     (WEB_DATA / "classifiche.json").write_text(
-        json.dumps({"generato_il": datetime.now().isoformat(), "divisioni": out}, ensure_ascii=False), encoding="utf-8"
+        # allow_nan=False: se un NaN rispuntasse (bug diverso), meglio un
+        # errore rumoroso qui che un JSON non valido pubblicato in silenzio.
+        json.dumps({"generato_il": datetime.now().isoformat(), "divisioni": out}, ensure_ascii=False, allow_nan=False),
+        encoding="utf-8",
     )
     con_slug = sum(x["slug"] is not None for d in out for x in d["classifica"]) + sum(1 for d in out if d["campione"] and d["campione"]["slug"])
     totale = sum(len(d["classifica"]) for d in out) + sum(1 for d in out if d["campione"])

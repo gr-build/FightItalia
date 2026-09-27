@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609271723";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609271758";
 
 renderChrome(null);
 
@@ -125,9 +125,41 @@ function iniziali(nome) {
   return (nome || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
 }
 
+// Chiave tipo|categoria|nome per l'indice delle classifiche: "Women's X" /
+// "Women's X" (apostrofo tipografico incluso) e' "donne", il resto "uomini" —
+// stesse categorie (senza il prefisso) usate in classifiche.json.
+function chiaveClassifica(categoriaBout, nome) {
+  const c = (categoriaBout || "").trim();
+  const donne = /^women[''’]?s\s+/i.test(c);
+  const cat = c.replace(/^women[''’]?s\s+/i, "").toLowerCase();
+  return `${donne ? "donne" : "uomini"}|${cat}|${normalizzaNome(nome)}`;
+}
+
+function indiceClassifiche(classifiche) {
+  const idx = new Map();
+  for (const div of classifiche?.divisioni || []) {
+    if (!div.categoria) continue; // pound-for-pound: non e' una categoria di peso
+    const cat = div.categoria.toLowerCase();
+    if (div.campione) idx.set(`${div.tipo}|${cat}|${normalizzaNome(div.campione.nome)}`, "C");
+    for (const x of div.classifica || []) idx.set(`${div.tipo}|${cat}|${normalizzaNome(x.nome)}`, x.pos);
+  }
+  return idx;
+}
+
+// Su richiesta di Giovanni, dopo un errore vero (un lottatore dato "non in
+// classifica" mentre era gia' #12): il numero vero o "Non in classifica"
+// sempre visibile, mai un'affermazione implicita non controllata.
+function badgeRanking(categoriaBout, nome, idxClassifiche) {
+  if (!nome || !idxClassifiche) return "";
+  const pos = idxClassifiche.get(chiaveClassifica(categoriaBout, nome));
+  if (pos === "C") return `<span class="bout-ranking campione">Campione</span>`;
+  if (pos) return `<span class="bout-ranking">#${pos}</span>`;
+  return `<span class="bout-ranking non-ranked">Non in classifica</span>`;
+}
+
 // Un lato dell'incontro: foto (o iniziali), nome, record ed eta'. Stessi
 // campi per tutti, con "—" dove il dato manca.
-function latoIncontro(nome, riga, slugLink, lato, vincitore) {
+function latoIncontro(nome, riga, slugLink, lato, vincitore, categoriaBout, idxClassifiche) {
   const slug = riga?.slug || slugLink;
   const nomeHtml = nome ? (slug ? `<a href="lottatore.html?slug=${slug}">${nome}</a>` : nome) : "—";
   const vuoto = `<span class="bout-avatar bout-avatar-vuoto" aria-hidden="true">${iniziali(nome)}</span>`;
@@ -143,6 +175,7 @@ function latoIncontro(nome, riga, slugLink, lato, vincitore) {
       ${avatar}
       <div class="bout-lato-testo">
         <div class="bout-nome">${nomeHtml}${vincitore ? ` <span class="bout-w">W</span>` : ""}</div>
+        ${badgeRanking(categoriaBout, nome, idxClassifiche)}
         ${meta}
       </div>
     </div>`;
@@ -162,7 +195,7 @@ function trovaLottatore(slug, nome, roster) {
   return n ? roster.find((r) => normalizzaNome(r.nome) === n) || null : null;
 }
 
-function rigaIncontro(b, roster, posizione = "", contestoEvento) {
+function rigaIncontro(b, roster, posizione = "", contestoEvento, idxClassifiche) {
   const haRisultato = b.metodo && b.metodo.trim();
   // Nelle tabelle risultati di Wikipedia il vincitore e' sempre a sinistra,
   // tranne pareggi e no contest.
@@ -181,9 +214,9 @@ function rigaIncontro(b, roster, posizione = "", contestoEvento) {
         ${posizione ? `<span class="bout-posizione">${posizione}</span>` : ""}
       </div>
       <div class="bout-grid">
-        ${latoIncontro(b.fighter1, rigaA, slugA, "a", vinceA)}
+        ${latoIncontro(b.fighter1, rigaA, slugA, "a", vinceA, b.categoria, idxClassifiche)}
         <span class="bout-vs">vs</span>
-        ${latoIncontro(b.fighter2, rigaB, slugB, "b", false)}
+        ${latoIncontro(b.fighter2, rigaB, slugB, "b", false, b.categoria, idxClassifiche)}
       </div>
       <div class="bout-foot">${esito}${azioneConfronto(rigaA, rigaB, b, contestoEvento)}</div>
     </div>`;
@@ -191,11 +224,11 @@ function rigaIncontro(b, roster, posizione = "", contestoEvento) {
 
 // Wikipedia elenca la main card dal main event in giu': il primo bout e'
 // il main event, il secondo il co-main — lo stesso ordine della serata.
-function sezioneCard(titolo, incontri, roster, conPosizioni = false, contestoEvento) {
+function sezioneCard(titolo, incontri, roster, conPosizioni = false, contestoEvento, idxClassifiche) {
   if (!incontri.length) return "";
   return `
     <div class="event-group-title">${titolo}</div>
-    <div class="bout-list">${incontri.map((b, i) => rigaIncontro(b, roster, conPosizioni ? ["Main event", "Co-main event"][i] || "" : "", contestoEvento)).join("")}</div>`;
+    <div class="bout-list">${incontri.map((b, i) => rigaIncontro(b, roster, conPosizioni ? ["Main event", "Co-main event"][i] || "" : "", contestoEvento, idxClassifiche)).join("")}</div>`;
 }
 
 async function caricaCard(link) {
@@ -263,13 +296,15 @@ async function init() {
   // roster UFC attuale (undercard di eventi passati, o un nome uscito dal
   // roster su Wikipedia pur avendo appena combattuto) — senza, per loro non
   // comparirebbe mai il link "Confronta" (vedi commento su azioneConfronto).
-  const [card, roster, extra] = ev.link
+  const [card, roster, extra, classifiche] = ev.link
     ? await Promise.all([
         caricaCard(ev.link),
         fetchJSON("data/roster.json").catch(() => []),
         fetchJSON("data/extra-lottatori.json").catch(() => []),
+        fetchJSON("data/classifiche.json").catch(() => null),
       ])
-    : [[], [], []];
+    : [[], [], [], null];
+  const idxClassifiche = indiceClassifiche(classifiche);
   const rosterCompleto = [...roster, ...extra];
 
   if (card.length) {
@@ -284,7 +319,7 @@ async function init() {
     const prelim = card.filter((b) => (b.sezione || "").toLowerCase().startsWith("preliminary"));
     const main = card.filter((b) => !early.includes(b) && !prelim.includes(b));
     const contestoEvento = { evento: ev.evento, data: ev.data, luogo, passato: ev.stato === "passato" };
-    cardBox.innerHTML = sezioneCard("Main Card", main, rosterCompleto, true, contestoEvento) + sezioneCard("Preliminary Card", prelim, rosterCompleto, false, contestoEvento) + sezioneCard("Early Preliminary Card", early, rosterCompleto, false, contestoEvento);
+    cardBox.innerHTML = sezioneCard("Main Card", main, rosterCompleto, true, contestoEvento, idxClassifiche) + sezioneCard("Preliminary Card", prelim, rosterCompleto, false, contestoEvento, idxClassifiche) + sezioneCard("Early Preliminary Card", early, rosterCompleto, false, contestoEvento, idxClassifiche);
   } else {
     cardBox.innerHTML = `<div class="empty-state">Card non ancora disponibile per questo evento.</div>`;
   }
