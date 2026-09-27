@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, debounce, fotoDi, classeFoto } from "./common.js?v=202609261139";
+import { fetchJSON, renderChrome, icon, debounce, fotoDi, classeFoto } from "./common.js?v=202609270604";
 
 renderChrome("database");
 document.getElementById("search-icon").innerHTML = icon("search");
@@ -103,6 +103,10 @@ function cardLottatore(r) {
 
 function renderGrid() {
   const q = document.getElementById("search").value.trim().toLowerCase();
+  // Le pillole delle categorie occupano spazio utile e su telefono spingono
+  // i risultati sotto la piega: mentre si cerca per nome non servono (la
+  // ricerca gia' guarda in tutte le categorie), quindi si nascondono.
+  document.getElementById("category-pills").hidden = !!q;
   let filtrati = roster;
   // Senza ricerca o filtro attivo, mostriamo solo le vere categorie di peso:
   // le sezioni speciali (release, sospesi...) hanno etichette troppo lunghe
