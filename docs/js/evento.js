@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609270711";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609271205";
 
 renderChrome(null);
 
@@ -92,27 +92,16 @@ async function traduciInItaliano(testo) {
 // hanno una scheda (molti esordienti non hanno una pagina Wikipedia). La
 // riga ha comunque sempre la stessa struttura: dove il link non c'e' resta
 // una nota discreta, cosi' la card non alterna righe piene e righe vuote.
-// Se l'incontro ha gia' un risultato, il link porta a una pagina "del
-// match" (Confronto + il risultato vero di QUESTO incontro in cima), non
-// solo al confronto generico tra due lottatori — su richiesta di Giovanni,
-// che vuole i dati del match a portata di clic, non solo lo strumento di
-// confronto astratto.
-function azioneConfronto(rigaA, rigaB, b, contestoEvento) {
+// Su un evento gia' disputato il tale of the tape (eta', record, fisico)
+// non serve piu': il fight e' gia' successo, quello che conta e' il
+// risultato (gia' in bout-esito) — niente link in quel caso, su richiesta
+// di Giovanni. Il confronto pre-fight resta solo sugli eventi futuri.
+function azioneConfronto(rigaA, rigaB, contestoEvento) {
+  if (contestoEvento?.passato) return "";
   if (!(rigaA?.slug && rigaB?.slug)) {
     return `<span class="bout-confronto-na">Confronto non disponibile</span>`;
   }
-  const base = `confronto.html?a=${rigaA.slug}&b=${rigaB.slug}`;
-  const haRisultato = b?.metodo && b.metodo.trim();
-  if (!haRisultato || !contestoEvento) {
-    return `<a href="${base}" class="bout-confronto-link">Confronta →</a>`;
-  }
-  const pareggio = /draw|no contest|pareggio/i.test(b.metodo);
-  const extra = new URLSearchParams({
-    evt: contestoEvento.evento || "", data: contestoEvento.data || "", luogo: contestoEvento.luogo || "",
-    cat: b.categoria || "", metodo: b.metodo, round: b.round || "", tempo: b.tempo || "",
-    vincitore: pareggio ? "" : b.fighter1, perdente: pareggio ? "" : b.fighter2,
-  });
-  return `<a href="${base}&${extra.toString()}" class="bout-confronto-link">Il match →</a>`;
+  return `<a href="confronto.html?a=${rigaA.slug}&b=${rigaB.slug}" class="bout-confronto-link">Confronta →</a>`;
 }
 
 function iniziali(nome) {
@@ -179,7 +168,7 @@ function rigaIncontro(b, roster, posizione = "", contestoEvento) {
         <span class="bout-vs">vs</span>
         ${latoIncontro(b.fighter2, rigaB, slugB, "b", false)}
       </div>
-      <div class="bout-foot">${esito}${azioneConfronto(rigaA, rigaB, b, contestoEvento)}</div>
+      <div class="bout-foot">${esito}${azioneConfronto(rigaA, rigaB, contestoEvento)}</div>
     </div>`;
 }
 
@@ -277,7 +266,7 @@ async function init() {
     const early = card.filter((b) => (b.sezione || "").toLowerCase().startsWith("early"));
     const prelim = card.filter((b) => (b.sezione || "").toLowerCase().startsWith("preliminary"));
     const main = card.filter((b) => !early.includes(b) && !prelim.includes(b));
-    const contestoEvento = { evento: ev.evento, data: ev.data, luogo };
+    const contestoEvento = { evento: ev.evento, data: ev.data, luogo, passato: ev.stato === "passato" };
     cardBox.innerHTML = sezioneCard("Main Card", main, rosterCompleto, true, contestoEvento) + sezioneCard("Preliminary Card", prelim, rosterCompleto, false, contestoEvento) + sezioneCard("Early Preliminary Card", early, rosterCompleto, false, contestoEvento);
   } else {
     cardBox.innerHTML = `<div class="empty-state">Card non ancora disponibile per questo evento.</div>`;

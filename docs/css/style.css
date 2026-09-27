@@ -589,18 +589,6 @@ h1, h2, h3, h4 {
 .autocomplete-list div:hover, .autocomplete-list div.highlighted { background: var(--accent-soft); }
 .autocomplete-list .sub { color: var(--text-muted); font-size: 12px; }
 
-.match-risultato {
-  margin-top: 20px;
-  padding: 16px 20px;
-  background: rgba(47, 184, 114, 0.1);
-  border: 1px solid rgba(47, 184, 114, 0.4);
-  border-radius: var(--radius);
-}
-
-.match-risultato-esito { font-size: 16px; }
-.match-risultato-esito strong { color: var(--win); }
-.match-risultato-dettagli { margin-top: 6px; color: var(--text-secondary); font-size: 13px; }
-
 .compare-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -1039,6 +1027,9 @@ h1, h2, h3, h4 {
 .mini-evento:hover { border-color: var(--accent); transform: translateX(2px); }
 .mini-evento .mini-data { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
 .mini-evento .mini-nome { font-size: 13.5px; margin-top: 3px; color: var(--text); }
+
+.mini-evento-risultato { margin-top: 12px; border-color: var(--border); border-style: dashed; }
+.mini-evento .mini-data.risultato { color: var(--win); }
 
 .evento-widget-tutti {
   display: block;

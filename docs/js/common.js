@@ -412,7 +412,7 @@ function ritmoFinalizzazione(storico) {
   return Math.round((finish / vittorie.length) * 100);
 }
 
-// Punti chiave statistici e fattuali del match, senza pronostico: ogni
+// Punti chiave statistici e fattuali del fight, senza pronostico: ogni
 // fatto compare solo se i dati necessari sono disponibili per entrambi i
 // lottatori, altrimenti viene omesso invece di mostrare un buco/N-D.
 // fA/fB: { nome, inf (infobox), storico }
@@ -463,7 +463,7 @@ export function blocPuntiChiave(punti) {
   if (!punti || !punti.length) return "";
   return `
     <div class="key-points">
-      <div class="key-points-title">Punti chiave del match</div>
+      <div class="key-points-title">Punti chiave del fight</div>
       <ul>${punti.map((p) => `<li>${p}</li>`).join("")}</ul>
     </div>`;
 }
