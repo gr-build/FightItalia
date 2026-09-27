@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, cmDaStringa, numeroDaRecord, classeRisultato, letteraRisultato, debounce, slugDaLink, formDots, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, fotoDi, classeFoto } from "./common.js?v=202609270711";
+import { fetchJSON, renderChrome, cmDaStringa, numeroDaRecord, classeRisultato, letteraRisultato, debounce, slugDaLink, formDots, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, fotoDi, classeFoto } from "./common.js?v=202609271205";
 
 renderChrome("confronto");
 
@@ -136,35 +136,6 @@ function testaATesta(dettA, dettB) {
   return box.outerHTML;
 }
 
-const MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
-
-function dataEstesa(dataStr) {
-  const d = new Date(dataStr);
-  if (isNaN(d)) return dataStr || "";
-  return `${d.getDate()} ${MESI[d.getMonth()]} ${d.getFullYear()}`;
-}
-
-// Arrivando dal link "Il match" di una scheda evento con un risultato gia'
-// disputato (vedi azioneConfronto in evento.js): il confronto tra i due
-// lottatori resta uguale, ma in cima c'e' il risultato VERO di QUESTO
-// incontro — quello che manca al semplice "Confronta" generico.
-function bannerRisultatoMatch(params, nomeA, nomeB) {
-  const metodo = params.get("metodo");
-  if (!metodo) return "";
-  const vincitore = params.get("vincitore");
-  const perdente = params.get("perdente");
-  const pareggio = !vincitore;
-  const riga = pareggio
-    ? `${nomeA} e ${nomeB}: ${metodo}`
-    : `<strong>${vincitore}</strong> batte ${perdente} — ${metodo}${params.get("round") ? ` · R${params.get("round")}` : ""}${params.get("tempo") ? ` · ${params.get("tempo")}` : ""}`;
-  const dettagli = [params.get("evt"), params.get("cat"), params.get("data") ? dataEstesa(params.get("data")) : null, params.get("luogo")].filter(Boolean).join(" · ");
-  return `
-    <div class="match-risultato">
-      <div class="match-risultato-esito">${riga}</div>
-      ${dettagli ? `<div class="match-risultato-dettagli">${dettagli}</div>` : ""}
-    </div>`;
-}
-
 async function aggiornaConfronto() {
   const out = document.getElementById("risultato");
   if (!scelti.a || !scelti.b) return;
@@ -189,7 +160,6 @@ async function aggiornaConfronto() {
   const pct = (n, tot) => (tot ? Math.round((n / tot) * 100) : null);
 
   out.innerHTML = `
-    ${bannerRisultatoMatch(new URLSearchParams(location.search), dA.nome, dB.nome)}
     <div class="compare-grid">
       ${colonna(dA, "a", scelti.a)}
       <div class="vs-divider">VS</div>
