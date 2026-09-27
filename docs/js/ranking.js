@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome } from "./common.js?v=202609271227";
+import { fetchJSON, renderChrome } from "./common.js?v=202609271230";
 
 renderChrome("ranking");
 

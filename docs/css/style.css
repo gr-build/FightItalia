@@ -969,6 +969,31 @@ h1, h2, h3, h4 {
   font-size: 11.5px;
 }
 
+.bout-fight-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.bout-fight-tag {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  padding: 3px 7px;
+}
+
+.bout-fight-score {
+  color: var(--text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
 @media (max-width: 520px) {
   .bout-avatar { width: 32px; height: 32px; }
   .bout-grid { gap: 8px; }

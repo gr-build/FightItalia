@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609271227";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609271230";
 
 renderChrome(null);
 
@@ -88,16 +88,33 @@ async function traduciInItaliano(testo) {
   }
 }
 
+// Il testo del metodo per una decision finisce sempre con le tre schede dei
+// giudici tra parentesi, es. "Decision (unanimous) (29–28, 29–28, 29–27)":
+// ogni coppia e' il punteggio di un giudice, primo numero al fighter1 (il
+// vincitore, tranne pareggi/no contest — vedi vinceA in rigaIncontro).
+function schedeGiudici(metodo) {
+  const m = (metodo || "").match(/\(([\d]+[–-][\d]+(?:,\s*[\d]+[–-][\d]+)*)\)\s*$/);
+  if (!m) return null;
+  return m[1].split(",").map((s, i) => `G${i + 1} ${s.trim()}`).join(" · ");
+}
+
+// Al posto di "Confronta" su un evento gia' disputato: il tale of the tape
+// (eta', record, fisico) non serve piu', ma un'etichetta "Fight" resta,
+// con le schede dei giudici quando l'incontro e' andato a decision (unico
+// dato di dettaglio che oggi non e' gia' altrove sulla card) — su
+// richiesta di Giovanni.
+function badgeFight(b) {
+  const schede = schedeGiudici(b?.metodo);
+  return `<span class="bout-fight-pill"><span class="bout-fight-tag">Fight</span>${schede ? `<span class="bout-fight-score">${schede}</span>` : ""}</span>`;
+}
+
 // "Confronta ->" verso il Tale of the Tape: solo se ENTRAMBI i lottatori
 // hanno una scheda (molti esordienti non hanno una pagina Wikipedia). La
 // riga ha comunque sempre la stessa struttura: dove il link non c'e' resta
 // una nota discreta, cosi' la card non alterna righe piene e righe vuote.
-// Su un evento gia' disputato il tale of the tape (eta', record, fisico)
-// non serve piu': il fight e' gia' successo, quello che conta e' il
-// risultato (gia' in bout-esito) — niente link in quel caso, su richiesta
-// di Giovanni. Il confronto pre-fight resta solo sugli eventi futuri.
-function azioneConfronto(rigaA, rigaB, contestoEvento) {
-  if (contestoEvento?.passato) return "";
+// Il confronto pre-fight (fisico, record) resta solo sugli eventi futuri.
+function azioneConfronto(rigaA, rigaB, b, contestoEvento) {
+  if (contestoEvento?.passato) return badgeFight(b);
   if (!(rigaA?.slug && rigaB?.slug)) {
     return `<span class="bout-confronto-na">Confronto non disponibile</span>`;
   }
@@ -168,7 +185,7 @@ function rigaIncontro(b, roster, posizione = "", contestoEvento) {
         <span class="bout-vs">vs</span>
         ${latoIncontro(b.fighter2, rigaB, slugB, "b", false)}
       </div>
-      <div class="bout-foot">${esito}${azioneConfronto(rigaA, rigaB, contestoEvento)}</div>
+      <div class="bout-foot">${esito}${azioneConfronto(rigaA, rigaB, b, contestoEvento)}</div>
     </div>`;
 }
 
