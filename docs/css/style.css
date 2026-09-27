@@ -2128,6 +2128,13 @@ h1, h2, h3, h4 {
   .filtro-cerca { grid-column: 1 / -1; }
 }
 
+/* Sotto i 480px anche 3 colonne strette sono troppo poco per l'input data
+   nativo (testo e icona del calendario non ci stanno, tagliati fuori dalla
+   colonna e a volte da tutta la pagina): una sotto l'altra, a tutta larghezza. */
+@media (max-width: 480px) {
+  .filtri-eventi { grid-template-columns: 1fr; }
+}
+
 .news-lingua {
   font-size: 10px;
   font-weight: 700;
