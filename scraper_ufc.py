@@ -799,36 +799,32 @@ def scarica_orari_evento(nome_evento, luogo, usa_cache=True):
 
 def scarica_classifiche():
     """Classifiche ufficiali UFC (uomini, donne, pound-for-pound) da
-    ufc.com/rankings. Richiede Selenium + Edge (vedi scarica_orari_evento):
-    ufc.com blocca le richieste dirette con un WAF (403), un browser vero
-    passa. Ritorna None se il sito non e' raggiungibile: mai una classifica
-    indovinata o vecchia.
+    ufc.com/rankings. ufc.com blocca le richieste dirette con un WAF (403);
+    un browser vero passa. Usiamo Playwright (non Selenium+Edge come
+    scarica_orari_evento: msedgedriver non e' disponibile sui runner
+    GitHub Actions senza un passo di setup dedicato, e la classifica
+    restava sempre vecchia in silenzio — vedi requirements.txt e il passo
+    "Installa Playwright" in dati.yml). Ritorna None se il sito non e'
+    raggiungibile: mai una classifica indovinata o vecchia.
 
     La pagina ripete ogni divisione due volte: una scheda "solo campione"
     (senza classifica) e una con il campione e i 15 sfidanti numerati.
     Prendiamo solo la seconda (quella con le righe numerate)."""
     try:
-        from selenium import webdriver
-        from selenium.common.exceptions import WebDriverException
+        from playwright.sync_api import sync_playwright
     except ImportError:
         return None
-    import time as _time
 
-    options = webdriver.EdgeOptions()
-    options.add_argument("--headless=new")
-    options.add_argument("--window-size=1400,1000")
     try:
-        driver = webdriver.Edge(options=options)
-    except WebDriverException:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            page.goto("https://www.ufc.com/rankings", timeout=30000, wait_until="domcontentloaded")
+            page.wait_for_timeout(3000)
+            html = page.content()
+            browser.close()
+    except Exception:
         return None
-    try:
-        driver.get("https://www.ufc.com/rankings")
-        _time.sleep(5)
-        html = driver.page_source
-    except WebDriverException:
-        return None
-    finally:
-        driver.quit()
 
     soup = BeautifulSoup(html, "lxml")
     divisioni = []
