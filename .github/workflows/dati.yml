@@ -28,6 +28,13 @@ jobs:
       - name: Installa dipendenze
         run: pip install -r requirements.txt
 
+      # Serve solo a scarica_classifiche() (ufc.com/rankings blocca le
+      # richieste dirette con un WAF): Selenium+Edge, usato per gli orari
+      # degli eventi, non ha msedgedriver disponibile su questo runner e
+      # falliva in silenzio ogni giorno lasciando le classifiche vecchie.
+      - name: Installa Chromium per Playwright
+        run: python -m playwright install --with-deps chromium
+
       # scarica_roster()/scarica_eventi() (usati da genera_roster_e_eventi)
       # ignorano la cache CSV di default, quindi roster.json/eventi.json
       # vengono sempre rigenerati da capo qui — e' proprio quello che serve
