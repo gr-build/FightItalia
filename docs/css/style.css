@@ -1028,7 +1028,7 @@ h1, h2, h3, h4 {
 .mini-evento .mini-data { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
 .mini-evento .mini-nome { font-size: 13.5px; margin-top: 3px; color: var(--text); }
 
-.mini-evento-risultato { margin-top: 12px; border-color: var(--border); border-style: dashed; }
+.mini-evento-risultato { margin-bottom: 16px; border-color: var(--border); border-style: dashed; }
 .mini-evento .mini-data.risultato { color: var(--win); }
 
 .evento-widget-tutti {
