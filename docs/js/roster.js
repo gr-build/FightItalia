@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, debounce, fotoDi, classeFoto } from "./common.js?v=202609271230";
+import { fetchJSON, renderChrome, icon, debounce, fotoDi, classeFoto } from "./common.js?v=202609271232";
 
 renderChrome("database");
 document.getElementById("search-icon").innerHTML = icon("search");
