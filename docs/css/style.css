@@ -486,6 +486,28 @@ h1, h2, h3, h4 {
 .tag.numerato { background: rgba(212, 165, 61, 0.14); color: var(--gold); }
 .tag.fight-night { background: rgba(255, 255, 255, 0.06); color: var(--text-secondary); }
 
+.prossimo-incontro {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.prossimo-incontro a { color: var(--text); text-decoration: underline; }
+.prossimo-incontro a:hover { color: var(--accent); }
+
+.prossimo-incontro-tag {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .fighter-card .meta-row {
   display: flex;
   gap: 14px;
