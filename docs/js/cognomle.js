@@ -4,8 +4,8 @@
 // puo' provare solo un cognome che esiste davvero nel roster (stessa
 // lunghezza) — niente dizionario, il "vocabolario" e' l'elenco lottatori.
 
-import { renderChrome } from "./common.js?v=202609271947";
-import { caricaLottatori, leggi, scrivi, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609271947";
+import { renderChrome } from "./common.js?v=202609272011";
+import { caricaLottatori, leggi, scrivi, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609272011";
 
 renderChrome("giochi");
 

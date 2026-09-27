@@ -634,9 +634,6 @@ h1, h2, h3, h4 {
 .compare-col .row .k { color: var(--text-muted); }
 .compare-col .row .v { text-align: right; max-width: 65%; overflow-wrap: break-word; }
 
-.compare-col.b .row { flex-direction: row-reverse; }
-.compare-col.b .row .v { text-align: left; }
-
 .vs-divider {
   display: flex;
   align-items: flex-start;
@@ -1976,8 +1973,6 @@ h1, h2, h3, h4 {
 @media (max-width: 760px) {
   .vs-picker, .compare-grid { grid-template-columns: minmax(0, 1fr); }
   .vs-divider, .vs-picker .vs-label { padding-top: 0; }
-  .compare-col.b .row { flex-direction: row; }
-  .compare-col.b .row .v { text-align: right; }
   .compare-col.b .form-dots { flex-direction: row; }
   .event-row { grid-template-columns: 60px 1fr; }
   .event-link { grid-column: 1 / -1; justify-self: start; }
