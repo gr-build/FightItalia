@@ -36,6 +36,7 @@ PAGINE_STATICHE = [
     ("", "weekly", "1.0"),
     ("eventi.html", "daily", "0.8"),
     ("news.html", "daily", "0.7"),
+    ("lottatori.html", "monthly", "0.7"),
     ("confronto.html", "monthly", "0.7"),
     ("campioni.html", "monthly", "0.6"),
     ("europa.html", "monthly", "0.6"),

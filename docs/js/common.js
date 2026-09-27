@@ -178,21 +178,17 @@ export function linkSocial(classe = "social-link") {
 export function renderChrome(active) {
   const header = document.getElementById("site-header");
   if (header) {
-    // Campioni e Ranking sono sottocategorie di Lottatori (menu apribile
-    // con la freccetta): troppe voci separate in alto non ci stavano piu'
-    // bene, su richiesta di Giovanni. Se la pagina attiva e' una delle due
-    // il sottomenu parte gia' aperto, cosi' la voce attiva si vede subito.
-    const espanso = active === "campioni" || active === "ranking";
+    // "Lottatori" e' la pagina indice (Campioni + Ranking), separata dalla
+    // home (il database/ricerca, che ora nel menu si chiama "Home") — su
+    // richiesta di Giovanni. Il tentativo precedente con un sottomenu a
+    // freccetta e' stato sostituito da questa pagina vera e propria.
+    const suLottatori = active === "lottatori" || active === "campioni" || active === "ranking";
     header.innerHTML = `
       <div class="container nav">
         <a href="/" class="brand" aria-label="MMA Oggi, home"><img src="img/logo-128.png?v=2" alt="" class="brand-logo" width="56" height="56"><span class="brand-testo notranslate" translate="no">MMA<span class="dot">•</span>Oggi</span></a>
         <ul class="nav-links">
-          <li class="nav-lottatori-wrap">
-            <a href="/" class="${active === "database" ? "active" : ""}">Lottatori</a>
-            <button type="button" class="nav-caret${espanso ? " aperto" : ""}" id="nav-caret-lottatori" aria-expanded="${espanso}" aria-controls="nav-sub-campioni nav-sub-ranking" aria-label="Altre categorie di Lottatori">▾</button>
-          </li>
-          <li class="nav-sub" id="nav-sub-campioni" ${espanso ? "" : "hidden"}><a href="campioni.html" class="${active === "campioni" ? "active" : ""}">Campioni</a></li>
-          <li class="nav-sub" id="nav-sub-ranking" ${espanso ? "" : "hidden"}><a href="ranking.html" class="${active === "ranking" ? "active" : ""}">Ranking</a></li>
+          <li><a href="/" class="${active === "database" ? "active" : ""}">Home</a></li>
+          <li><a href="lottatori.html" class="${suLottatori ? "active" : ""}">Lottatori</a></li>
           <li><a href="confronto.html" class="${active === "confronto" ? "active" : ""}">Confronto</a></li>
           <li><a href="eventi.html" class="${active === "eventi" ? "active" : ""}">Eventi</a></li>
           <li><a href="europa.html" class="${active === "europa" ? "active" : ""}">Europa</a></li>
@@ -204,15 +200,6 @@ export function renderChrome(active) {
       </div>`;
     const sel = header.querySelector("#lingua");
     if (sel) sel.addEventListener("change", () => cambiaLingua(sel.value));
-    const caret = header.querySelector("#nav-caret-lottatori");
-    if (caret) {
-      caret.addEventListener("click", () => {
-        const apri = caret.getAttribute("aria-expanded") !== "true";
-        caret.setAttribute("aria-expanded", String(apri));
-        caret.classList.toggle("aperto", apri);
-        header.querySelectorAll(".nav-sub").forEach((li) => { li.hidden = !apri; });
-      });
-    }
   }
   if (!window.__liveAvviato) {
     window.__liveAvviato = true;

@@ -154,24 +154,6 @@ h1, h2, h3, h4 {
 
 .nav-links a.nav-gauntlet.active { box-shadow: inset 0 -2px 0 var(--accent); }
 
-.nav-lottatori-wrap { display: flex; align-items: center; }
-
-.nav-caret {
-  background: none;
-  border: 0;
-  color: var(--text-secondary);
-  font-size: 10px;
-  line-height: 1;
-  padding: 10px 8px 10px 2px;
-  margin-left: -6px;
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: color 0.15s ease, transform 0.15s ease;
-}
-
-.nav-caret:hover { color: var(--text); background: var(--bg-elevated); }
-.nav-caret.aperto { color: var(--accent); transform: rotate(180deg); }
-
 .live-badge {
   display: inline-flex;
   align-items: center;
