@@ -296,12 +296,35 @@ export function badgeStreak(storico) {
 // tooltip resta bloccata aperta perche' i browser mobile non tolgono il
 // focus da un div toccando altrove: un solo listener per pagina lo fa a
 // mano, cosi' un tocco fuori dal pallino la chiude subito.
+//
+// La tooltip e' centrata sul pallino (left:50%; transform:translateX(-50%)):
+// per il primo o l'ultimo pallino di una riga vicino al bordo dello schermo
+// finisce tagliata fuori dalla viewport. Al focus/hover la riposizioniamo
+// dentro i margini invece di lasciarla sempre centrata.
+function _riposizionaTooltipPallino(e) {
+  const dot = e.target.closest?.(".dot-result");
+  const tip = dot?.querySelector(".dot-tooltip");
+  if (!tip) return;
+  tip.style.left = "";
+  tip.style.transform = "";
+  const margine = 10;
+  const r = tip.getBoundingClientRect();
+  if (r.left < margine) {
+    tip.style.left = `${margine - dot.getBoundingClientRect().left}px`;
+    tip.style.transform = "none";
+  } else if (r.right > window.innerWidth - margine) {
+    tip.style.left = `calc(50% - ${(r.right - (window.innerWidth - margine)).toFixed(0)}px)`;
+  }
+}
+
 if (!window.__dotTooltipChiudi) {
   window.__dotTooltipChiudi = true;
   document.addEventListener("touchstart", (e) => {
     const attivo = document.activeElement;
     if (attivo?.classList?.contains("dot-result") && !attivo.contains(e.target)) attivo.blur();
   });
+  document.addEventListener("focusin", _riposizionaTooltipPallino);
+  document.addEventListener("mouseover", _riposizionaTooltipPallino);
 }
 
 export function formDots(storico, n = 5) {
