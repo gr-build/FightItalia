@@ -28,10 +28,10 @@ jobs:
       - name: Installa dipendenze
         run: pip install -r requirements.txt
 
-      # Serve solo a scarica_classifiche() (ufc.com/rankings blocca le
-      # richieste dirette con un WAF): Selenium+Edge, usato per gli orari
-      # degli eventi, non ha msedgedriver disponibile su questo runner e
-      # falliva in silenzio ogni giorno lasciando le classifiche vecchie.
+      # Serve a scarica_classifiche() e scarica_orari_evento() (entrambe
+      # aprono ufc.com con un browser vero): prima usavano Selenium+Edge,
+      # ma msedgedriver non e' disponibile su questo runner e fallivano in
+      # silenzio ogni giorno, lasciando classifiche e orari vecchi.
       - name: Installa Chromium per Playwright
         run: python -m playwright install --with-deps chromium
 

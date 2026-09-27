@@ -2,7 +2,6 @@ requests>=2.34
 beautifulsoup4>=4.13
 lxml>=5.3
 pandas>=3.0
-selenium>=4.27
 playwright>=1.48
 tzdata>=2025.2
 feedparser>=6.0

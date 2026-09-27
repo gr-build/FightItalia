@@ -733,10 +733,12 @@ def _estrai_orari_da_testo(testo):
 def scarica_orari_evento(nome_evento, luogo, usa_cache=True):
     """Orario di inizio (Early Prelims/Prelims/Main Card) della card,
     nel fuso REALE della sede — non nel fuso che ufc.com indovina per chi
-    naviga (vedi commento su _FUSI_LUOGO). Richiede Selenium + Edge
-    installato. Ritorna None se la sede non e' mappata, la pagina evento
-    non esiste ancora su ufc.com, o il sito non e' raggiungibile: mai un
-    orario indovinato o sbagliato."""
+    naviga (vedi commento su _FUSI_LUOGO). Usa Playwright (non Selenium+Edge:
+    msedgedriver non e' disponibile sui runner GitHub Actions senza un passo
+    di setup dedicato, e questa funzione restava ferma in silenzio — stesso
+    bug gia' risolto in scarica_classifiche). Ritorna None se la sede non e'
+    mappata, la pagina evento non esiste ancora su ufc.com, o il sito non e'
+    raggiungibile: mai un orario indovinato o sbagliato."""
     fuso = fuso_da_luogo(luogo)
     slug = _slug_ufc_com(nome_evento)
     if not fuso or not slug:
@@ -764,30 +766,24 @@ def scarica_orari_evento(nome_evento, luogo, usa_cache=True):
         # permanente, si ritenta lo scraping sotto invece di andare in crash.
 
     try:
-        from selenium import webdriver
-        from selenium.common.exceptions import WebDriverException
-        from selenium.webdriver.common.by import By
+        from playwright.sync_api import sync_playwright
     except ImportError:
         return None
-    import time as _time
-
-    options = webdriver.EdgeOptions()
-    options.add_argument("--headless=new")
-    options.add_argument("--window-size=1400,1000")
-    try:
-        driver = webdriver.Edge(options=options)
-    except WebDriverException:
-        return None
 
     try:
-        driver.execute_cdp_cmd("Emulation.setTimezoneOverride", {"timezoneId": fuso})
-        driver.get(f"https://www.ufc.com/event/{slug}")
-        _time.sleep(5)
-        testo = driver.find_element(By.TAG_NAME, "body").text
-    except WebDriverException:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                timezone_id=fuso,
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            )
+            page = context.new_page()
+            page.goto(f"https://www.ufc.com/event/{slug}", timeout=30000, wait_until="domcontentloaded")
+            page.wait_for_timeout(5000)
+            testo = page.locator("body").inner_text()
+            browser.close()
+    except Exception:
         return None
-    finally:
-        driver.quit()
 
     risultato = _estrai_orari_da_testo(testo)
     if not risultato:

@@ -210,7 +210,7 @@ def _orari_evento_italia(nome_evento, luogo, data_evento):
 
     indicativo = False
     if not orari:
-        # ufc.com non leggibile (Selenium+Edge non c'e' su GitHub Actions,
+        # ufc.com non leggibile (Playwright non riesce a raggiungerlo,
         # o pagina evento non ancora pubblicata): meglio un orario tipico
         # dichiarato come tale che nessun orario — vedi ORARI_TIPICI.
         orari = _orari_tipici(luogo, nome_evento)
@@ -258,7 +258,7 @@ def genera_roster_e_eventi():
     eventi = eventi.assign(tipo=eventi["evento"].apply(_tipo_evento))
 
     # Orario di inizio (sede + Italia): solo per eventi futuri con card
-    # gia' annunciata su ufc.com — vedi _orari_evento_italia. Selenium apre
+    # gia' annunciata su ufc.com — vedi _orari_evento_italia. Playwright apre
     # un browser per ogni evento, quindi lo facciamo solo per il sottoinsieme
     # "programmato" (poche decine al piu', mai per gli 800 eventi passati).
     programmati = eventi["stato"] == "programmato"
@@ -575,7 +575,7 @@ def genera_classifiche(roster):
     ogni nome del roster per confronto testuale, non per slug."""
     divisioni = scarica_classifiche()
     if not divisioni:
-        print("[classifiche] ufc.com non raggiungibile (o Selenium/Edge non disponibile): classifiche non aggiornate")
+        print("[classifiche] ufc.com non raggiungibile (o Playwright/Chromium non disponibile): classifiche non aggiornate")
         return
     per_nome = {_norm_nome(r.get("nome")): r.get("slug") for r in roster.to_dict("records") if r.get("nome")}
 
