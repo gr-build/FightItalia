@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609270656";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609270711";
 
 renderChrome(null);
 
@@ -92,11 +92,27 @@ async function traduciInItaliano(testo) {
 // hanno una scheda (molti esordienti non hanno una pagina Wikipedia). La
 // riga ha comunque sempre la stessa struttura: dove il link non c'e' resta
 // una nota discreta, cosi' la card non alterna righe piene e righe vuote.
-function azioneConfronto(rigaA, rigaB) {
-  if (rigaA?.slug && rigaB?.slug) {
-    return `<a href="confronto.html?a=${rigaA.slug}&b=${rigaB.slug}" class="bout-confronto-link">Confronta →</a>`;
+// Se l'incontro ha gia' un risultato, il link porta a una pagina "del
+// match" (Confronto + il risultato vero di QUESTO incontro in cima), non
+// solo al confronto generico tra due lottatori — su richiesta di Giovanni,
+// che vuole i dati del match a portata di clic, non solo lo strumento di
+// confronto astratto.
+function azioneConfronto(rigaA, rigaB, b, contestoEvento) {
+  if (!(rigaA?.slug && rigaB?.slug)) {
+    return `<span class="bout-confronto-na">Confronto non disponibile</span>`;
   }
-  return `<span class="bout-confronto-na">Confronto non disponibile</span>`;
+  const base = `confronto.html?a=${rigaA.slug}&b=${rigaB.slug}`;
+  const haRisultato = b?.metodo && b.metodo.trim();
+  if (!haRisultato || !contestoEvento) {
+    return `<a href="${base}" class="bout-confronto-link">Confronta →</a>`;
+  }
+  const pareggio = /draw|no contest|pareggio/i.test(b.metodo);
+  const extra = new URLSearchParams({
+    evt: contestoEvento.evento || "", data: contestoEvento.data || "", luogo: contestoEvento.luogo || "",
+    cat: b.categoria || "", metodo: b.metodo, round: b.round || "", tempo: b.tempo || "",
+    vincitore: pareggio ? "" : b.fighter1, perdente: pareggio ? "" : b.fighter2,
+  });
+  return `<a href="${base}&${extra.toString()}" class="bout-confronto-link">Il match →</a>`;
 }
 
 function iniziali(nome) {
@@ -140,7 +156,7 @@ function trovaLottatore(slug, nome, roster) {
   return n ? roster.find((r) => normalizzaNome(r.nome) === n) || null : null;
 }
 
-function rigaIncontro(b, roster, posizione = "") {
+function rigaIncontro(b, roster, posizione = "", contestoEvento) {
   const haRisultato = b.metodo && b.metodo.trim();
   // Nelle tabelle risultati di Wikipedia il vincitore e' sempre a sinistra,
   // tranne pareggi e no contest.
@@ -163,17 +179,17 @@ function rigaIncontro(b, roster, posizione = "") {
         <span class="bout-vs">vs</span>
         ${latoIncontro(b.fighter2, rigaB, slugB, "b", false)}
       </div>
-      <div class="bout-foot">${esito}${azioneConfronto(rigaA, rigaB)}</div>
+      <div class="bout-foot">${esito}${azioneConfronto(rigaA, rigaB, b, contestoEvento)}</div>
     </div>`;
 }
 
 // Wikipedia elenca la main card dal main event in giu': il primo bout e'
 // il main event, il secondo il co-main — lo stesso ordine della serata.
-function sezioneCard(titolo, incontri, roster, conPosizioni = false) {
+function sezioneCard(titolo, incontri, roster, conPosizioni = false, contestoEvento) {
   if (!incontri.length) return "";
   return `
     <div class="event-group-title">${titolo}</div>
-    <div class="bout-list">${incontri.map((b, i) => rigaIncontro(b, roster, conPosizioni ? ["Main event", "Co-main event"][i] || "" : "")).join("")}</div>`;
+    <div class="bout-list">${incontri.map((b, i) => rigaIncontro(b, roster, conPosizioni ? ["Main event", "Co-main event"][i] || "" : "", contestoEvento)).join("")}</div>`;
 }
 
 async function caricaCard(link) {
@@ -261,7 +277,8 @@ async function init() {
     const early = card.filter((b) => (b.sezione || "").toLowerCase().startsWith("early"));
     const prelim = card.filter((b) => (b.sezione || "").toLowerCase().startsWith("preliminary"));
     const main = card.filter((b) => !early.includes(b) && !prelim.includes(b));
-    cardBox.innerHTML = sezioneCard("Main Card", main, rosterCompleto, true) + sezioneCard("Preliminary Card", prelim, rosterCompleto) + sezioneCard("Early Preliminary Card", early, rosterCompleto);
+    const contestoEvento = { evento: ev.evento, data: ev.data, luogo };
+    cardBox.innerHTML = sezioneCard("Main Card", main, rosterCompleto, true, contestoEvento) + sezioneCard("Preliminary Card", prelim, rosterCompleto, false, contestoEvento) + sezioneCard("Early Preliminary Card", early, rosterCompleto, false, contestoEvento);
   } else {
     cardBox.innerHTML = `<div class="empty-state">Card non ancora disponibile per questo evento.</div>`;
   }
