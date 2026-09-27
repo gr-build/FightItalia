@@ -1246,6 +1246,24 @@ h1, h2, h3, h4 {
 
 .load-more:hover { border-color: var(--accent); color: var(--accent); }
 
+.filtri-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.filtri-top .filtri-eventi { flex: 1; margin: 0; min-width: 260px; }
+
+.eventi-passati-link {
+  margin: 0;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+#titolo-passati { scroll-margin-top: 90px; }
+
 /* ---------- Tab organizzazione (Roster / Eventi) ---------- */
 
 .org-tabs {
