@@ -949,16 +949,19 @@ h1, h2, h3, h4 {
   font-size: 12px;
 }
 
-.bout-esito { color: var(--text-secondary); }
-.bout-esito.da-disputare { color: var(--text-muted); }
+/* Il risultato vero (metodo/round/tempo) e' il dato che conta: deve
+   saltare all'occhio piu' del link "Confronta", che resta un'azione
+   secondaria — prima erano invertiti (grigio il dato, rosso il link). */
+.bout-esito { color: var(--text); font-weight: 600; }
+.bout-esito.da-disputare { color: var(--text-muted); font-weight: 500; }
 
 .bout-confronto-link {
-  color: var(--accent);
-  font-weight: 600;
+  color: var(--text-secondary);
+  font-weight: 500;
   white-space: nowrap;
 }
 
-.bout-confronto-link:hover { text-decoration: underline; }
+.bout-confronto-link:hover { color: var(--accent); text-decoration: underline; }
 
 .bout-confronto-na {
   color: var(--text-muted);
