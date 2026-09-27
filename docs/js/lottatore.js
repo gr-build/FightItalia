@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto } from "./common.js?v=202609271758";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto, slugDaLink } from "./common.js?v=202609271807";
 
 renderChrome(null);
 
@@ -58,6 +58,34 @@ function pannelloComeVince(storico) {
     <div class="compare-col a" style="max-width:520px;">
       ${barraMetodiVittoria(m, pct)}
     </div>`;
+}
+
+const normalizzaNomeIncontro = (n) => (n || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+
+// Cerca il lottatore nella card di ogni evento futuro (dal piu' vicino), non
+// nel campo "risultato_recente" del roster: quel campo mischia senza uno
+// schema fisso risultati passati, ritiri e prossimi incontri (testo libero
+// di ESPN) — la card evento e' l'unica fonte affidabile per "chi, quando".
+// Su richiesta di Giovanni.
+async function trovaProssimoIncontro(nomeLottatore) {
+  const nomeNorm = normalizzaNomeIncontro(nomeLottatore);
+  const eventi = await fetchJSON("data/eventi.json").catch(() => []);
+  const prossimi = eventi
+    .filter((e) => e.stato === "programmato" && e.link)
+    .sort((a, b) => new Date(a.data) - new Date(b.data));
+  for (const ev of prossimi) {
+    const slug = slugDaLink(ev.link);
+    const card = await fetchJSON(`data/eventi/${slug}.json`).catch(() => []);
+    const bout = card.find(
+      (b) => normalizzaNomeIncontro(b.fighter1) === nomeNorm || normalizzaNomeIncontro(b.fighter2) === nomeNorm
+    );
+    if (bout) {
+      const avversario = normalizzaNomeIncontro(bout.fighter1) === nomeNorm ? bout.fighter2 : bout.fighter1;
+      const avversarioLink = normalizzaNomeIncontro(bout.fighter1) === nomeNorm ? bout.fighter2_link : bout.fighter1_link;
+      return { evento: ev, slug, avversario, avversarioSlug: avversarioLink ? slugDaLink(avversarioLink) : null, categoria: bout.categoria };
+    }
+  }
+  return null;
 }
 
 function dataItaliana(iso) {
@@ -206,6 +234,7 @@ async function init() {
           ${inf["Other names"] || rigaRoster.soprannome ? `<p style="margin-top:6px; font-style:italic; color:var(--text-secondary);">"${inf["Other names"] || rigaRoster.soprannome}"</p>` : ""}
           ${badge ? `<div style="margin-top:8px;">${badge}</div>` : ""}
           ${dataAgg ? `<p style="margin-top:10px; font-size:12px; color:var(--text-muted);">Dati aggiornati al: ${dataAgg}${dett.fonte === "ESPN" ? ` · Fonte: <a href="${dett.link}" target="_blank" rel="noopener" style="text-decoration:underline;">ESPN</a>` : ""}</p>` : ""}
+          <div id="prossimo-incontro"></div>
         </div>
         <div style="text-align:right;">
           <div style="font-family:var(--font-display); font-size:34px; color:var(--accent);">${rigaRoster.record_mma || "—"}</div>
@@ -270,6 +299,22 @@ async function init() {
     const sue = newsSu({ nome: dett.nome }, news);
     box.innerHTML = sue.slice(0, 6).map((a) => cardNewsBreve(a)).join("") || `<div class="empty-state">Nessuna notizia recente su ${dett.nome}.</div>`;
   }
+
+  // Cerca nelle card degli eventi futuri se ha gia' un incontro fissato:
+  // non blocca il resto della pagina, arriva quando arriva.
+  trovaProssimoIncontro(dett.nome).then((prossimo) => {
+    const box = document.getElementById("prossimo-incontro");
+    if (!box || !prossimo) return;
+    const data = dataItaliana(prossimo.evento.data) || prossimo.evento.data;
+    const avversarioHtml = prossimo.avversarioSlug
+      ? `<a href="lottatore.html?slug=${prossimo.avversarioSlug}">${prossimo.avversario}</a>`
+      : prossimo.avversario;
+    box.innerHTML = `
+      <div class="prossimo-incontro">
+        <span class="prossimo-incontro-tag">Prossimo incontro</span>
+        vs ${avversarioHtml} · <a href="evento.html?slug=${prossimo.slug}">${prossimo.evento.evento}</a> · ${data}
+      </div>`;
+  });
 }
 
 init();
