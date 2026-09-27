@@ -6,13 +6,13 @@
 //   - allenamento:  griglie casuali senza limiti
 // I dati (data/griglia.json) li prepara build_griglia.py.
 
-import { renderChrome, fetchJSON, SOCIAL } from "./common.js?v=202609271335";
-import { leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609271335";
+import { renderChrome, fetchJSON, SOCIAL } from "./common.js?v=202609271717";
+import { leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609271717";
 
 renderChrome("giochi");
 
 const TENTATIVI = 9;
-const INIZIO = "2026-09-25"; // griglia #1
+const INIZIO = "2026-09-27"; // griglia #1 — 27/09 e' il primo post pubblicato davvero, non il 25 (solo test interni)
 const PREFISSO_FOTO = "https://upload.wikimedia.org/wikipedia/commons/thumb/";
 const FAMIGLIE = {
   paese: "Nazionalità", divisione: "Categoria", titolo: "Titolo", numeri: "Numeri", bonus: "Bonus",
