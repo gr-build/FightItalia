@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto, slugDaLink } from "./common.js?v=202609280844";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto, slugDaLink } from "./common.js?v=202609282357";
 
 renderChrome(null);
 
@@ -197,7 +197,7 @@ async function init() {
   const out = document.getElementById("profilo");
 
   if (!slug) {
-    out.innerHTML = `<div class="empty-state">Lottatore non specificato. <a href="/">Torna al database</a>.</div>`;
+    out.innerHTML = `<div class="empty-state">Lottatore non specificato. <a href="tutti-i-lottatori.html">Cerca un lottatore</a>.</div>`;
     return;
   }
 
@@ -207,7 +207,7 @@ async function init() {
     dett = risultato.dett;
     rigaRoster = risultato.riga;
   } catch (e) {
-    out.innerHTML = `<div class="empty-state">Scheda non trovata. <a href="/">Torna al database</a>.</div>`;
+    out.innerHTML = `<div class="empty-state">Scheda non trovata. <a href="tutti-i-lottatori.html">Cerca un altro lottatore</a>.</div>`;
     return;
   }
 

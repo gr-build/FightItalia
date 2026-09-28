@@ -350,6 +350,10 @@ h1, h2, h3, h4 {
 }
 
 .search-input input:focus { border-color: var(--accent); }
+/* Pagina di ricerca dedicata: barra a tutta larghezza, e 16px perche' iOS
+   ingrandisce la pagina quando si tocca un campo con testo piu' piccolo. */
+.search-grande { flex-basis: 100%; max-width: none; }
+.search-grande input { font-size: 16px; padding: 13px 16px 13px 40px; }
 
 .pill {
   padding: 8px 14px;

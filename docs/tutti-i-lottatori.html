@@ -10,54 +10,51 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>MMA Oggi — Confronto Lottatori</title>
-<meta name="description" content="Confronta due lottatori UFC: tale of the tape, storico incontri completo e scontri diretti.">
+<title>MMA Oggi — Tutti i lottatori UFC</title>
+<meta name="description" content="Cerca tra tutti i lottatori del roster UFC: record, età, altezza e scheda completa, con filtro per categoria di peso.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="MMA Oggi">
-<meta property="og:title" content="MMA Oggi — Confronto Lottatori">
-<meta property="og:description" content="Confronta due lottatori UFC: tale of the tape, storico incontri completo e scontri diretti.">
+<meta property="og:title" content="Tutti i lottatori UFC — MMA Oggi">
+<meta property="og:description" content="Cerca tra tutti i lottatori del roster UFC: record, età, altezza e scheda completa, con filtro per categoria di peso.">
 <meta property="og:image" content="https://mmaoggi.it/og-image.png">
-<meta property="og:url" content="https://mmaoggi.it/confronto.html">
+<meta property="og:url" content="https://mmaoggi.it/tutti-i-lottatori.html">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="MMA Oggi — Confronto Lottatori">
-<meta name="twitter:description" content="Confronta due lottatori UFC: tale of the tape, storico incontri completo e scontri diretti.">
+<meta name="twitter:title" content="Tutti i lottatori UFC — MMA Oggi">
+<meta name="twitter:description" content="Cerca tra tutti i lottatori del roster UFC: record, età, altezza e scheda completa, con filtro per categoria di peso.">
 <meta name="twitter:image" content="https://mmaoggi.it/og-image.png">
-<link rel="canonical" href="https://mmaoggi.it/confronto.html">
+<link rel="canonical" href="https://mmaoggi.it/tutti-i-lottatori.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=202609282357">
 <script defer data-domain="mmaoggi.it" src="https://plausible.io/js/script.js"></script>
 </head>
-<body>
+
+<body data-pagina="lottatori">
 
 <header id="site-header" class="site-header"></header>
 
-<section class="hero">
+<section class="hero hero-gioco">
   <div class="container">
-    <h1>Tale of the <span class="accent">Tape</span></h1>
-    <p>Confronta due lottatori: statistiche fisiche, record, forma recente ed eventuali scontri diretti già disputati.</p>
+    <h1>Tutti i <span class="accent">lottatori</span></h1>
   </div>
 </section>
 
 <div class="container">
-  <div class="vs-picker">
-    <div class="autocomplete" id="picker-a">
-      <input type="text" placeholder="Cerca lottatore A...">
-      <div class="autocomplete-list"></div>
+  <div class="filter-bar">
+    <div class="search-input search-grande">
+      <span id="search-icon"></span>
+      <input id="search" type="search" placeholder="Cerca un lottatore..." autocomplete="off" enterkeyhint="search">
     </div>
-    <div class="vs-label">VS</div>
-    <div class="autocomplete" id="picker-b">
-      <input type="text" placeholder="Cerca lottatore B...">
-      <div class="autocomplete-list"></div>
-    </div>
+    <div id="category-pills" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
   </div>
 
-  <div id="risultato"></div>
+  <div class="section-title">Lottatori <span class="count" id="result-count"></span></div>
+  <div class="fighter-grid" id="fighter-grid"></div>
 </div>
 
 <footer id="site-footer" class="site-footer"></footer>
 
-<script type="module" src="js/confronto.js?v=202609282357"></script>
+<script type="module" src="js/roster.js?v=202609282357"></script>
 </body>
 </html>

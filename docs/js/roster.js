@@ -1,6 +1,7 @@
-import { fetchJSON, renderChrome, icon, debounce, fotoDi, classeFoto } from "./common.js?v=202609280844";
+import { fetchJSON, renderChrome, icon, debounce, fotoDi, classeFoto } from "./common.js?v=202609282357";
 
-renderChrome("database");
+// Gira sia in home sia in tutti-i-lottatori.html, che non ha statistiche ne' campioni in evidenza.
+renderChrome(document.body.dataset.pagina || "database");
 document.getElementById("search-icon").innerHTML = icon("search");
 
 const ORDINE_CATEGORIE = [
@@ -27,8 +28,10 @@ function nomeBreveCategoria(cat) {
 }
 
 function renderStatStrip() {
+  const strip = document.getElementById("stat-strip");
+  if (!strip) return;
   const categorie = new Set(roster.map((r) => r.categoria).filter((c) => ORDINE_CATEGORIE.includes(c)));
-  document.getElementById("stat-strip").innerHTML = `
+  strip.innerHTML = `
     <div class="stat"><div class="value">${roster.length}</div><div class="label">Lottatori</div></div>
     <div class="stat"><div class="value">${categorie.size}</div><div class="label">Categorie di peso</div></div>
   `;
@@ -134,6 +137,7 @@ async function init() {
   renderGrid();
   document.getElementById("search").addEventListener("input", debounce(renderGrid, 120));
 
+  if (!document.getElementById("in-evidenza")) return;
   const inEvidenza = ORDINE_CATEGORIE.map((cat) => roster.find((r) => r.categoria === cat && r.campione_attuale)).filter(Boolean).slice(0, 4);
   document.getElementById("in-evidenza").innerHTML = inEvidenza.map(cardEvidenza).join("");
   document.getElementById("riassunto-nota").innerHTML = `Campioni attuali per categoria — <a href="campioni.html" style="text-decoration:underline;">vedi tutti i campioni e le leggende →</a>`;
