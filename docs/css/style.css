@@ -825,6 +825,9 @@ h1, h2, h3, h4 {
 }
 
 .history-row:last-child { border-bottom: none; }
+a.history-row { color: inherit; text-decoration: none; }
+.history-row.con-scheda .opp { color: var(--text); text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+.history-row.con-scheda:hover, .history-row.con-scheda:active { background: var(--bg-elevated-2); }
 .history-row .dot-result { flex-shrink: 0; width: 22px; height: 22px; }
 
 .history-main { flex: 1 1 auto; min-width: 0; overflow: hidden; }
