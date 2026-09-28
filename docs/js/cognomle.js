@@ -1,11 +1,12 @@
 // Cognomle — il cognome del lottatore UFC del giorno, alla Wordle: 6
 // tentativi, tastiera a schermo, lettere verdi/gialle/grigie. La lunghezza
-// della griglia cambia ogni giorno in base al cognome da indovinare, e si
-// puo' provare solo un cognome che esiste davvero nel roster (stessa
-// lunghezza) — niente dizionario, il "vocabolario" e' l'elenco lottatori.
+// della griglia cambia ogni giorno in base al cognome da indovinare. Si
+// puo' scrivere qualsiasi sequenza di lettere della lunghezza giusta, non
+// serve che sia un cognome vero: come nel Wordle originale, il feedback
+// lettera per lettera funziona comunque.
 
-import { renderChrome } from "./common.js?v=202609272011";
-import { caricaLottatori, leggi, scrivi, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609272011";
+import { renderChrome } from "./common.js?v=202609280844";
+import { caricaLottatori, leggi, scrivi, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609280844";
 
 renderChrome("giochi");
 
@@ -65,7 +66,7 @@ function lottatoreDelGiorno(pool, n) {
   return ordinati[idx];
 }
 
-const TASTIERA = ["QWERTYUIOP", "ASDFGHJKL", "⏎ZXCVBNM⌫"];
+const TASTIERA = ["QWERTYUIOP", "ASDFGHJKL", "⌫ZXCVBNM⏎"];
 
 // Algoritmo classico Wordle: prima i verdi (posto giusto), poi i gialli sulle
 // lettere restanti — cosi' i doppi (es. due "S") non vengono segnati due volte.
@@ -106,10 +107,6 @@ async function init() {
   const segreto = segretoX.cognomeNorm;
   const L = segreto.length;
 
-  // Solo cognomi che esistono davvero nel roster, della stessa lunghezza,
-  // si possono provare (nessun dizionario italiano da validare).
-  const validi = new Set(arricchiti.filter((x) => x.cognomeNorm.length === L).map((x) => x.cognomeNorm));
-
   const chiave = `cognomle-${oggi}`;
   let tentativi = libero ? [] : leggi(chiave, []);
   let corrente = "";
@@ -145,12 +142,14 @@ async function init() {
 
   function disegnaTastiera() {
     const stati = statoTastiera();
+    const etichetta = { "⏎": "Invio", "⌫": "Canc" };
     tastieraEl.innerHTML = TASTIERA.map((riga) => `
       <div class="cogn-riga-tasti">
         ${[...riga].map((c) => {
           const speciale = c === "⏎" || c === "⌫";
           const cls = speciale ? "speciale" : stati[c] || "";
-          return `<button type="button" class="cogn-tasto ${cls}" data-tasto="${c}" aria-label="${c === "⏎" ? "Invio" : c === "⌫" ? "Cancella" : c}">${c}</button>`;
+          const testo = speciale ? etichetta[c] : c;
+          return `<button type="button" class="cogn-tasto ${cls}" data-tasto="${c}" aria-label="${speciale ? etichetta[c] : c}">${testo}</button>`;
         }).join("")}
       </div>`).join("");
   }
@@ -215,11 +214,6 @@ async function init() {
     if (corrente.length !== L) {
       scuoti();
       aggiorna(`Il cognome deve avere ${L} lettere.`);
-      return;
-    }
-    if (!validi.has(corrente)) {
-      scuoti();
-      aggiorna("Non è il cognome di nessun lottatore del roster.");
       return;
     }
     tentativi.push(corrente);
