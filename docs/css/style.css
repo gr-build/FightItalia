@@ -634,9 +634,6 @@ h1, h2, h3, h4 {
 .compare-col .row .k { color: var(--text-muted); }
 .compare-col .row .v { text-align: right; max-width: 65%; overflow-wrap: break-word; }
 
-.compare-col.b .row { flex-direction: row-reverse; }
-.compare-col.b .row .v { text-align: left; }
-
 .vs-divider {
   display: flex;
   align-items: flex-start;
@@ -1976,8 +1973,6 @@ h1, h2, h3, h4 {
 @media (max-width: 760px) {
   .vs-picker, .compare-grid { grid-template-columns: minmax(0, 1fr); }
   .vs-divider, .vs-picker .vs-label { padding-top: 0; }
-  .compare-col.b .row { flex-direction: row; }
-  .compare-col.b .row .v { text-align: right; }
   .compare-col.b .form-dots { flex-direction: row; }
   .event-row { grid-template-columns: 60px 1fr; }
   .event-link { grid-column: 1 / -1; justify-self: start; }
@@ -2129,6 +2124,71 @@ h1, h2, h3, h4 {
   .pom-foto { width: 76px; height: 76px; }
   .pom-valore { font-size: 26px; }
   .pom-nome { font-size: 13.5px; }
+}
+
+/* Cognomle */
+.cogn { max-width: 480px; padding-bottom: 70px; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+.cogn-info { text-align: center; font-size: 13px; color: var(--text-secondary); margin: 0; }
+
+.cogn-griglia { display: grid; grid-template-columns: repeat(var(--lettere), 1fr); gap: 6px; width: 100%; max-width: min(100%, calc(var(--lettere) * 52px)); }
+.cogn-griglia.scuoti { animation: cogn-scuoti 0.5s; }
+@keyframes cogn-scuoti {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-8px); }
+  40%, 60% { transform: translateX(8px); }
+}
+
+.cogn-riga { display: contents; }
+.cogn-cella {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-elevated);
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.cogn-cella.ok { background: rgba(47, 184, 114, 0.22); border-color: var(--win); }
+.cogn-cella.vicino { background: rgba(212, 165, 61, 0.22); border-color: var(--gold); }
+.cogn-cella.no { background: var(--bg-elevated-2); border-color: var(--border-soft); }
+
+.cogn-msg { min-height: 1em; font-size: 13px; color: var(--gold); margin: 0; text-align: center; }
+
+.cogn-tastiera { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.cogn-riga-tasti { display: flex; gap: 4px; justify-content: center; }
+.cogn-tasto {
+  flex: 1;
+  max-width: 40px;
+  padding: 12px 0;
+  border: 0;
+  border-radius: 6px;
+  background: var(--bg-elevated-2);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.cogn-tasto.speciale { max-width: 56px; font-size: 11px; }
+.cogn-tasto.ok { background: rgba(47, 184, 114, 0.4); }
+.cogn-tasto.vicino { background: rgba(212, 165, 61, 0.4); }
+.cogn-tasto.no { background: rgba(255, 255, 255, 0.06); color: var(--text-muted); }
+
+.cogn-fine { text-align: center; padding: 22px; border-radius: var(--radius); background: var(--bg-elevated); border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.cogn-fine.vinto { border-color: rgba(47, 184, 114, 0.5); }
+.cogn-fine.perso { border-color: rgba(232, 53, 47, 0.5); }
+.cogn-fine-titolo { font-family: var(--font-display); font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+.cogn-fine-nome { font-family: var(--font-display); font-size: 30px; text-transform: uppercase; }
+.cogn-fine-sub { color: var(--text-secondary); font-size: 13.5px; margin: 0; }
+
+@media (max-width: 420px) {
+  .cogn-cella { font-size: 16px; border-width: 1.5px; }
+  .cogn-tasto { padding: 10px 0; font-size: 11px; }
 }
 
 /* ---------- Ricerca eventi ---------- */
