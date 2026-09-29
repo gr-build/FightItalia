@@ -1,6 +1,14 @@
-import { fetchJSON, renderChrome, cmDaStringa, numeroDaRecord, classeRisultato, letteraRisultato, debounce, slugDaLink, formDots, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, fotoDi, classeFoto } from "./common.js?v=202609282359";
+import { fetchJSON, renderChrome, cmDaStringa, numeroDaRecord, classeRisultato, letteraRisultato, debounce, slugDaLink, formDots, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, fotoDi, classeFoto } from "./common.js?v=202609291115";
 
 renderChrome("confronto");
+
+// I nomi sopra le barre restano appiccicati sotto l'intestazione del sito (anch'essa
+// fissa): la sua altezza cambia tra telefono e computer, quindi si misura.
+function misuraHeader() {
+  const h = document.getElementById("site-header");
+  document.documentElement.style.setProperty("--header-h", `${h ? h.offsetHeight : 0}px`);
+}
+window.addEventListener("resize", misuraHeader);
 
 const ORDINE_CATEGORIE = [
   "Heavyweights (265lb, 120 kg)", "Light heavyweights (205 lb, 93 kg)", "Middleweights (185 lb, 84 kg)",
@@ -166,6 +174,10 @@ async function aggiornaConfronto() {
       ${colonna(dB, "b", scelti.b)}
     </div>
     <div class="bar-compare">
+      <div class="bar-nomi" aria-hidden="true">
+        <span class="a"><span class="n">${dA.nome}</span></span>
+        <span class="b"><span class="n">${dB.nome}</span></span>
+      </div>
       ${barraCoppia("Reach (cm)", reachA, reachB)}
       ${barraCoppia("Altezza (cm)", altezzaA, altezzaB)}
       ${barraCoppia("Vittorie", vintA, vintB)}
@@ -185,6 +197,7 @@ async function aggiornaConfronto() {
       ${colonnaStorico(dB)}
     </div>
   `;
+  misuraHeader();
 }
 
 async function init() {
