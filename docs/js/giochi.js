@@ -1,10 +1,10 @@
-import { renderChrome, traccia, SOCIAL, FORM_KEY } from "./common.js?v=202609292337";
+import { renderChrome, traccia, SOCIAL, FORM_KEY } from "./common.js?v=202609292341";
 
 renderChrome("giochi");
 
 // Feedback: un tocco sul gioco preferito. Non raccoglie nulla di personale:
 // arriva a Plausible come evento "Gioco preferito" con il nome del gioco.
-const GIOCHI = ["Griglia MMA", "Chi è?", "Più o meno", "MMA Gauntlet", "Cognomle"];
+const GIOCHI = ["Griglia MMA", "Chi è?", "Higher or Lower", "MMA Gauntlet", "Cognomle"];
 const box = document.getElementById("feedback-scelte");
 const grazie = document.getElementById("feedback-grazie");
 let votato = null;
