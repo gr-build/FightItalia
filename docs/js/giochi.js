@@ -1,4 +1,4 @@
-import { renderChrome, traccia, SOCIAL } from "./common.js?v=202609292311";
+import { renderChrome, traccia, SOCIAL, EMAIL, EMAIL_ATTIVA } from "./common.js?v=202609292332";
 
 renderChrome("giochi");
 
@@ -30,3 +30,43 @@ for (const [id, chiave] of [["fb-ig", "instagram"], ["fb-tt", "tiktok"]]) {
   if (s) document.getElementById(id).href = s.url;
 }
 disegna();
+
+// Modulo di contatto: compare solo quando la casella della redazione esiste
+// davvero (EMAIL_ATTIVA in common.js). Il sito e' statico, quindi il messaggio
+// parte verso l'email tramite FormSubmit; senza casella attiva resta l'invito
+// ai DM, cosi' nessun messaggio si perde.
+const form = document.getElementById("feedback-form");
+if (EMAIL_ATTIVA && form) {
+  form.hidden = false;
+  document.getElementById("feedback-social").hidden = true;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const esito = document.getElementById("fb-esito");
+    const bottone = document.getElementById("fb-invia");
+    if (document.getElementById("fb-honey").value) return; // e' un bot
+    const messaggio = document.getElementById("fb-msg").value.trim();
+    if (!messaggio) return;
+    bottone.disabled = true;
+    esito.textContent = "Invio in corso...";
+    try {
+      const risposta = await fetch(`https://formsubmit.co/ajax/${EMAIL}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          _subject: `MMA Oggi · ${document.getElementById("fb-tipo").value}`,
+          _template: "table",
+          messaggio,
+          email: document.getElementById("fb-mail").value.trim() || "(non indicata)",
+          pagina: location.href,
+        }),
+      });
+      if (!risposta.ok) throw new Error(String(risposta.status));
+      esito.textContent = "Grazie! Il messaggio è arrivato.";
+      form.reset();
+      traccia("Feedback inviato", { tipo: document.getElementById("fb-tipo").value });
+    } catch (err) {
+      esito.textContent = "Non sono riuscito a inviarlo. Riprova tra poco, oppure scrivici in DM su Instagram.";
+    }
+    bottone.disabled = false;
+  });
+}

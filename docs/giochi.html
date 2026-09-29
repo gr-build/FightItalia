@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=202609292311">
+<link rel="stylesheet" href="css/style.css?v=202609292332">
 <script defer data-domain="mmaoggi.it" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
@@ -79,11 +79,27 @@
     <p>Quale gioco ti è piaciuto di più? Un tocco e ci dici quello giusto: sono i giochi più amati a ricevere le novità.</p>
     <div class="feedback-scelte" id="feedback-scelte"></div>
     <p class="feedback-grazie" id="feedback-grazie" role="status"></p>
-    <p class="feedback-scrivici">Hai un'idea, un errore da segnalare o un gioco che vorresti? Scrivici in DM su <a id="fb-ig" href="#" target="_blank" rel="noopener">Instagram</a> o <a id="fb-tt" href="#" target="_blank" rel="noopener">TikTok</a>.</p>
+    <form class="feedback-form" id="feedback-form" hidden>
+      <label for="fb-tipo">Di cosa vuoi parlarci?</label>
+      <select id="fb-tipo" name="tipo">
+        <option>Un'idea o un gioco che vorrei</option>
+        <option>Un errore da segnalare</option>
+        <option>Altro</option>
+      </select>
+      <label for="fb-msg">Il tuo messaggio</label>
+      <textarea id="fb-msg" name="messaggio" rows="4" maxlength="1500" required placeholder="Scrivi qui, anche in due righe."></textarea>
+      <label for="fb-mail">La tua email <span>(solo se vuoi una risposta)</span></label>
+      <input id="fb-mail" name="email" type="email" autocomplete="email" placeholder="nome@esempio.it">
+      <input type="text" name="_honey" id="fb-honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;">
+      <button type="submit" class="btn-gioco" id="fb-invia">Invia</button>
+      <p class="feedback-esito" id="fb-esito" role="status"></p>
+      <p class="feedback-privacy">Il messaggio arriva alla redazione via email. Non usiamo cookie e non conserviamo altro.</p>
+    </form>
+    <p class="feedback-scrivici" id="feedback-social">Hai un'idea o un errore da segnalare? Scrivici in DM su <a id="fb-ig" href="#" target="_blank" rel="noopener">Instagram</a> o <a id="fb-tt" href="#" target="_blank" rel="noopener">TikTok</a>.</p>
   </section>
 </div>
 <footer id="site-footer" class="site-footer"></footer>
 
-<script type="module" src="js/giochi.js?v=202609292311"></script>
+<script type="module" src="js/giochi.js?v=202609292332"></script>
 </body>
 </html>

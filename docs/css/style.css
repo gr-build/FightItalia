@@ -2493,3 +2493,13 @@ a.rank-row:hover { color: var(--accent); }
 .feedback-grazie { min-height: 1.4em; color: var(--gold) !important; margin-bottom: 8px !important; }
 .feedback-scrivici { margin-bottom: 0 !important; }
 .feedback-scrivici a { color: var(--accent); text-decoration: underline; }
+.feedback-form { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 14px; max-width: 520px; }
+.feedback-form label { font-size: 13px; color: var(--text-secondary); }
+.feedback-form label span { color: var(--text-muted); }
+.feedback-form select, .feedback-form textarea, .feedback-form input[type="email"] {
+  width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg); color: inherit; font: inherit; font-size: 15px;
+}
+.feedback-form button { align-self: flex-start; margin-top: 4px; cursor: pointer; }
+.feedback-esito { min-height: 1.4em; color: var(--gold) !important; margin: 0 !important; }
+.feedback-privacy { font-size: 12px !important; color: var(--text-muted) !important; margin: 0 !important; }
