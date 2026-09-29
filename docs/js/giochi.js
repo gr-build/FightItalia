@@ -1,4 +1,4 @@
-import { renderChrome, traccia, SOCIAL, EMAIL, EMAIL_ATTIVA } from "./common.js?v=202609292332";
+import { renderChrome, traccia, SOCIAL, FORM_KEY } from "./common.js?v=202609292337";
 
 renderChrome("giochi");
 
@@ -31,12 +31,11 @@ for (const [id, chiave] of [["fb-ig", "instagram"], ["fb-tt", "tiktok"]]) {
 }
 disegna();
 
-// Modulo di contatto: compare solo quando la casella della redazione esiste
-// davvero (EMAIL_ATTIVA in common.js). Il sito e' statico, quindi il messaggio
-// parte verso l'email tramite FormSubmit; senza casella attiva resta l'invito
+// Modulo di contatto: compare solo quando in common.js c'e' la chiave FORM_KEY. Il sito e' statico, quindi il messaggio
+// parte verso l'email tramite Web3Forms; senza casella attiva resta l'invito
 // ai DM, cosi' nessun messaggio si perde.
 const form = document.getElementById("feedback-form");
-if (EMAIL_ATTIVA && form) {
+if (FORM_KEY && form) {
   form.hidden = false;
   document.getElementById("feedback-social").hidden = true;
   form.addEventListener("submit", async (e) => {
@@ -49,18 +48,21 @@ if (EMAIL_ATTIVA && form) {
     bottone.disabled = true;
     esito.textContent = "Invio in corso...";
     try {
-      const risposta = await fetch(`https://formsubmit.co/ajax/${EMAIL}`, {
+      const mail = document.getElementById("fb-mail").value.trim();
+      const risposta = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
-          _subject: `MMA Oggi · ${document.getElementById("fb-tipo").value}`,
-          _template: "table",
-          messaggio,
-          email: document.getElementById("fb-mail").value.trim() || "(non indicata)",
-          pagina: location.href,
+          access_key: FORM_KEY,
+          subject: `MMA Oggi · ${document.getElementById("fb-tipo").value}`,
+          from_name: "Modulo mmaoggi.it",
+          message: `${messaggio}\n\nPagina: ${location.href}`,
+          ...(mail ? { email: mail } : {}),
+          botcheck: "",
         }),
       });
-      if (!risposta.ok) throw new Error(String(risposta.status));
+      const esitoJson = await risposta.json().catch(() => ({}));
+      if (!risposta.ok || esitoJson.success === false) throw new Error(String(risposta.status));
       esito.textContent = "Grazie! Il messaggio è arrivato.";
       form.reset();
       traccia("Feedback inviato", { tipo: document.getElementById("fb-tipo").value });

@@ -174,6 +174,9 @@ export function classeFoto(url) {
 // (EMAIL_ATTIVA = true quando redazione@mmaoggi.it arriva davvero).
 export const EMAIL = "redazione@mmaoggi.it";
 export const EMAIL_ATTIVA = false;
+// Chiave pubblica di Web3Forms (web3forms.com): fa arrivare i messaggi del modulo
+// alla casella scelta senza scrivere l'indirizzo nel sito. Vuota = modulo nascosto.
+export const FORM_KEY = "";
 
 // Profili social di MMA Oggi (pagina seguici.html, piede del sito, fine dei giochi).
 export const SOCIAL = [

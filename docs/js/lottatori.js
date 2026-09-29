@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome } from "./common.js?v=202609292332";
+import { fetchJSON, renderChrome } from "./common.js?v=202609292337";
 
 renderChrome("lottatori");
 
