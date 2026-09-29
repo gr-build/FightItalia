@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto, slugDaLink } from "./common.js?v=202609280844";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto, slugDaLink } from "./common.js?v=202609282359";
 
 renderChrome(null);
 
@@ -7,17 +7,38 @@ let extra = []; // extra-lottatori.json: chi compare in una card evento ma non n
 let dettCorrente = null;
 let rigaCorrente = null;
 
-function rigaStorico(f) {
+// Nome avversario -> slug della sua scheda. Prima il roster, poi gli extra:
+// alcuni lottatori stanno in entrambi con slug diversi ("marlon-vera" e
+// "marlon-vera-fighter"), vince il roster. Un nome con piu' slug nello stesso
+// elenco e' un omonimo vero: niente link piuttosto che la scheda sbagliata.
+function mappaSchede() {
+  const mappa = new Map();
+  for (const elenco of [roster, extra]) {
+    const qui = new Map();
+    for (const r of elenco) {
+      if (!r.slug || !r.nome) continue;
+      const k = normalizzaNomeIncontro(r.nome);
+      qui.set(k, qui.has(k) && qui.get(k) !== r.slug ? null : r.slug);
+    }
+    for (const [k, slug] of qui) if (!mappa.has(k)) mappa.set(k, slug);
+  }
+  return mappa;
+}
+
+function rigaStorico(f, schede) {
   const meta = [f.method, f.event].filter(Boolean).join(" · ");
+  const slug = f.opponent ? schede.get(normalizzaNomeIncontro(f.opponent)) : null;
+  const tag = slug ? "a" : "div";
+  const attr = slug ? ` href="lottatore.html?slug=${slug}"` : "";
   return `
-    <div class="history-row">
+    <${tag} class="history-row${slug ? " con-scheda" : ""}"${attr}>
       <div class="dot-result ${classeRisultato(f["res."])}">${letteraRisultato(f["res."])}</div>
       <div class="history-main">
         <div class="opp">${f.opponent || "—"}</div>
         ${meta ? `<div class="meta">${meta}</div>` : ""}
       </div>
       <div class="history-date">${f.date || ""}</div>
-    </div>`;
+    </${tag}>`;
 }
 
 function campoInfobox(k, v) {
@@ -197,7 +218,7 @@ async function init() {
   const out = document.getElementById("profilo");
 
   if (!slug) {
-    out.innerHTML = `<div class="empty-state">Lottatore non specificato. <a href="/">Torna al database</a>.</div>`;
+    out.innerHTML = `<div class="empty-state">Lottatore non specificato. <a href="tutti-i-lottatori.html">Cerca un lottatore</a>.</div>`;
     return;
   }
 
@@ -207,7 +228,7 @@ async function init() {
     dett = risultato.dett;
     rigaRoster = risultato.riga;
   } catch (e) {
-    out.innerHTML = `<div class="empty-state">Scheda non trovata. <a href="/">Torna al database</a>.</div>`;
+    out.innerHTML = `<div class="empty-state">Scheda non trovata. <a href="tutti-i-lottatori.html">Cerca un altro lottatore</a>.</div>`;
     return;
   }
 
@@ -216,6 +237,7 @@ async function init() {
 
   const inf = dett.infobox || {};
   const storico = dett.storico || [];
+  const schede = mappaSchede();
   const categoria = (inf["Division"] || rigaRoster.categoria || "").replace(/\s*\([^)]*\)/, "");
   const foto = fotoDi(rigaRoster) || inf["_immagine"];
   const badge = rigaRoster.campione_attuale
@@ -271,7 +293,7 @@ async function init() {
 
     <div class="section-title">Storico Incontri <span class="count">(${storico.length})</span></div>
     <div class="history-list" style="max-width:640px; max-height:600px;">
-      ${storico.length ? storico.map(rigaStorico).join("") : `<div class="empty-state">Storico non disponibile.</div>`}
+      ${storico.length ? storico.map((f) => rigaStorico(f, schede)).join("") : `<div class="empty-state">Storico non disponibile.</div>`}
     </div>
   `;
 

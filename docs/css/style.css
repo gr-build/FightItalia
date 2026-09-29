@@ -350,6 +350,10 @@ h1, h2, h3, h4 {
 }
 
 .search-input input:focus { border-color: var(--accent); }
+/* Pagina di ricerca dedicata: barra a tutta larghezza, e 16px perche' iOS
+   ingrandisce la pagina quando si tocca un campo con testo piu' piccolo. */
+.search-grande { flex-basis: 100%; max-width: none; }
+.search-grande input { font-size: 16px; padding: 13px 16px 13px 40px; }
 
 .pill {
   padding: 8px 14px;
@@ -821,6 +825,9 @@ h1, h2, h3, h4 {
 }
 
 .history-row:last-child { border-bottom: none; }
+a.history-row { color: inherit; text-decoration: none; }
+.history-row.con-scheda .opp { color: var(--text); text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+.history-row.con-scheda:hover, .history-row.con-scheda:active { background: var(--bg-elevated-2); }
 .history-row .dot-result { flex-shrink: 0; width: 22px; height: 22px; }
 
 .history-main { flex: 1 1 auto; min-width: 0; overflow: hidden; }
@@ -2157,6 +2164,9 @@ h1, h2, h3, h4 {
 .cogn-cella.ok { background: rgba(47, 184, 114, 0.28); border-color: var(--win); }
 .cogn-cella.vicino { background: rgba(212, 165, 61, 0.28); border-color: var(--gold); }
 .cogn-cella.no { background: var(--bg-elevated-2); border-color: var(--border-soft); }
+/* Dopo una particella (es. "da" in "da Silva"): spazio visivo in piu' tra le
+   celle, cosi' si legge "DA · SILVA" e non "DASILVA" tutto attaccato. */
+.cogn-cella-sep { margin-right: 12px; }
 
 .cogn-msg { min-height: 1em; font-size: 13px; color: var(--gold); margin: 0; text-align: center; }
 

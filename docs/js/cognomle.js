@@ -5,8 +5,8 @@
 // serve che sia un cognome vero: come nel Wordle originale, il feedback
 // lettera per lettera funziona comunque.
 
-import { renderChrome } from "./common.js?v=202609280844";
-import { caricaLottatori, leggi, scrivi, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609280844";
+import { renderChrome } from "./common.js?v=202609282359";
+import { caricaLottatori, leggi, scrivi, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609282359";
 
 renderChrome("giochi");
 
@@ -22,14 +22,18 @@ const PARTICELLE = new Set(["de", "du", "da", "dos", "das", "von"]);
 const FAMIGLIA_PRIMA = new Set(["Corea del Sud", "Cina"]);
 const SUFFISSI = /^(jr\.?|sr\.?|ii|iii|iv)$/i;
 
+// Ritorna anche la particella a parte (es. "da"), cosi' chi disegna la
+// griglia sa dopo quante lettere mettere uno spacer visivo: "DASILVA" tutto
+// attaccato si legge come una parola sola, non come "da" + "Silva".
 function cognome(x) {
   const parole = x.n.replace(/\*/g, "").trim().split(/\s+/);
   while (parole.length > 1 && SUFFISSI.test(parole[parole.length - 1])) parole.pop();
-  if (FAMIGLIA_PRIMA.has(x.p)) return parole[0];
+  if (FAMIGLIA_PRIMA.has(x.p)) return { testo: parole[0], particella: "" };
   if (parole.length >= 2 && PARTICELLE.has(parole[parole.length - 2].toLowerCase())) {
-    return `${parole[parole.length - 2]} ${parole[parole.length - 1]}`;
+    const particella = parole[parole.length - 2];
+    return { testo: `${particella} ${parole[parole.length - 1]}`, particella };
   }
-  return parole[parole.length - 1];
+  return { testo: parole[parole.length - 1], particella: "" };
 }
 
 // Accenti, trattini e apostrofi via: si gioca solo con A-Z, altrimenti su
@@ -95,7 +99,10 @@ function quadratini(tentativi, segreto) {
 
 async function init() {
   const tutti = await caricaLottatori();
-  const arricchiti = tutti.map((x) => ({ ...x, cognomeNorm: normalizza(cognome(x)) }));
+  const arricchiti = tutti.map((x) => {
+    const { testo, particella } = cognome(x);
+    return { ...x, cognomeNorm: normalizza(testo), spacerDopo: particella ? normalizza(particella).length : 0 };
+  });
 
   const conteggi = new Map();
   for (const x of arricchiti) conteggi.set(x.cognomeNorm.length, (conteggi.get(x.cognomeNorm.length) || 0) + 1);
@@ -106,6 +113,7 @@ async function init() {
   const segretoX = libero ? pool[Math.floor(Math.random() * pool.length)] : lottatoreDelGiorno(pool, n);
   const segreto = segretoX.cognomeNorm;
   const L = segreto.length;
+  const spacerDopo = segretoX.spacerDopo; // indice (1-based) dell'ultima lettera della particella, 0 se non c'e'
 
   const chiave = `cognomle-${oggi}`;
   let tentativi = libero ? [] : leggi(chiave, []);
@@ -161,7 +169,7 @@ async function init() {
       const inCorso = r === tentativi.length && !fin;
       const lettereRiga = t ? [...t] : [...(inCorso ? corrente : "").padEnd(L, " ")];
       const stati = t ? valutaTentativo(t, segreto) : new Array(L).fill("");
-      righe.push(`<div class="cogn-riga">${lettereRiga.map((c, i) => `<div class="cogn-cella ${stati[i] || ""}">${c.trim()}</div>`).join("")}</div>`);
+      righe.push(`<div class="cogn-riga">${lettereRiga.map((c, i) => `<div class="cogn-cella ${stati[i] || ""} ${i === spacerDopo - 1 ? "cogn-cella-sep" : ""}">${c.trim()}</div>`).join("")}</div>`);
     }
     griglia.innerHTML = righe.join("");
   }
