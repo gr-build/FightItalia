@@ -7,7 +7,15 @@
 export function traccia(nome, props) {
   try {
     window.plausible = window.plausible || function () { (window.plausible.q = window.plausible.q || []).push(arguments); };
-    window.plausible(nome, { props });
+    // Plausible distingue maiuscole e minuscole nei nomi delle proprieta': le mando
+    // in entrambe le forme ("lottatore" e "Lottatore"), quelle non registrate
+    // nel cruscotto vengono semplicemente ignorate.
+    const doppie = {};
+    for (const [k, v] of Object.entries(props || {})) {
+      doppie[k] = v;
+      doppie[k.charAt(0).toUpperCase() + k.slice(1)] = v;
+    }
+    window.plausible(nome, { props: doppie });
   } catch (e) { /* le statistiche non devono mai rompere la pagina */ }
 }
 
