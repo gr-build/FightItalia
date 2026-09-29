@@ -1,5 +1,5 @@
-import { renderChrome } from "./common.js?v=202609292346";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202609292346";
+import { renderChrome } from "./common.js?v=202609292348";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202609292348";
 
 renderChrome("europa");
 

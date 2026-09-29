@@ -2506,8 +2506,11 @@ a.rank-row:hover { color: var(--accent); }
 
 /* Feedback in fondo a ogni pagina */
 .footer-feedback { margin: 0 0 18px; }
-.footer-feedback summary { cursor: pointer; color: var(--accent); font-weight: 600; font-size: 14px; list-style: none; }
-.footer-feedback summary::-webkit-details-marker { display: none; }
-.footer-feedback summary::after { content: " +"; }
-.footer-feedback[open] summary::after { content: " −"; }
+.footer-feedback-riga { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; }
+.ff-apri { background: none; border: 0; padding: 0; font: inherit; cursor: pointer; color: var(--accent); font-weight: 600; font-size: 14px; }
+.ff-stelle { display: inline-flex; gap: 2px; }
+.ff-stella { background: none; border: 0; padding: 2px 3px; font-size: 24px; line-height: 1; cursor: pointer; color: var(--text-muted); }
+.ff-stella.piena { color: var(--gold); }
+.ff-stella:hover { color: var(--gold); }
+.ff-invito { margin: 8px 0 0; color: var(--gold); font-size: 13.5px; }
 .footer-feedback-corpo { margin-top: 12px; }

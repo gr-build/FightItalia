@@ -6,8 +6,8 @@
 //   - allenamento:  griglie casuali senza limiti
 // I dati (data/griglia.json) li prepara build_griglia.py.
 
-import { renderChrome, fetchJSON, SOCIAL } from "./common.js?v=202609292346";
-import { leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609292346";
+import { renderChrome, fetchJSON, SOCIAL } from "./common.js?v=202609292348";
+import { leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609292348";
 
 renderChrome("giochi");
 

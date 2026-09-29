@@ -228,14 +228,45 @@ export function renderChrome(active) {
   if (footer) {
     footer.innerHTML = `
       <div class="container">
-        ${document.getElementById("feedback-modulo") ? "" : `<details class="footer-feedback"><summary>Aiutaci a migliorare</summary><div class="footer-feedback-corpo"></div></details>`}
+        <div class="footer-feedback">
+          <div class="footer-feedback-riga">
+            <button type="button" class="ff-apri" aria-expanded="false">Aiutaci a migliorare <span>+</span></button>
+            <span class="ff-stelle" role="group" aria-label="Dai un voto da 1 a 5 stelle">${[1, 2, 3, 4, 5].map((s) => `<button type="button" class="ff-stella" data-stelle="${s}" aria-label="${s} ${s === 1 ? "stella" : "stelle"}">★</button>`).join("")}</span>
+          </div>
+          <p class="ff-invito" hidden></p>
+          <div class="footer-feedback-corpo" hidden></div>
+        </div>
         <div class="footer-social"><span>Segui MMA Oggi</span>${linkSocial()}<a class="social-link" href="seguici.html"><span class="social-nome">Contatti</span></a></div>
         <p style="margin:0 0 6px;">I dati riportati hanno scopo informativo e statistico; non costituiscono consiglio di scommessa. Gioca responsabilmente.</p>
         <p style="margin:0 0 6px;">MMA Oggi — statistiche e confronti sugli sport da combattimento. Dati e immagini da Wikipedia (licenza CC BY-SA), aggiornati periodicamente. In Italia gli eventi UFC si seguono in streaming legale su discovery+ (e in parte su Eurosport).</p>
         <p style="margin:0; font-size:11.5px; color:var(--text-muted);">MMA Oggi è un progetto indipendente, non affiliato né sponsorizzato da UFC o Zuffa, LLC.</p>
       </div>`;
-    const det = footer.querySelector(".footer-feedback");
-    if (det) det.addEventListener("toggle", () => { if (det.open) montaFeedback(det.querySelector(".footer-feedback-corpo")); });
+    const ff = footer.querySelector(".footer-feedback");
+    const corpo = ff.querySelector(".footer-feedback-corpo");
+    const apri = ff.querySelector(".ff-apri");
+    const invito = ff.querySelector(".ff-invito");
+    let stelle = 0;
+    try { stelle = Number(localStorage.getItem("voto-sito")) || 0; } catch (e) { /* senza memoria locale va bene lo stesso */ }
+    const coloraStelle = () => ff.querySelectorAll(".ff-stella").forEach((b) => b.classList.toggle("piena", Number(b.dataset.stelle) <= stelle));
+    const mostra = (aperto) => {
+      corpo.hidden = !aperto;
+      apri.setAttribute("aria-expanded", String(aperto));
+      apri.querySelector("span").textContent = aperto ? "−" : "+";
+      if (aperto) montaFeedback(corpo, () => stelle);
+    };
+    apri.addEventListener("click", () => mostra(corpo.hidden));
+    ff.querySelector(".ff-stelle").addEventListener("click", (e) => {
+      const b = e.target.closest(".ff-stella");
+      if (!b) return;
+      stelle = Number(b.dataset.stelle);
+      try { localStorage.setItem("voto-sito", String(stelle)); } catch (err) { /* ignora */ }
+      traccia("Valutazione", { stelle: String(stelle) });
+      coloraStelle();
+      invito.hidden = false;
+      invito.textContent = `Grazie per le ${stelle} ${stelle === 1 ? "stella" : "stelle"}! Vuoi dirci cosa migliorare? Manda un feedback.`;
+      mostra(true);
+    });
+    coloraStelle();
   }
 }
 
@@ -243,7 +274,7 @@ export function renderChrome(active) {
 // Giochi. Il messaggio parte via Web3Forms verso la casella della redazione;
 // senza FORM_KEY (o senza rete) resta l'invito ai DM.
 let contaModuli = 0;
-export function montaFeedback(box) {
+export function montaFeedback(box, stelleDi = () => 0) {
   if (!box || box.dataset.pronto) return;
   box.dataset.pronto = "1";
   const n = ++contaModuli;
@@ -290,7 +321,7 @@ export function montaFeedback(box) {
           access_key: FORM_KEY,
           subject: `MMA Oggi · ${form.elements.tipo.value}`,
           from_name: "Modulo mmaoggi.it",
-          message: `${messaggio}\n\nPagina: ${location.href}`,
+          message: `${messaggio}${stelleDi() ? `\n\nVoto: ${stelleDi()}/5` : ""}\n\nPagina: ${location.href}`,
           ...(mail ? { email: mail } : {}),
           botcheck: "",
         }),
