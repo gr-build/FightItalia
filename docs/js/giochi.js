@@ -1,4 +1,4 @@
-import { renderChrome, traccia, SOCIAL, FORM_KEY } from "./common.js?v=202609292341";
+import { renderChrome, traccia, SOCIAL, FORM_KEY } from "./common.js?v=202609292343";
 
 renderChrome("giochi");
 

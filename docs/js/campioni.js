@@ -1,5 +1,5 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, newsSu, cardNewsBreve, fotoDi, classeFoto } from "./common.js?v=202609292341";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202609292341";
+import { fetchJSON, renderChrome, icon, slugDaLink, newsSu, cardNewsBreve, fotoDi, classeFoto } from "./common.js?v=202609292343";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202609292343";
 
 renderChrome("campioni");
 
