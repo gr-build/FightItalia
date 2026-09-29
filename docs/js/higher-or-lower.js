@@ -1,8 +1,8 @@
 // "Piu' o meno": due lottatori, una statistica. Il secondo ne ha di piu' o
 // di meno del primo? Una risposta sbagliata e la serie finisce.
 
-import { renderChrome } from "./common.js?v=202609292343";
-import { caricaLottatori, leggi, scrivi, iniziali, condividi, SITO, bandiera } from "./giochi-comuni.js?v=202609292343";
+import { renderChrome } from "./common.js?v=202609292345";
+import { caricaLottatori, leggi, scrivi, iniziali, condividi, SITO, bandiera } from "./giochi-comuni.js?v=202609292345";
 
 renderChrome("giochi");
 
@@ -84,7 +84,7 @@ function rispondi(scelta) {
     }, 1100);
     return;
   }
-  const testo = `MMA Oggi · Higher or Lower: serie di ${serie} 🥊\nMi batti? ${SITO}piu-o-meno.html`;
+  const testo = `MMA Oggi · Higher or Lower: serie di ${serie} 🥊\nMi batti? ${SITO}higher-or-lower.html`;
   document.getElementById("pom-esito").innerHTML = `
     <div class="chie-fine perso">
       <div class="chie-fine-titolo">Serie finita: ${serie}</div>

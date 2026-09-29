@@ -46,7 +46,7 @@ PAGINE_STATICHE = [
     ("seguici.html", "monthly", "0.4"),
     ("chi-e.html", "daily", "0.7"),
     ("cognomle.html", "daily", "0.7"),
-    ("piu-o-meno.html", "monthly", "0.6"),
+    ("higher-or-lower.html", "monthly", "0.6"),
     ("gauntlet.html", "monthly", "0.6"),
 ]
 
