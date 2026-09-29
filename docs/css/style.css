@@ -2503,3 +2503,11 @@ a.rank-row:hover { color: var(--accent); }
 .feedback-form button { align-self: flex-start; margin-top: 4px; cursor: pointer; }
 .feedback-esito { min-height: 1.4em; color: var(--gold) !important; margin: 0 !important; }
 .feedback-privacy { font-size: 12px !important; color: var(--text-muted) !important; margin: 0 !important; }
+
+/* Feedback in fondo a ogni pagina */
+.footer-feedback { margin: 0 0 18px; }
+.footer-feedback summary { cursor: pointer; color: var(--accent); font-weight: 600; font-size: 14px; list-style: none; }
+.footer-feedback summary::-webkit-details-marker { display: none; }
+.footer-feedback summary::after { content: " +"; }
+.footer-feedback[open] summary::after { content: " −"; }
+.footer-feedback-corpo { margin-top: 12px; }

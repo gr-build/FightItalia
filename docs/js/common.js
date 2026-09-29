@@ -228,12 +228,83 @@ export function renderChrome(active) {
   if (footer) {
     footer.innerHTML = `
       <div class="container">
+        ${document.getElementById("feedback-modulo") ? "" : `<details class="footer-feedback"><summary>Aiutaci a migliorare</summary><div class="footer-feedback-corpo"></div></details>`}
         <div class="footer-social"><span>Segui MMA Oggi</span>${linkSocial()}<a class="social-link" href="seguici.html"><span class="social-nome">Contatti</span></a></div>
         <p style="margin:0 0 6px;">I dati riportati hanno scopo informativo e statistico; non costituiscono consiglio di scommessa. Gioca responsabilmente.</p>
         <p style="margin:0 0 6px;">MMA Oggi — statistiche e confronti sugli sport da combattimento. Dati e immagini da Wikipedia (licenza CC BY-SA), aggiornati periodicamente. In Italia gli eventi UFC si seguono in streaming legale su discovery+ (e in parte su Eurosport).</p>
         <p style="margin:0; font-size:11.5px; color:var(--text-muted);">MMA Oggi è un progetto indipendente, non affiliato né sponsorizzato da UFC o Zuffa, LLC.</p>
       </div>`;
+    const det = footer.querySelector(".footer-feedback");
+    if (det) det.addEventListener("toggle", () => { if (det.open) montaFeedback(det.querySelector(".footer-feedback-corpo")); });
   }
+}
+
+// Modulo "Aiutaci a migliorare": lo stesso in fondo a ogni pagina e nella pagina
+// Giochi. Il messaggio parte via Web3Forms verso la casella della redazione;
+// senza FORM_KEY (o senza rete) resta l'invito ai DM.
+let contaModuli = 0;
+export function montaFeedback(box) {
+  if (!box || box.dataset.pronto) return;
+  box.dataset.pronto = "1";
+  const n = ++contaModuli;
+  const social = (id) => (SOCIAL.find((x) => x.id === id) || {}).url || "#";
+  const dm = `<p class="feedback-scrivici">Puoi anche scriverci in DM su <a href="${social("instagram")}" target="_blank" rel="noopener">Instagram</a> o <a href="${social("tiktok")}" target="_blank" rel="noopener">TikTok</a>.</p>`;
+  if (!FORM_KEY) {
+    box.innerHTML = `<p class="feedback-scrivici">Hai un'idea, un errore o qualcosa che non ti piace? Scrivici in DM su <a href="${social("instagram")}" target="_blank" rel="noopener">Instagram</a> o <a href="${social("tiktok")}" target="_blank" rel="noopener">TikTok</a>.</p>`;
+    return;
+  }
+  box.innerHTML = `
+    <form class="feedback-form">
+      <label for="fb-tipo-${n}">Di cosa vuoi parlarci?</label>
+      <select id="fb-tipo-${n}" name="tipo">
+        <option>Un'idea o un gioco che vorrei</option>
+        <option>Un errore da segnalare</option>
+        <option>Qualcosa che non mi piace</option>
+        <option>Altro</option>
+      </select>
+      <label for="fb-msg-${n}">Il tuo messaggio</label>
+      <textarea id="fb-msg-${n}" name="messaggio" rows="4" maxlength="1500" required placeholder="Scrivi qui, anche in due righe."></textarea>
+      <label for="fb-mail-${n}">La tua email <span>(solo se vuoi una risposta)</span></label>
+      <input id="fb-mail-${n}" name="email" type="email" autocomplete="email" placeholder="nome@esempio.it">
+      <input type="text" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;">
+      <button type="submit" class="btn-gioco">Invia</button>
+      <p class="feedback-esito" role="status"></p>
+      <p class="feedback-privacy">Il messaggio arriva alla redazione via email (servizio Web3Forms). Non usiamo cookie e non conserviamo altro.</p>
+    </form>${dm}`;
+  const form = box.querySelector("form");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const esito = form.querySelector(".feedback-esito");
+    const bottone = form.querySelector("button");
+    if (form.elements.botcheck.value) return; // e' un bot
+    const messaggio = form.elements.messaggio.value.trim();
+    if (!messaggio) return;
+    bottone.disabled = true;
+    esito.textContent = "Invio in corso...";
+    try {
+      const mail = form.elements.email.value.trim();
+      const risposta = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: FORM_KEY,
+          subject: `MMA Oggi · ${form.elements.tipo.value}`,
+          from_name: "Modulo mmaoggi.it",
+          message: `${messaggio}\n\nPagina: ${location.href}`,
+          ...(mail ? { email: mail } : {}),
+          botcheck: "",
+        }),
+      });
+      const esitoJson = await risposta.json().catch(() => ({}));
+      if (!risposta.ok || esitoJson.success === false) throw new Error(String(risposta.status));
+      esito.textContent = "Grazie! Il messaggio è arrivato.";
+      traccia("Feedback inviato", { tipo: form.elements.tipo.value });
+      form.reset();
+    } catch (err) {
+      esito.textContent = "Non sono riuscito a inviarlo. Riprova tra poco, oppure scrivici in DM.";
+    }
+    bottone.disabled = false;
+  });
 }
 
 async function aggiornaLive() {
