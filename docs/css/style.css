@@ -711,6 +711,31 @@ h1, h2, h3, h4 {
 
 .bar-compare { margin-top: 32px; }
 
+/* Nomi sopra le barre, fissi sotto l'intestazione: scorrendo le barre si sa sempre
+   chi e' rosso e chi e' oro senza tornare su. */
+.bar-nomi {
+  position: sticky;
+  top: var(--header-h, 0px);
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 8px 0;
+  margin-bottom: 14px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-soft);
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.bar-nomi > span { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.bar-nomi > span::before { content: ""; flex: none; width: 10px; height: 10px; border-radius: 50%; }
+.bar-nomi .a::before { background: var(--accent); }
+.bar-nomi .b::before { background: var(--gold); }
+.bar-nomi .b { flex-direction: row-reverse; text-align: right; }
+.bar-nomi .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 .bar-compare .metric { margin-bottom: 18px; }
 
 .bar-compare .metric .label {
