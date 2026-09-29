@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, cmDaStringa, numeroDaRecord, classeRisultato, letteraRisultato, debounce, slugDaLink, formDots, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, fotoDi, classeFoto } from "./common.js?v=202609291115";
+import { fetchJSON, renderChrome, cmDaStringa, numeroDaRecord, classeRisultato, letteraRisultato, debounce, slugDaLink, formDots, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, fotoDi, classeFoto, traccia } from "./common.js?v=202609292310";
 
 renderChrome("confronto");
 
@@ -144,6 +144,7 @@ function testaATesta(dettA, dettB) {
   return box.outerHTML;
 }
 
+let ultimaCoppia = "";
 async function aggiornaConfronto() {
   const out = document.getElementById("risultato");
   if (!scelti.a || !scelti.b) return;
@@ -152,6 +153,11 @@ async function aggiornaConfronto() {
     return;
   }
   out.innerHTML = `<div class="empty-state">Carico i dati...</div>`;
+  const coppia = [scelti.a.slug, scelti.b.slug].sort().join(" vs ");
+  if (coppia !== ultimaCoppia) {
+    ultimaCoppia = coppia;
+    traccia("Confronto", { coppia });
+  }
 
   const [dA, dB] = await Promise.all([
     fetchJSON(`data/lottatori/${scelti.a.slug}.json`),

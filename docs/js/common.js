@@ -1,5 +1,16 @@
 // Utility condivise tra le pagine del sito.
 
+// Evento personalizzato per Plausible (statistiche senza cookie): dice quale
+// scheda e' stata aperta, cosi' si vede quali lottatori/eventi interessano
+// davvero. Plausible toglie da solo la parte dopo il "?" dall'indirizzo, senza
+// questo vedremmo un'unica pagina "lottatore.html" per tutti.
+export function traccia(nome, props) {
+  try {
+    window.plausible = window.plausible || function () { (window.plausible.q = window.plausible.q || []).push(arguments); };
+    window.plausible(nome, { props });
+  } catch (e) { /* le statistiche non devono mai rompere la pagina */ }
+}
+
 export async function fetchJSON(path) {
   // "no-cache": il browser ricontrolla sempre col server (se il file non e'
   // cambiato risponde 304, costa pochissimo). Senza, GitHub Pages lascia in

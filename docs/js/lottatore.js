@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto, slugDaLink } from "./common.js?v=202609291115";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto, slugDaLink, traccia } from "./common.js?v=202609292310";
 
 renderChrome(null);
 
@@ -232,6 +232,7 @@ async function init() {
     return;
   }
 
+  traccia("Scheda lottatore", { lottatore: slug });
   dettCorrente = dett;
   rigaCorrente = rigaRoster;
 

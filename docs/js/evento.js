@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto } from "./common.js?v=202609291115";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto, traccia } from "./common.js?v=202609292310";
 
 renderChrome(null);
 
@@ -258,6 +258,7 @@ async function init() {
     return;
   }
 
+  traccia("Scheda evento", { evento: slug });
   const luogo = [ev.sede, ev.luogo].filter(Boolean).join(", ");
   const citta = (ev.luogo || "").split(",")[0].trim() || null;
   const dataParsata = new Date(ev.data);
