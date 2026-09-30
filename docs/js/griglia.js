@@ -6,8 +6,8 @@
 //   - allenamento:  griglie casuali senza limiti
 // I dati (data/griglia.json) li prepara build_griglia.py.
 
-import { renderChrome, fetchJSON, SOCIAL } from "./common.js?v=202609300013";
-import { leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609300013";
+import { renderChrome, fetchJSON, SOCIAL, tracciaGioco } from "./common.js?v=202609301121";
+import { leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609301121";
 
 renderChrome("giochi");
 
@@ -312,6 +312,7 @@ async function init() {
       if (!stato.finito && (rimasti <= 0 || indovinate === 9)) {
         stato.finito = true;
         salva();
+        tracciaGioco("Griglia MMA", "fine", { modo: allenamento ? "allenamento" : "giorno", esito: indovinate === 9 ? "completa" : "incompleta", caselle: String(indovinate) });
         if (!allenamento) aggiornaSerie(indovinate);
       }
       const punti = Object.entries(stato.celle).reduce((s, [k, id]) => s + rarita(dati, griglia.celle[k], id), 0);
@@ -340,6 +341,7 @@ async function init() {
         b.addEventListener("click", () => {
           const k = Number(b.dataset.k);
           apriDialog(griglia.righe[Math.floor(k / 3)], griglia.colonne[k % 3], `Tentativi rimasti: ${TENTATIVI - stato.usati}`, (id) => {
+            if (stato.usati === 0) tracciaGioco("Griglia MMA", "inizio", { modo: allenamento ? "allenamento" : "giorno" });
             stato.usati++;
             if (griglia.celle[k].has(id)) {
               stato.celle[k] = id;

@@ -1,8 +1,8 @@
 // "Piu' o meno": due lottatori, una statistica. Il secondo ne ha di piu' o
 // di meno del primo? Una risposta sbagliata e la serie finisce.
 
-import { renderChrome } from "./common.js?v=202609300013";
-import { caricaLottatori, leggi, scrivi, iniziali, condividi, SITO, bandiera } from "./giochi-comuni.js?v=202609300013";
+import { renderChrome, tracciaGioco } from "./common.js?v=202609301121";
+import { caricaLottatori, leggi, scrivi, iniziali, condividi, SITO, bandiera } from "./giochi-comuni.js?v=202609301121";
 
 renderChrome("giochi");
 
@@ -68,8 +68,14 @@ function mostra() {
   box.querySelectorAll("[data-scelta]").forEach((btn) => btn.addEventListener("click", () => rispondi(btn.dataset.scelta)));
 }
 
+let avviata = false; // la serie in corso e' gia' stata contata come partita iniziata
+
 function rispondi(scelta) {
   const { a, b, stat } = coppia;
+  if (!avviata) {
+    avviata = true;
+    tracciaGioco("Higher or Lower", "inizio");
+  }
   const giusto = (valore(b, stat.k) > valore(a, stat.k)) === (scelta === "piu");
   box.querySelectorAll("[data-scelta]").forEach((btn) => (btn.disabled = true));
   const latoB = document.getElementById("lato-b");
@@ -84,6 +90,7 @@ function rispondi(scelta) {
     }, 1100);
     return;
   }
+  tracciaGioco("Higher or Lower", "fine", { serie: String(serie) });
   const testo = `MMA Oggi · Higher or Lower: serie di ${serie} 🥊\nMi batti? ${SITO}higher-or-lower.html`;
   document.getElementById("pom-esito").innerHTML = `
     <div class="chie-fine perso">
@@ -96,6 +103,7 @@ function rispondi(scelta) {
     </div>`;
   document.getElementById("ricomincia").addEventListener("click", () => {
     serie = 0;
+    avviata = false;
     coppia = nuovaCoppia(null);
     mostra();
   });

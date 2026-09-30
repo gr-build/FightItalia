@@ -2,8 +2,8 @@
 // ogni errore (come nei giochi calcistici tipo Tiki-Taka-Toe/Who Are Ya) e
 // ultimi incontri svelati uno alla volta come indizi.
 
-import { renderChrome } from "./common.js?v=202609300013";
-import { caricaLottatori, leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO, bandiera, genere } from "./giochi-comuni.js?v=202609300013";
+import { renderChrome, tracciaGioco } from "./common.js?v=202609301121";
+import { caricaLottatori, leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO, bandiera, genere } from "./giochi-comuni.js?v=202609301121";
 
 renderChrome("giochi");
 
@@ -284,9 +284,11 @@ async function init() {
     msg.textContent = "";
     input.value = "";
     lista.hidden = true;
+    if (tentativi.length === 0) tracciaGioco("Chi è?", "inizio", { modo: libero ? "libero" : "giorno" });
     tentativi.push(scelto);
     if (!libero) scrivi(chiave, tentativi.map((t) => t.s));
     const vinto = scelto.s === segreto.s;
+    if (vinto || tentativi.length >= TENTATIVI) tracciaGioco("Chi è?", "fine", { modo: libero ? "libero" : "giorno", esito: vinto ? "vinto" : "perso", tentativi: String(tentativi.length) });
     if (!libero && (vinto || tentativi.length >= TENTATIVI)) aggiornaSerie(vinto);
     aggiorna();
   });

@@ -5,8 +5,8 @@
 // serve che sia un cognome vero: come nel Wordle originale, il feedback
 // lettera per lettera funziona comunque.
 
-import { renderChrome } from "./common.js?v=202609300013";
-import { caricaLottatori, leggi, scrivi, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609300013";
+import { renderChrome, tracciaGioco } from "./common.js?v=202609301121";
+import { caricaLottatori, leggi, scrivi, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609301121";
 
 renderChrome("giochi");
 
@@ -224,8 +224,10 @@ async function init() {
       aggiorna(`Il cognome deve avere ${L} lettere.`);
       return;
     }
+    if (tentativi.length === 0) tracciaGioco("Cognomle", "inizio", { modo: libero ? "libero" : "giorno" });
     tentativi.push(corrente);
     corrente = "";
+    if (finito()) tracciaGioco("Cognomle", "fine", { modo: libero ? "libero" : "giorno", esito: tentativi.includes(segreto) ? "vinto" : "perso", tentativi: String(tentativi.length) });
     if (!libero) scrivi(chiave, tentativi);
     if (!libero && finito()) aggiornaSerie(tentativi.includes(segreto));
     aggiorna();

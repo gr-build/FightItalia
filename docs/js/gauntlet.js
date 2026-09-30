@@ -1,7 +1,7 @@
 // MMA Gauntlet — minigioco a scelte multiple: arrivare a 30-0 senza
 // finire KO, senza farsi tagliare dal roster e senza squalifiche.
 
-import { renderChrome } from "./common.js?v=202609300013";
+import { renderChrome, tracciaGioco } from "./common.js?v=202609301121";
 
 // Una carriera vera dura un numero finito di turni, non un numero di vittorie:
 // arrivare in fondo imbattuto e' il vero obiettivo del 30-0.
@@ -903,6 +903,7 @@ function mostraSelezionePersonaggio() {
 }
 
 function nuovaPartita(personaggio, nickname = nomeAttivo) {
+  tracciaGioco("MMA Gauntlet", "inizio", { personaggio: personaggio.nome });
   personaggioAttivo = personaggio;
   nomeAttivo = (nickname || "").trim().slice(0, 24) || personaggio.nome;
   stato = { ...personaggio.stats, vittorie: 0, sconfitte: 0, incontro: 1, finita: false };
@@ -1082,6 +1083,7 @@ function testoCondivisione(causa) {
 
 function finePartita(causa) {
   stato.finita = true;
+  tracciaGioco("MMA Gauntlet", "fine", { esito: causa, record: `${stato.vittorie}-${stato.sconfitte}` });
   const finale = FINALI[causa];
   const classeEsito = causa === "goat" ? "goat" : ["ko", "cut", "usada"].includes(causa) ? "sconfitta" : "";
 

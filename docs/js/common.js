@@ -287,6 +287,12 @@ export function renderChrome(active) {
   }
 }
 
+// Eventi anonimi dei giochi (solo numeri, nessun dato personale): quando parte una
+// partita e quando finisce, con l'esito. Servono a contare quanti giocano davvero.
+export function tracciaGioco(gioco, fase, extra = {}) {
+  traccia(fase === "inizio" ? "Gioco iniziato" : "Gioco finito", { gioco, ...extra });
+}
+
 // Modulo "Aiutaci a migliorare": lo stesso in fondo a ogni pagina e nella pagina
 // Giochi. Il messaggio parte via Web3Forms verso la casella della redazione;
 // senza FORM_KEY (o senza rete) resta l'invito ai DM.
