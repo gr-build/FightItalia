@@ -2498,8 +2498,10 @@ a.rank-row:hover { color: var(--accent); }
 .feedback-form label span { color: var(--text-muted); }
 .feedback-form select, .feedback-form textarea, .feedback-form input[type="email"] {
   width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
-  background: var(--bg); color: inherit; font: inherit; font-size: 15px;
+  background: var(--bg); color: var(--text); font: inherit; font-size: 16px;
 }
+.feedback-form ::placeholder { color: var(--text-muted); opacity: 1; }
+.feedback-form select option { color: var(--text); background: var(--bg-elevated, #16161b); }
 .feedback-form button { align-self: flex-start; margin-top: 4px; cursor: pointer; }
 .feedback-esito { min-height: 1.4em; color: var(--gold) !important; margin: 0 !important; }
 .feedback-privacy { font-size: 12px !important; color: var(--text-muted) !important; margin: 0 !important; }

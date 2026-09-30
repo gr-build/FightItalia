@@ -1,5 +1,5 @@
-import { fetchJSON, renderChrome, debounce } from "./common.js?v=202609292356";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202609292356";
+import { fetchJSON, renderChrome, debounce } from "./common.js?v=202609300000";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202609300000";
 
 renderChrome("europa");
 

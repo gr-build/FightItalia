@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto, traccia } from "./common.js?v=202609292356";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto, traccia } from "./common.js?v=202609300000";
 
 renderChrome(null);
 
