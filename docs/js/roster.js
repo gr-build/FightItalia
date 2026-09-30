@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, debounce, fotoDi, classeFoto } from "./common.js?v=202609300000";
+import { fetchJSON, renderChrome, icon, debounce, fotoDi, classeFoto } from "./common.js?v=202609300013";
 
 // Gira sia in home sia in tutti-i-lottatori.html, che non ha statistiche ne' campioni in evidenza.
 renderChrome(document.body.dataset.pagina || "database");

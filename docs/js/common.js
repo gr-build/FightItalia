@@ -47,9 +47,18 @@ export function icon(name) {
 // document.title + meta description con i dati veri del lottatore/evento, e
 // inietta JSON-LD (schema.org) cosi' i risultati di ricerca possono mostrare
 // record, data, sede ecc. invece del solo link.
-export function impostaMetaPagina({ titolo, descrizione, jsonLd }) {
-  if (titolo) document.title = titolo;
-  if (descrizione) {
+export function impostaMetaPagina({ titolo, descrizione, jsonLd, canonical }) {
+  // nelle pagine statiche titolo e descrizione sono gia' giusti nell'HTML: non li tocco
+  const statica = Boolean(document.body.dataset.slug);
+  if (titolo && !statica) document.title = titolo;
+  if (canonical) {
+    // ogni scheda ha il suo indirizzo "ufficiale": senza, Google le vede tutte come la stessa pagina
+    const link = document.querySelector('link[rel="canonical"]');
+    if (link) link.setAttribute("href", canonical);
+    const og = document.querySelector('meta[property="og:url"]');
+    if (og) og.setAttribute("content", canonical);
+  }
+  if (descrizione && !statica) {
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", descrizione);
   }

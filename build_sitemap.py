@@ -63,11 +63,13 @@ def main():
 
     entries = [url_entry(path, freq, pri) for path, freq, pri in PAGINE_STATICHE]
 
-    slug_lottatori = sorted({r["slug"] for r in roster if r.get("slug")})
-    entries += [url_entry(f"lottatore.html?slug={slug}", "monthly", "0.5") for slug in slug_lottatori]
+    # Solo le pagine statiche che esistono davvero (le genera build_static.py):
+    # ogni lottatore/evento ha il suo indirizzo, non piu' lottatore.html?slug=...
+    slug_lottatori = sorted(p.stem for p in (DOCS / "lottatore").glob("*.html"))
+    entries += [url_entry(f"lottatore/{slug}.html", "monthly", "0.5") for slug in slug_lottatori]
 
-    slug_eventi = sorted({s for e in eventi if (s := slug_da_link(e.get("link")))})
-    entries += [url_entry(f"evento.html?slug={slug}", "monthly", "0.4") for slug in slug_eventi]
+    slug_eventi = sorted(p.stem for p in (DOCS / "evento").glob("*.html"))
+    entries += [url_entry(f"evento/{slug}.html", "monthly", "0.4") for slug in slug_eventi]
 
     xml = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'

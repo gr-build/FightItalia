@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto, traccia } from "./common.js?v=202609300000";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto, traccia } from "./common.js?v=202609300013";
 
 renderChrome(null);
 
@@ -242,7 +242,7 @@ async function caricaCard(link) {
 
 async function init() {
   const params = new URLSearchParams(location.search);
-  const slug = params.get("slug");
+  const slug = params.get("slug") || document.body.dataset.slug;
   const out = document.getElementById("scheda-evento");
 
   if (!slug) {
@@ -264,6 +264,7 @@ async function init() {
   const dataParsata = new Date(ev.data);
   impostaMetaPagina({
     titolo: `${ev.evento} — MMA Oggi`,
+    canonical: `https://mmaoggi.it/evento/${slug}.html`,
     descrizione: `${ev.evento}${luogo ? ` — ${luogo}` : ""}. Data, card completa e risultati su MMA Oggi.`,
     jsonLd: {
       "@context": "https://schema.org",

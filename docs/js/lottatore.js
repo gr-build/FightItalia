@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto, slugDaLink, traccia } from "./common.js?v=202609300000";
+import { fetchJSON, renderChrome, classeRisultato, letteraRisultato, formDots, cmDaStringa, numeroDaRecord, debounce, metodoVittorie, badgeStreak, puntiChiaveMatch, blocPuntiChiave, impostaMetaPagina, newsSu, cardNewsBreve, fotoDi, classeFoto, slugDaLink, traccia } from "./common.js?v=202609300013";
 
 renderChrome(null);
 
@@ -214,7 +214,7 @@ async function renderTestaATesta(slugA, dettA, rigaA) {
 
 async function init() {
   const params = new URLSearchParams(location.search);
-  const slug = params.get("slug");
+  const slug = params.get("slug") || document.body.dataset.slug;
   const out = document.getElementById("profilo");
 
   if (!slug) {
@@ -300,6 +300,7 @@ async function init() {
 
   impostaMetaPagina({
     titolo: `${dett.nome} — MMA Oggi`,
+    canonical: roster.some((r) => r.slug === slug) ? `https://mmaoggi.it/lottatore/${slug}.html` : `https://mmaoggi.it/lottatore.html?slug=${slug}`,
     descrizione: `${dett.nome} — ${categoria || "MMA"}, record ${rigaRoster.record_mma || "n/d"}. Statistiche, storico incontri e confronto su MMA Oggi.`,
     jsonLd: {
       "@context": "https://schema.org",

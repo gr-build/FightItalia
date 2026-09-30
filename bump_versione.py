@@ -26,3 +26,8 @@ for path in list(DOCS.glob("*.html")) + list((DOCS / "js").glob("*.js")):
         path.write_text(nuovo, encoding="utf-8")
 
 print(f"Versione JS e CSS: {VERSIONE}")
+
+# le pagine statiche di lottatori ed eventi nascono dai modelli lottatore.html /
+# evento.html: rigenerarle qui le tiene allineate alla nuova versione
+import subprocess, sys
+subprocess.run([sys.executable, str(Path(__file__).parent / "build_static.py")], check=True)

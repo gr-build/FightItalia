@@ -5,8 +5,8 @@
 // serve che sia un cognome vero: come nel Wordle originale, il feedback
 // lettera per lettera funziona comunque.
 
-import { renderChrome } from "./common.js?v=202609300000";
-import { caricaLottatori, leggi, scrivi, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609300000";
+import { renderChrome } from "./common.js?v=202609300013";
+import { caricaLottatori, leggi, scrivi, casualeConSeme, oggiItalia, condividi, SITO } from "./giochi-comuni.js?v=202609300013";
 
 renderChrome("giochi");
 
