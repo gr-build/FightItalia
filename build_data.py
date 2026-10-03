@@ -324,6 +324,31 @@ GIORNI_AGGIORNAMENTO_CAMPIONE = 7
 MAX_AGGIORNAMENTI_PER_RUN = 100
 
 
+CORREZIONI_FISICO = Path(__file__).parent / "correzioni_fisico.json"
+
+
+def applica_correzioni_fisico():
+    """Sovrascrive Height/Reach dell'infobox dove Wikipedia sbaglia (verificato
+    su altre fonti, vedi correzioni_fisico.json). Idempotente: gira a ogni
+    build, cosi' la correzione sopravvive al riscaricamento da Wikipedia."""
+    if not CORREZIONI_FISICO.exists():
+        return
+    correzioni = json.loads(CORREZIONI_FISICO.read_text(encoding="utf-8"))
+    for slug, campi in correzioni.items():
+        path = WEB_DATA_LOTTATORI / f"{slug}.json"
+        if not path.exists():
+            continue
+        dati = json.loads(path.read_text(encoding="utf-8"))
+        infobox = dati.setdefault("infobox", {})
+        modificato = False
+        for campo in ("Height", "Reach"):
+            if campo in campi and infobox.get(campo) != campi[campo]:
+                infobox[campo] = campi[campo]
+                modificato = True
+        if modificato:
+            path.write_text(json.dumps(dati, ensure_ascii=False), encoding="utf-8")
+
+
 def _scheda_da_aggiornare(path, campione):
     try:
         ultimo = date.fromisoformat(json.loads(path.read_text(encoding="utf-8")).get("ultimo_aggiornamento", ""))
@@ -931,6 +956,7 @@ def aggiorna_da_espn():
 if __name__ == "__main__":
     roster = genera_roster_e_eventi()
     genera_dettagli_lottatori(roster)
+    applica_correzioni_fisico()
     scrivi_roster_json(roster)
     genera_classifiche(roster)
 
