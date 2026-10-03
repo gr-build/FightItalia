@@ -20,7 +20,7 @@ function rigaOrario(chiave, etichetta, o, citta) {
   // rigenerati resta il vecchio "(giorno dopo)" come rete di sicurezza.
   const giorno = o.giorno_dopo ? `<span class="fase-giorno-dopo">${o.giorno_it || "giorno dopo"}</span>` : "";
   return `
-    <div class="orario-fase ${CLASSE_FASE[chiave]}">
+    <div class="orario-fase ${CLASSE_FASE[chiave]}" data-fase="${CLASSE_FASE[chiave]}" role="button" tabindex="0" title="Mostra solo ${etichetta}">
       <div class="fase-label"><span class="fase-dot"></span>${etichetta}</div>
       <div class="fase-orari">
         <div class="fase-italia">${o.italia} ${giorno}</div>
@@ -224,11 +224,45 @@ function rigaIncontro(b, roster, posizione = "", contestoEvento, idxClassifiche)
 
 // Wikipedia elenca la main card dal main event in giu': il primo bout e'
 // il main event, il secondo il co-main — lo stesso ordine della serata.
-function sezioneCard(titolo, incontri, roster, conPosizioni = false, contestoEvento, idxClassifiche) {
+function sezioneCard(titolo, incontri, roster, conPosizioni = false, contestoEvento, idxClassifiche, fase = "") {
   if (!incontri.length) return "";
   return `
-    <div class="event-group-title">${titolo}</div>
-    <div class="bout-list">${incontri.map((b, i) => rigaIncontro(b, roster, conPosizioni ? ["Main event", "Co-main event"][i] || "" : "", contestoEvento, idxClassifiche)).join("")}</div>`;
+    <div class="fase-sezione" data-fase="${fase}">
+      <div class="event-group-title">${titolo}</div>
+      <div class="bout-list">${incontri.map((b, i) => rigaIncontro(b, roster, conPosizioni ? ["Main event", "Co-main event"][i] || "" : "", contestoEvento, idxClassifiche)).join("")}</div>
+    </div>`;
+}
+
+// Barra sotto gli orari: un tocco mostra solo main card / prelims / early
+// prelims, un secondo tocco sullo stesso bottone torna a tutta la card.
+// Compare solo se la card ha almeno due sezioni.
+function barraFasi(fasi) {
+  if (fasi.length < 2) return "";
+  const bottoni = fasi
+    .map(([chiave, etichetta]) => `<button type="button" class="fase-btn" data-fase="${chiave}" aria-pressed="false">${etichetta}</button>`)
+    .join("");
+  return `<div class="fase-filtro" role="group" aria-label="Mostra una parte della card">${bottoni}</div>`;
+}
+
+function attivaFiltroFasi(radice) {
+  const bottoni = [...radice.querySelectorAll(".fase-btn")];
+  if (!bottoni.length) return;
+  const mostra = (fase) => {
+    radice.querySelectorAll(".fase-sezione").forEach((el) => { el.hidden = fase !== "tutte" && el.dataset.fase !== fase; });
+    bottoni.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.fase === fase)));
+    document.querySelectorAll(".orario-fase").forEach((r) => r.classList.toggle("scelta", fase !== "tutte" && r.dataset.fase === fase));
+  };
+  bottoni.forEach((b) => b.addEventListener("click", () => mostra(b.getAttribute("aria-pressed") === "true" ? "tutte" : b.dataset.fase)));
+  // toccare un orario equivale a scegliere quella parte della card
+  document.querySelectorAll(".orario-fase[data-fase]").forEach((r) => {
+    const vai = () => {
+      if (!bottoni.some((b) => b.dataset.fase === r.dataset.fase)) return;
+      mostra(r.classList.contains("scelta") ? "tutte" : r.dataset.fase);
+      radice.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    r.addEventListener("click", vai);
+    r.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); vai(); } });
+  });
 }
 
 async function caricaCard(link) {
@@ -321,7 +355,14 @@ async function init() {
     const prelim = card.filter((b) => (b.sezione || "").toLowerCase().startsWith("preliminary"));
     const main = card.filter((b) => !early.includes(b) && !prelim.includes(b));
     const contestoEvento = { evento: ev.evento, data: ev.data, luogo, passato: ev.stato === "passato" };
-    cardBox.innerHTML = sezioneCard("Main Card", main, rosterCompleto, true, contestoEvento, idxClassifiche) + sezioneCard("Preliminary Card", prelim, rosterCompleto, false, contestoEvento, idxClassifiche) + sezioneCard("Early Preliminary Card", early, rosterCompleto, false, contestoEvento, idxClassifiche);
+    const fasi = [["main", main, "Main card"], ["prelims", prelim, "Prelims"], ["early", early, "Early prelims"]]
+      .filter(([, lista]) => lista.length)
+      .map(([chiave, , etichetta]) => [chiave, etichetta]);
+    cardBox.innerHTML = barraFasi(fasi)
+      + sezioneCard("Main Card", main, rosterCompleto, true, contestoEvento, idxClassifiche, "main")
+      + sezioneCard("Preliminary Card", prelim, rosterCompleto, false, contestoEvento, idxClassifiche, "prelims")
+      + sezioneCard("Early Preliminary Card", early, rosterCompleto, false, contestoEvento, idxClassifiche, "early");
+    attivaFiltroFasi(cardBox);
   } else {
     cardBox.innerHTML = `<div class="empty-state">Card non ancora disponibile per questo evento.</div>`;
   }

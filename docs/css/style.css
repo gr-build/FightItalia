@@ -2516,3 +2516,17 @@ a.rank-row:hover { color: var(--accent); }
 .ff-stella:hover { color: var(--gold); }
 .ff-invito { margin: 8px 0 0; color: var(--gold); font-size: 13.5px; }
 .footer-feedback-corpo { margin-top: 12px; }
+
+/* Barra sotto gli orari: mostra tutta la card o una sola parte */
+.fase-filtro { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 18px; }
+.fase-btn {
+  font: 600 13px var(--font-body, inherit); color: var(--text-secondary);
+  background: var(--bg-card, transparent); border: 1px solid var(--border);
+  border-radius: 999px; padding: 8px 14px; cursor: pointer;
+}
+.fase-btn:hover { color: var(--text); border-color: var(--text-muted); }
+.fase-btn[aria-pressed="true"] { color: var(--text); border-color: var(--accent); background: rgba(232, 53, 47, 0.12); }
+.fase-btn:focus-visible, .orario-fase:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.orario-fase[data-fase] { cursor: pointer; }
+.orario-fase.scelta { background: rgba(232, 53, 47, 0.08); }
+.fase-sezione[hidden] { display: none; }

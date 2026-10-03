@@ -361,14 +361,62 @@ export function montaFeedback(box, stelleDi = () => 0) {
   });
 }
 
+const ESPN_SCOREBOARD = "https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard";
+const FINESTRA_RISULTATO_RECENTE_MIN = 90; // come in live.py
+
+// Stesso calcolo di live.py, fatto nel browser: il workflow di GitHub che
+// scrive live.json parte con ore di ritardo, ESPN invece e' sempre aggiornato.
+async function statoLiveDaEspn() {
+  const adesso = new Date();
+  for (const indietro of [0, 1]) {
+    const g = new Date(adesso.getTime() - indietro * 86400000);
+    const data = `${g.getUTCFullYear()}${String(g.getUTCMonth() + 1).padStart(2, "0")}${String(g.getUTCDate()).padStart(2, "0")}`;
+    const r = await fetch(`${ESPN_SCOREBOARD}?dates=${data}`, { signal: AbortSignal.timeout(6000) });
+    if (!r.ok) throw new Error("ESPN " + r.status);
+    const ev = ((await r.json()).events || [])[0];
+    if (!ev) continue;
+    const incontri = [];
+    for (const c of ev.competitions || []) {
+      const atleti = [...(c.competitors || [])].sort((a, b) => (a.order ?? 9) - (b.order ?? 9));
+      const inizio = Date.parse(c.date);
+      if (atleti.length !== 2 || Number.isNaN(inizio)) continue;
+      incontri.push({
+        inizio,
+        stato: c.status?.type?.state,
+        nomi: atleti.map((a) => a.athlete.displayName),
+        round: c.status?.period,
+        clock: c.status?.displayClock,
+        vincitore: atleti.find((a) => a.winner)?.athlete.displayName || null,
+      });
+    }
+    if (!incontri.length) continue;
+    const corrente = incontri.find((x) => x.stato === "in");
+    const conclusi = incontri.filter((x) => x.stato === "post" && x.vincitore);
+    const ultimo = conclusi.length ? conclusi.reduce((a, b) => (b.inizio > a.inizio ? b : a)) : null;
+    const recente = ultimo && adesso.getTime() - ultimo.inizio < FINESTRA_RISULTATO_RECENTE_MIN * 60000;
+    if (!corrente && !recente) continue;
+    return {
+      evento: ev.name,
+      stato: corrente ? "in_corso" : "risultato_recente",
+      incontro_corrente: corrente ? { nomi: corrente.nomi, round: corrente.round, clock: corrente.clock } : null,
+      ultimo_risultato: ultimo ? { nomi: ultimo.nomi, vincitore: ultimo.vincitore } : null,
+    };
+  }
+  return { stato: "nessuno" };
+}
+
 async function aggiornaLive() {
   const el = document.getElementById("live-badge");
   if (!el) return;
   let d;
   try {
-    d = await fetchJSON("data/live.json");
+    d = await statoLiveDaEspn();
   } catch {
-    return; // non tocca il badge: meglio tenere l'ultimo stato buono che nasconderlo per un errore di rete
+    try {
+      d = await fetchJSON("data/live.json");
+    } catch {
+      return; // non tocca il badge: meglio tenere l'ultimo stato buono che nasconderlo per un errore di rete
+    }
   }
   if (!d || d.stato === "nessuno") {
     el.hidden = true;
