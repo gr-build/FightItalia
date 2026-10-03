@@ -208,7 +208,8 @@ h1, h2, h3, h4 {
 .live-round { color: var(--text-muted); }
 
 @media (max-width: 980px) {
-  .live-badge { display: none; } /* sulla nav mobile a scorrimento non c'e' spazio: si vede solo da tablet in su */
+  /* sulla nav mobile non c'e' spazio accanto ai link: la scheda diventa una striscia a tutta larghezza sotto il menu */
+  .live-badge:not([hidden]) { display: flex; order: 99; flex-basis: 100%; max-width: none; justify-content: center; border-radius: 8px; margin: 0 0 8px; padding: 7px 12px; }
 }
 
 .lingua {
