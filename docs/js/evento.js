@@ -233,12 +233,13 @@ function sezioneCard(titolo, incontri, roster, conPosizioni = false, contestoEve
     </div>`;
 }
 
-// Barra sotto gli orari: mostra tutta la card o solo main card / prelims /
-// early prelims. Compare solo se la card ha almeno due sezioni.
+// Barra sotto gli orari: un tocco mostra solo main card / prelims / early
+// prelims, un secondo tocco sullo stesso bottone torna a tutta la card.
+// Compare solo se la card ha almeno due sezioni.
 function barraFasi(fasi) {
   if (fasi.length < 2) return "";
-  const bottoni = [["tutte", "Tutta la card"], ...fasi]
-    .map(([chiave, etichetta], i) => `<button type="button" class="fase-btn" data-fase="${chiave}" aria-pressed="${i === 0}">${etichetta}</button>`)
+  const bottoni = fasi
+    .map(([chiave, etichetta]) => `<button type="button" class="fase-btn" data-fase="${chiave}" aria-pressed="false">${etichetta}</button>`)
     .join("");
   return `<div class="fase-filtro" role="group" aria-label="Mostra una parte della card">${bottoni}</div>`;
 }
@@ -251,7 +252,7 @@ function attivaFiltroFasi(radice) {
     bottoni.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.fase === fase)));
     document.querySelectorAll(".orario-fase").forEach((r) => r.classList.toggle("scelta", fase !== "tutte" && r.dataset.fase === fase));
   };
-  bottoni.forEach((b) => b.addEventListener("click", () => mostra(b.dataset.fase)));
+  bottoni.forEach((b) => b.addEventListener("click", () => mostra(b.getAttribute("aria-pressed") === "true" ? "tutte" : b.dataset.fase)));
   // toccare un orario equivale a scegliere quella parte della card
   document.querySelectorAll(".orario-fase[data-fase]").forEach((r) => {
     const vai = () => {
