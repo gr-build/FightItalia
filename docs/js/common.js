@@ -197,7 +197,6 @@ export const FORM_KEY = "ddf0c991-62a3-4f61-b5e1-3042eeef2d41";
 
 // Profili social di MMA Oggi (pagina seguici.html, piede del sito, fine dei giochi).
 export const SOCIAL = [
-  { id: "whatsapp", nome: "WhatsApp", testo: "Canale WhatsApp", url: "https://whatsapp.com/channel/0029VbDcULiDzgTDwuzpGR46", desc: "Le notizie appena escono, la card di ogni evento, i risultati la domenica mattina." },
   { id: "instagram", nome: "Instagram", testo: "@mmaoggi", url: "https://www.instagram.com/mmaoggi/", desc: "Card, analisi e numeri degli incontri in grafica." },
   { id: "tiktok", nome: "TikTok", testo: "@mmaoggi", url: "https://www.tiktok.com/@mmaoggi", desc: "La Griglia del giorno, i risultati in 60 secondi, le notizie in video." },
 ];
