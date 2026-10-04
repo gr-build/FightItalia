@@ -1,0 +1,93 @@
+# Piano B: aggiornamenti automatici e pubblicazione su Cloudflare Pages senza GitHub.
+# NON ancora provato su GitLab. Per attivarlo servono, in Settings > CI/CD > Variables:
+#   CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, CF_PAGES_PROJECT (es. mmaoggi)
+#   GITLAB_PUSH_TOKEN (Project access token con scrittura sul repository, mascherato)
+#   GEMINI_API_KEY (mascherato)
+# E in Build > Pipeline schedules due programmazioni:
+#   JOB=dati  ogni giorno alle 06:15 UTC      JOB=news  ogni 3 ore
+# Il job "pubblica" parte anche a ogni push su main che tocca docs/.
+
+stages: [aggiorna, pubblica]
+
+default:
+  interruptible: false
+
+variables:
+  GIT_STRATEGY: clone
+  GIT_DEPTH: "50"
+
+.salva_su_main: &salva_su_main |
+  git config user.name "mmaoggi-bot"
+  git config user.email "bot@mmaoggi.it"
+  git add docs/data docs/lottatore docs/evento docs/sitemap.xml
+  if git diff --staged --quiet; then
+    echo "Nessuna novita' da committare."
+  else
+    git commit -m "Aggiorna dati [automatico] [skip ci]"
+    git push "https://oauth2:${GITLAB_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:main
+    echo "SALVATO=1"
+  fi
+
+aggiorna-dati:
+  stage: aggiorna
+  image: python:3.12
+  timeout: 45 minutes
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $JOB == "dati"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+  cache:
+    key: espn-cache
+    paths: [cache/espn_cache.json]
+  script:
+    - git checkout -B main
+    - pip install -r requirements.txt
+    - python -m playwright install --with-deps chromium
+    - python build_data.py
+    - ESPN_MAX=60 python build_espn.py
+    - python build_griglia.py
+    - python -c "from build_data import genera_europa; genera_europa()"
+    - python build_static.py
+    - python build_sitemap.py
+    - *salva_su_main
+
+aggiorna-news:
+  stage: aggiorna
+  image: python:3.12
+  timeout: 15 minutes
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $JOB == "news"'
+  cache:
+    key: news-cache
+    paths: [cache/news_cache.json]
+  script:
+    - test -n "$GEMINI_API_KEY" || { echo "GEMINI_API_KEY non configurata"; exit 1; }
+    - git checkout -B main
+    - pip install requests feedparser beautifulsoup4
+    - python build_news.py
+    - git config user.name "mmaoggi-bot"
+    - git config user.email "bot@mmaoggi.it"
+    - git add docs/data/news.json
+    - |
+      if git diff --staged --quiet; then
+        echo "Nessuna novita' da committare."
+      else
+        git commit -m "Aggiorna news.json [automatico] [skip ci]"
+        git push "https://oauth2:${GITLAB_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:main
+      fi
+
+pubblica:
+  stage: pubblica
+  image: node:20
+  needs:
+    - job: aggiorna-dati
+      optional: true
+    - job: aggiorna-news
+      optional: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes: [docs/**/*]
+  script:
+    - git checkout -B main origin/main || true
+    - npx --yes wrangler@3 pages deploy docs --project-name="$CF_PAGES_PROJECT" --branch=main --commit-dirty=true
