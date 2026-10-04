@@ -265,6 +265,51 @@ function attivaFiltroFasi(radice) {
   });
 }
 
+// Se i dati del sito non hanno ancora il risultato (l'aggiornamento
+// programmato puo' ritardare di ore), li prende da ESPN nel browser: chi ha
+// vinto, round e tempo. Il metodo preciso (KO, sottomissione...) arriva piu'
+// tardi con l'aggiornamento dei dati; qui si distingue solo ai punti / prima
+// del limite. Se ESPN non risponde la pagina resta com'e'.
+const ESPN_SCOREBOARD_EVENTO = "https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard";
+const chiaveNome = (n) => (n || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]/g, "");
+
+async function conRisultatiEspn(card, ev) {
+  if (!card.some((b) => !(b.metodo || "").trim())) return card;
+  const giorno = new Date(`${ev.data} 12:00 UTC`);
+  if (Number.isNaN(giorno.getTime()) || giorno.getTime() > Date.now() + 86400000 || Date.now() - giorno.getTime() > 5 * 86400000) return card;
+  try {
+    const d = `${giorno.getUTCFullYear()}${String(giorno.getUTCMonth() + 1).padStart(2, "0")}${String(giorno.getUTCDate()).padStart(2, "0")}`;
+    const r = await fetch(`${ESPN_SCOREBOARD_EVENTO}?dates=${d}`, { signal: AbortSignal.timeout(6000) });
+    if (!r.ok) return card;
+    const evEspn = ((await r.json()).events || [])[0];
+    if (!evEspn) return card;
+    const finiti = new Map();
+    for (const c of evEspn.competitions || []) {
+      if (c.status?.type?.state !== "post") continue;
+      const atleti = c.competitors || [];
+      const vincitore = atleti.find((a) => a.winner);
+      if (atleti.length !== 2 || !vincitore) continue;
+      const chiave = atleti.map((a) => chiaveNome(a.athlete?.displayName)).sort().join("|");
+      const periodi = c.format?.regulation?.periods || 3;
+      const alLimite = c.status.period === periodi && ["5:00", "0:00"].includes(c.status.displayClock);
+      finiti.set(chiave, { vincitore: chiaveNome(vincitore.athlete.displayName), metodo: alLimite ? "Decision" : "Finish", round: String(c.status.period), tempo: c.status.displayClock });
+    }
+    return card.map((b) => {
+      if ((b.metodo || "").trim()) return b;
+      const x = finiti.get([chiaveNome(b.fighter1), chiaveNome(b.fighter2)].sort().join("|"));
+      if (!x) return b;
+      const scambia = chiaveNome(b.fighter1) !== x.vincitore;
+      return {
+        ...b,
+        ...(scambia ? { fighter1: b.fighter2, fighter2: b.fighter1, fighter1_link: b.fighter2_link, fighter2_link: b.fighter1_link } : {}),
+        metodo: x.metodo, round: x.round, tempo: x.tempo,
+      };
+    });
+  } catch {
+    return card;
+  }
+}
+
 async function caricaCard(link) {
   const slug = slugDaLink(link);
   try {
@@ -332,7 +377,7 @@ async function init() {
   // roster UFC attuale (undercard di eventi passati, o un nome uscito dal
   // roster su Wikipedia pur avendo appena combattuto) — senza, per loro non
   // comparirebbe mai il link "Confronta" (vedi commento su azioneConfronto).
-  const [card, roster, extra, classifiche] = ev.link
+  const [cardBase, roster, extra, classifiche] = ev.link
     ? await Promise.all([
         caricaCard(ev.link),
         fetchJSON("data/roster.json").catch(() => []),
@@ -340,6 +385,7 @@ async function init() {
         fetchJSON("data/classifiche.json").catch(() => null),
       ])
     : [[], [], [], null];
+  const card = await conRisultatiEspn(cardBase, ev);
   const idxClassifiche = indiceClassifiche(classifiche);
   const rosterCompleto = [...roster, ...extra];
 
