@@ -2,7 +2,7 @@ name: Live evento
 
 on:
   schedule:
-    - cron: "*/10 * * * *" # ogni 10 minuti, tutto l'anno
+    - cron: "*/15 * * * 5,6,0" # ogni 15 minuti, solo venerdi', sabato e domenica (UTC): gli eventi UFC sono nel weekend. Altri giorni: lancio manuale
   workflow_dispatch: {} # permette anche il lancio manuale da GitHub
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
 
       # live.py ha la sola dipendenza "requests" (vedi il file): niente
       # pandas/bs4/lxml/Playwright, per restare veloce su un workflow che
-      # gira ogni 10 minuti 24 ore su 24.
+      # gira ogni 15 minuti nel weekend.
       - name: Installa dipendenze
         run: pip install requests
 
