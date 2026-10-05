@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto, traccia } from "./common.js?v=202610052239";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto, traccia } from "./common.js?v=202610052255";
 
 renderChrome(null);
 
@@ -211,7 +211,23 @@ function nomePulito(n) {
 
 function linkSchedaIncontro(b) {
   const s = `${SLUG_EVENTO}-${slugTesto(nomePulito(b.fighter1))}-vs-${slugTesto(nomePulito(b.fighter2))}`;
-  return SCHEDE_INCONTRI.has(s) ? `<a href="incontro/${s}.html" class="bout-confronto-link">Scheda incontro →</a>` : "";
+  return SCHEDE_INCONTRI.has(s) ? `<a href="incontro/${s}.html" class="bout-scheda-btn">Scheda incontro <span aria-hidden="true">→</span></a>` : "";
+}
+
+// Piede della riga per un incontro disputato che ha la sua scheda: il
+// risultato (con i cartellini sotto, piu' piccoli) a sinistra e un bottone
+// ben visibile per la scheda; su telefono il bottone va a tutta larghezza.
+function piedeConScheda(b, linkScheda) {
+  const schede = schedeGiudici(b.metodo);
+  const metodo = String(b.metodo || "").replace(/\s*\(\d+[–-]\d+(?:,\s*\d+[–-]\d+)*\)\s*$/, "");
+  const dettagli = [b.round ? `R${b.round}` : "", b.tempo || ""].filter(Boolean).join(" · ");
+  return `<div class="bout-foot bout-foot-scheda">
+    <div class="bout-esito-box">
+      <span class="bout-esito">${metodo}${dettagli ? ` · ${dettagli}` : ""}</span>
+      ${schede ? `<span class="bout-fight-score">${schede}</span>` : ""}
+    </div>
+    ${linkScheda}
+  </div>`;
 }
 
 function rigaIncontro(b, roster, posizione = "", contestoEvento, idxClassifiche) {
@@ -237,7 +253,7 @@ function rigaIncontro(b, roster, posizione = "", contestoEvento, idxClassifiche)
         <span class="bout-vs">vs</span>
         ${latoIncontro(b.fighter2, rigaB, slugB, "b", false, b.categoria, idxClassifiche)}
       </div>
-      <div class="bout-foot">${esito}${azioneConfronto(rigaA, rigaB, b, contestoEvento)}${haRisultato ? linkSchedaIncontro(b) : ""}</div>
+      ${linkSchedaIncontro(b) && haRisultato ? piedeConScheda(b, linkSchedaIncontro(b)) : `<div class="bout-foot">${esito}${azioneConfronto(rigaA, rigaB, b, contestoEvento)}</div>`}
     </div>`;
 }
 
