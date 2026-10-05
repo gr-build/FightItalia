@@ -3,6 +3,7 @@ Genera le pagine statiche di lottatori ed eventi, una per indirizzo:
 
   docs/lottatore/<slug>.html   (uno per ogni lottatore del roster)
   docs/evento/<slug>.html      (uno per ogni evento in eventi.json)
+  docs/incontro/<slug>.html    (uno per ogni incontro gia' disputato dal 2025)
 
 Perche': le schede vere (lottatore.html?slug=..., evento.html?slug=...) sono
 una sola pagina che si riempie con JavaScript. Google le vedeva come un unico
@@ -20,6 +21,7 @@ Uso: python build_static.py
 
 import json
 import re
+import unicodedata
 from datetime import datetime
 from html import escape
 from pathlib import Path
@@ -256,12 +258,203 @@ def genera_eventi(base, roster_slugs):
     return slugs
 
 
+# ------------------------------------------------------------------- incontri
+# Una scheda per ogni incontro gia' disputato (dal 2025 in poi): risultato,
+# metodo, round e tempo dalle tabelle dei risultati (Wikipedia, ESPN per le
+# card piu' recenti). Si usano solo dati gia' presenti nelle card del sito:
+# niente quote, niente stime. Il vincitore e' sempre il lottatore a sinistra
+# (convenzione delle tabelle), tranne pareggi e no contest.
+
+PRIMO_ANNO_INCONTRI = 2025
+
+METODI = [  # (parola inglese in minuscolo, italiano)
+    ("technical submission", "sottomissione tecnica"),
+    ("verbal submission", "resa verbale"),
+    ("submission", "sottomissione"),
+    ("technical decision", "decisione tecnica"),
+    ("decision", "decisione"),
+    ("disqualification", "squalifica"),
+    ("dq", "squalifica"),
+    ("tko", "TKO"),
+    ("ko", "KO"),
+    ("walkover", "vittoria a tavolino"),
+]
+
+VERDETTI = {"unanimous": "unanime", "split": "divisa", "majority": "a maggioranza"}
+
+
+def slug_testo(testo):
+    t = unicodedata.normalize("NFKD", str(testo or "")).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", "-", t.lower()).strip("-")
+
+
+def nome_pulito(nome):
+    """Toglie i marcatori da tabella dei risultati, come "(c)" o "(ic)" dei campioni."""
+    return re.sub(r"\s*\((?:c|ic)\)\s*$", "", str(nome or "")).strip()
+
+
+def esito_incontro(c):
+    """(tipo, descrizione, cartellini): tipo = 'vittoria', 'pareggio' o 'no contest'."""
+    metodo = (c.get("metodo") or "").strip()
+    basso = metodo.lower()
+    if re.search(r"no contest|^nc\b", basso):
+        return "no contest", "no contest (incontro senza verdetto)", ""
+    if basso.startswith("draw"):
+        return "pareggio", "pareggio", _cartellini(metodo)
+    desc = ""
+    for en, it in METODI:
+        if re.match(rf"{re.escape(en)}\b", basso):
+            desc = it
+            break
+    if desc == "decisione":
+        for en, it in VERDETTI.items():
+            if en in basso:
+                desc = f"decisione {it}"
+                break
+    if not desc:
+        desc = "decisione dei giudici" if basso.startswith("decision") else re.sub(r"\s*\(.*", "", metodo) or "vittoria"
+    return "vittoria", desc, _cartellini(metodo)
+
+
+def _cartellini(metodo):
+    m = re.search(r"\((\d+-\d+(?:,\s*\d+-\d+)+)\)", metodo)
+    return m.group(1).replace(" ", "") if m else ""
+
+
+def sezione_it(sezione):
+    s = (sezione or "").lower()
+    if s.startswith("main"):
+        return "Main card"
+    if s.startswith("prelim"):
+        return "Preliminari"
+    return sezione or ""
+
+
+def contenuto_incontro(ev, c, tipo, desc, cartellini, roster_by_slug, slug_ev, vicini):
+    f1, f2 = c.get("fighter1"), c.get("fighter2")
+    r_ev = c.get("round")
+    esito = f"{desc}" + (f" al round {r_ev}" if r_ev else "") + (f" ({c['tempo']})" if c.get("tempo") else "")
+    def lott(nome, link):
+        s = slug_da_link(link)
+        r = roster_by_slug.get(s)
+        if not r:
+            return esc(nome)
+        return f'<a href="lottatore/{s}.html">{esc(nome)}</a>'
+    def record(link):
+        r = roster_by_slug.get(slug_da_link(link))
+        return esc(r["record_mma"]) if r and r.get("record_mma") else ""
+    quando = data_it(ev.get("data"))
+    luogo = ", ".join(x for x in (ev.get("sede"), pulisci_luogo(ev.get("luogo"))) if x)
+    if tipo == "vittoria":
+        frase = (f"{lott(f1, c.get('fighter1_link'))} ha battuto {lott(f2, c.get('fighter2_link'))} per {esc(esito)} "
+                 f"a {esc(ev['evento'])}" + (f" ({esc(quando)})" if quando else "") + ".")
+        vincitore = f"<strong>Vince {esc(f1)}</strong>"
+    elif tipo == "pareggio":
+        frase = f"{lott(f1, c.get('fighter1_link'))} e {lott(f2, c.get('fighter2_link'))} hanno chiuso in pareggio a {esc(ev['evento'])}."
+        vincitore = "<strong>Pareggio</strong>"
+    else:
+        frase = f"{lott(f1, c.get('fighter1_link'))} contro {lott(f2, c.get('fighter2_link'))} a {esc(ev['evento'])} si è chiuso con un no contest."
+        vincitore = "<strong>No contest</strong>"
+    righe = [("Esito", vincitore), ("Come", esc(esito)), ]
+    if cartellini:
+        righe.append(("Cartellini", esc(cartellini.replace(",", " · "))))
+    cat = categoria_it(c.get("categoria"))
+    righe.append(("Categoria", esc(cat or c.get("categoria") or "")))
+    righe.append(("Posizione in card", esc(sezione_it(c.get("sezione")))))
+    righe.append(("Evento", f'<a href="evento/{slug_ev}.html">{esc(ev["evento"])}</a>'))
+    if quando:
+        righe.append(("Data", esc(quando)))
+    if luogo:
+        righe.append(("Luogo", esc(luogo)))
+    tab = "".join(f"<tr><th>{k}</th><td>{v}</td></tr>" for k, v in righe if v)
+    rec1, rec2 = record(c.get("fighter1_link")), record(c.get("fighter2_link"))
+    atleti = ""
+    if rec1 or rec2:
+        atleti = ("<h2>I lottatori</h2><table><thead><tr><th>Lottatore</th><th>Record MMA attuale</th></tr></thead><tbody>"
+                  f"<tr><td>{lott(f1, c.get('fighter1_link'))}</td><td>{rec1 or '—'}</td></tr>"
+                  f"<tr><td>{lott(f2, c.get('fighter2_link'))}</td><td>{rec2 or '—'}</td></tr></tbody></table>"
+                  "<p><small>Il record è quello di oggi, non quello di quella sera.</small></p>")
+    nav = ""
+    for et, v in vicini:
+        if v:
+            nav += f'<li>{et}: <a href="incontro/{v[0]}.html">{esc(v[1])}</a></li>'
+    nav = f"<h2>Altri incontri di {esc(ev['evento'])}</h2><ul>{nav}</ul>" if nav else ""
+    fonte = "ESPN" if c.get("fonte") == "ESPN" else "Wikipedia"
+    return (f'<section class="hero" style="padding:44px 0 24px;"><h1>{esc(f1)} vs {esc(f2)}</h1></section>'
+            f"<p>{frase}</p><table><tbody>{tab}</tbody></table>{atleti}{nav}"
+            f'<p><small>Fonte dei risultati: {fonte}. Dati pubblici, nessuna quota o pronostico.</small></p>'
+            f'<p><a href="evento/{slug_ev}.html">Card completa di {esc(ev["evento"])}</a> · <a href="eventi.html">Tutti gli eventi</a></p>')
+
+
+def genera_incontri(base, roster_by_slug):
+    eventi = json.loads((DOCS / "data" / "eventi.json").read_text(encoding="utf-8"))
+    out = DOCS / "incontro"
+    out.mkdir(exist_ok=True)
+    vivi = set()
+    for ev in eventi:
+        if ev.get("stato") == "programmato":
+            continue
+        try:
+            data_iso = datetime.strptime(str(ev.get("data")).strip(), "%b %d, %Y").date()
+        except ValueError:
+            continue
+        if data_iso.year < PRIMO_ANNO_INCONTRI:
+            continue
+        slug_ev = slug_da_link(ev.get("link"))
+        card_file = DOCS / "data" / "eventi" / f"{slug_ev}.json" if slug_ev else None
+        if not card_file or not card_file.exists():
+            continue
+        card = [{**c, "fighter1": nome_pulito(c["fighter1"]), "fighter2": nome_pulito(c["fighter2"])}
+                for c in json.loads(card_file.read_text(encoding="utf-8")) if c.get("metodo") and c.get("fighter1") and c.get("fighter2")]
+        slugs = []
+        for c in card:
+            s = f"{slug_ev}-{slug_testo(c['fighter1'])}-vs-{slug_testo(c['fighter2'])}"
+            while f"{s}.html" in vivi:
+                s += "-2"
+            slugs.append(s)
+            vivi.add(f"{s}.html")
+        for i, c in enumerate(card):
+            tipo, desc, cartellini = esito_incontro(c)
+            titolo_inc = f"{c['fighter1']} vs {c['fighter2']}"
+            vicini = [("Precedente", (slugs[i - 1], f"{card[i - 1]['fighter1']} vs {card[i - 1]['fighter2']}") if i > 0 else None),
+                      ("Successivo", (slugs[i + 1], f"{card[i + 1]['fighter1']} vs {card[i + 1]['fighter2']}") if i + 1 < len(card) else None)]
+            quando = data_it(ev.get("data"))
+            if tipo == "vittoria":
+                descr = (f"{c['fighter1']} ha battuto {c['fighter2']} per {desc}"
+                         + (f" al round {c['round']}" if c.get("round") else "") + f" a {ev['evento']} ({quando}). Esito e dettagli su MMA Oggi.")
+            elif tipo == "pareggio":
+                descr = f"{titolo_inc} a {ev['evento']} ({quando}): pareggio. Esito e dettagli su MMA Oggi."
+            else:
+                descr = f"{titolo_inc} a {ev['evento']} ({quando}): no contest. Esito e dettagli su MMA Oggi."
+            canonical = f"{BASE_URL}/incontro/{slugs[i]}.html"
+            luogo = pulisci_luogo(ev.get("luogo"))
+            ld = {"@context": "https://schema.org", "@type": "SportsEvent", "name": titolo_inc, "url": canonical,
+                  "sport": "Mixed Martial Arts", "startDate": data_iso.isoformat(),
+                  "superEvent": {"@type": "SportsEvent", "name": ev["evento"], "url": f"{BASE_URL}/evento/{slug_ev}.html"},
+                  **({"location": {"@type": "Place", "name": ", ".join(x for x in (ev.get("sede"), luogo) if x)}} if (ev.get("sede") or luogo) else {})}
+            html = testa(base, titolo=f"{titolo_inc}: risultato a {ev['evento']} | MMA Oggi", descrizione=descr,
+                         canonical=canonical, jsonld=ld, slug=slugs[i])
+            html = html.replace('<div id="scheda-incontro"></div>',
+                                f'<div id="scheda-incontro">{contenuto_incontro(ev, c, tipo, desc, cartellini, roster_by_slug, slug_ev, vicini)}</div>', 1)
+            (out / f"{slugs[i]}.html").write_text(html, encoding="utf-8")
+    for f in out.glob("*.html"):
+        if f.name not in vivi:
+            f.unlink()
+    elenco = sorted(f[:-5] for f in vivi)
+    # elenco degli indirizzi esistenti: lo legge evento.js per mostrare il link "Scheda incontro"
+    (DOCS / "data" / "incontri.json").write_text(json.dumps(elenco, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    return elenco
+
+
 def main():
     base_l = (DOCS / "lottatore.html").read_text(encoding="utf-8")
     base_e = (DOCS / "evento.html").read_text(encoding="utf-8")
     lott = genera_lottatori(base_l)
     ev = genera_eventi(base_e, set(lott))
-    print(f"Pagine statiche: {len(lott)} lottatori, {len(ev)} eventi.")
+    base_i = (DOCS / "incontro.html").read_text(encoding="utf-8")
+    roster = json.loads((DOCS / "data" / "roster.json").read_text(encoding="utf-8"))
+    inc = genera_incontri(base_i, {r["slug"]: r for r in roster if r.get("slug")})
+    print(f"Pagine statiche: {len(lott)} lottatori, {len(ev)} eventi, {len(inc)} incontri.")
 
 
 if __name__ == "__main__":

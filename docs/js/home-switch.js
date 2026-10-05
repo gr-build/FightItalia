@@ -1,4 +1,4 @@
-import { fetchJSON, slugDaLink } from "./common.js?v=202609301121";
+import { fetchJSON, slugDaLink } from "./common.js?v=202610052239";
 
 // Riquadro "Prossimi eventi" a destra della home: i prossimi 4 eventi
 // programmati, con link alla scheda o a "Vedi tutti gli eventi" (eventi.html).

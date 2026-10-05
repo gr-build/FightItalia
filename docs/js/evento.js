@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto, traccia } from "./common.js?v=202609301121";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto, traccia } from "./common.js?v=202610052239";
 
 renderChrome(null);
 
@@ -195,6 +195,25 @@ function trovaLottatore(slug, nome, roster) {
   return n ? roster.find((r) => normalizzaNome(r.nome) === n) || null : null;
 }
 
+// Schede degli incontri gia' disputati (docs/incontro/): data/incontri.json
+// elenca gli indirizzi che esistono. Lo slug si costruisce come in
+// slug_testo() di build_static.py.
+let SCHEDE_INCONTRI = new Set();
+let SLUG_EVENTO = "";
+
+function slugTesto(t) {
+  return String(t || "").normalize("NFKD").replace(/[^\x00-\x7f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function nomePulito(n) {
+  return String(n || "").replace(/\s*\((?:c|ic)\)\s*$/, "").trim();
+}
+
+function linkSchedaIncontro(b) {
+  const s = `${SLUG_EVENTO}-${slugTesto(nomePulito(b.fighter1))}-vs-${slugTesto(nomePulito(b.fighter2))}`;
+  return SCHEDE_INCONTRI.has(s) ? `<a href="incontro/${s}.html" class="bout-confronto-link">Scheda incontro →</a>` : "";
+}
+
 function rigaIncontro(b, roster, posizione = "", contestoEvento, idxClassifiche) {
   const haRisultato = b.metodo && b.metodo.trim();
   // Nelle tabelle risultati di Wikipedia il vincitore e' sempre a sinistra,
@@ -218,7 +237,7 @@ function rigaIncontro(b, roster, posizione = "", contestoEvento, idxClassifiche)
         <span class="bout-vs">vs</span>
         ${latoIncontro(b.fighter2, rigaB, slugB, "b", false, b.categoria, idxClassifiche)}
       </div>
-      <div class="bout-foot">${esito}${azioneConfronto(rigaA, rigaB, b, contestoEvento)}</div>
+      <div class="bout-foot">${esito}${azioneConfronto(rigaA, rigaB, b, contestoEvento)}${haRisultato ? linkSchedaIncontro(b) : ""}</div>
     </div>`;
 }
 
@@ -386,6 +405,8 @@ async function init() {
       ])
     : [[], [], [], null];
   const card = await conRisultatiEspn(cardBase, ev);
+  SLUG_EVENTO = slug;
+  SCHEDE_INCONTRI = new Set(await fetchJSON("data/incontri.json").catch(() => []));
   const idxClassifiche = indiceClassifiche(classifiche);
   const rosterCompleto = [...roster, ...extra];
 

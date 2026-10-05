@@ -71,6 +71,9 @@ def main():
     slug_eventi = sorted(p.stem for p in (DOCS / "evento").glob("*.html"))
     entries += [url_entry(f"evento/{slug}.html", "monthly", "0.4") for slug in slug_eventi]
 
+    slug_incontri = sorted(p.stem for p in (DOCS / "incontro").glob("*.html"))
+    entries += [url_entry(f"incontro/{slug}.html", "yearly", "0.3") for slug in slug_incontri]
+
     xml = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
