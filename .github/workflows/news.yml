@@ -2,7 +2,7 @@ name: Aggiorna News
 
 on:
   schedule:
-    - cron: "0 */3 * * *" # ogni 3 ore
+    - cron: "0 */6 * * *" # ogni 6 ore
   workflow_dispatch: {} # permette anche il lancio manuale da GitHub
 
 permissions:
