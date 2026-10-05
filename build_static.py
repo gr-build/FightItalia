@@ -321,6 +321,32 @@ def _cartellini(metodo):
     return m.group(1).replace(" ", "") if m else ""
 
 
+def _norm_nome(n):
+    return re.sub(r"[^a-z0-9]", "", slug_testo(re.sub(r"\(.*?\)", "", str(n or ""))))
+
+
+def trova_atleta(link, nome, anagrafica):
+    """Riga di roster o extra-lottatori: prima per slug del link, poi per nome."""
+    r = anagrafica["slug"].get(slug_da_link(link))
+    return r or anagrafica["nome"].get(_norm_nome(nome))
+
+
+def faccia(nome, atleta, vincitore, lato):
+    url = (atleta or {}).get("foto_espn") or (atleta or {}).get("foto") or ""
+    if "Flag_of" in url:  # a volte la foto Wikipedia e' la bandiera: meglio le iniziali
+        url = ""
+    iniz = "".join(p[0] for p in str(nome).split()[:2]).upper()
+    img = ""
+    if url:
+        classe = ' class="foto-bianca"' if "espncdn.com" in url else ""
+        img = f'<img src="{esc(url)}" alt="{esc(nome)}" loading="lazy" onerror="this.remove()"{classe}>'
+    w = ' <span class="bout-w">W</span>' if vincitore else ""
+    cl = " vincitore" if vincitore else ""
+    return (f'<div class="faccia {lato}{cl}">'
+            f'<div class="faccia-foto"><span class="faccia-iniz" aria-hidden="true">{esc(iniz)}</span>{img}</div>'
+            f'<div class="faccia-nome">{esc(nome)}{w}</div></div>')
+
+
 def sezione_it(sezione):
     s = (sezione or "").lower()
     if s.startswith("main"):
@@ -330,7 +356,7 @@ def sezione_it(sezione):
     return sezione or ""
 
 
-def contenuto_incontro(ev, c, tipo, desc, cartellini, roster_by_slug, slug_ev, vicini):
+def contenuto_incontro(ev, c, tipo, desc, cartellini, roster_by_slug, slug_ev, vicini, anagrafica):
     f1, f2 = c.get("fighter1"), c.get("fighter2")
     r_ev = c.get("round")
     esito = f"{desc}" + (f" al round {r_ev}" if r_ev else "") + (f" ({c['tempo']})" if c.get("tempo") else "")
@@ -380,13 +406,15 @@ def contenuto_incontro(ev, c, tipo, desc, cartellini, roster_by_slug, slug_ev, v
             nav += f'<li>{et}: <a href="incontro/{v[0]}.html">{esc(v[1])}</a></li>'
     nav = f"<h2>Altri incontri di {esc(ev['evento'])}</h2><ul>{nav}</ul>" if nav else ""
     fonte = "ESPN" if c.get("fonte") == "ESPN" else "Wikipedia"
+    facce = (f'<div class="incontro-facce">{faccia(f1, trova_atleta(c.get("fighter1_link"), f1, anagrafica), tipo == "vittoria", "a")}'
+             f'<div class="faccia-vs">VS</div>{faccia(f2, trova_atleta(c.get("fighter2_link"), f2, anagrafica), False, "b")}</div>')
     return (f'<section class="hero" style="padding:44px 0 24px;"><h1>{esc(f1)} vs {esc(f2)}</h1></section>'
-            f"<p>{frase}</p><table><tbody>{tab}</tbody></table>{atleti}{nav}"
+            f"{facce}<p>{frase}</p><table><tbody>{tab}</tbody></table>{atleti}{nav}"
             f'<p><small>Fonte dei risultati: {fonte}. Dati pubblici, nessuna quota o pronostico.</small></p>'
             f'<p><a href="evento/{slug_ev}.html">Card completa di {esc(ev["evento"])}</a> · <a href="eventi.html">Tutti gli eventi</a></p>')
 
 
-def genera_incontri(base, roster_by_slug):
+def genera_incontri(base, roster_by_slug, anagrafica):
     eventi = json.loads((DOCS / "data" / "eventi.json").read_text(encoding="utf-8"))
     out = DOCS / "incontro"
     out.mkdir(exist_ok=True)
@@ -435,7 +463,7 @@ def genera_incontri(base, roster_by_slug):
             html = testa(base, titolo=f"{titolo_inc}: risultato a {ev['evento']} | MMA Oggi", descrizione=descr,
                          canonical=canonical, jsonld=ld, slug=slugs[i])
             html = html.replace('<div id="scheda-incontro"></div>',
-                                f'<div id="scheda-incontro">{contenuto_incontro(ev, c, tipo, desc, cartellini, roster_by_slug, slug_ev, vicini)}</div>', 1)
+                                f'<div id="scheda-incontro">{contenuto_incontro(ev, c, tipo, desc, cartellini, roster_by_slug, slug_ev, vicini, anagrafica)}</div>', 1)
             (out / f"{slugs[i]}.html").write_text(html, encoding="utf-8")
     for f in out.glob("*.html"):
         if f.name not in vivi:
@@ -453,7 +481,12 @@ def main():
     ev = genera_eventi(base_e, set(lott))
     base_i = (DOCS / "incontro.html").read_text(encoding="utf-8")
     roster = json.loads((DOCS / "data" / "roster.json").read_text(encoding="utf-8"))
-    inc = genera_incontri(base_i, {r["slug"]: r for r in roster if r.get("slug")})
+    extra_file = DOCS / "data" / "extra-lottatori.json"
+    extra = json.loads(extra_file.read_text(encoding="utf-8")) if extra_file.exists() else []
+    tutti = [r for r in roster + extra if r.get("slug") or r.get("nome")]
+    anagrafica = {"slug": {r["slug"]: r for r in tutti if r.get("slug")},
+                  "nome": {_norm_nome(r["nome"]): r for r in tutti if r.get("nome")}}
+    inc = genera_incontri(base_i, {r["slug"]: r for r in roster if r.get("slug")}, anagrafica)
     print(f"Pagine statiche: {len(lott)} lottatori, {len(ev)} eventi, {len(inc)} incontri.")
 
 

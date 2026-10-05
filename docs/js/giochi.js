@@ -1,4 +1,4 @@
-import { renderChrome, montaFeedback } from "./common.js?v=202610052255";
+import { renderChrome, montaFeedback } from "./common.js?v=202610052257";
 
 renderChrome("giochi");
 montaFeedback(document.getElementById("feedback-modulo"));

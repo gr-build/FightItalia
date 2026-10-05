@@ -1,4 +1,4 @@
-import { renderChrome, SOCIAL, EMAIL, EMAIL_ATTIVA } from "./common.js?v=202610052255";
+import { renderChrome, SOCIAL, EMAIL, EMAIL_ATTIVA } from "./common.js?v=202610052257";
 
 renderChrome("");
 
