@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, debounce } from "./common.js?v=202610071121";
+import { fetchJSON, renderChrome, icon, slugDaLink, debounce } from "./common.js?v=202610072233";
 
 renderChrome("eventi");
 
@@ -131,6 +131,10 @@ async function init() {
   ["cerca-evento", "filtro-anno", "filtro-tipo", "filtro-data"].forEach((id) => {
     document.getElementById(id).addEventListener(id === "cerca-evento" ? "input" : "change", applicaFiltri);
   });
+  const campoData = document.getElementById("filtro-data");
+  const aggiornaEtichettaData = () => campoData.parentElement.classList.toggle("vuoto", !campoData.value);
+  ["input", "change"].forEach((ev) => campoData.addEventListener(ev, aggiornaEtichettaData));
+  aggiornaEtichettaData();
   const campoCerca = document.getElementById("cerca-evento");
   const suggerimenti = document.getElementById("cerca-evento-suggerimenti");
   campoCerca.addEventListener("input", debounce(aggiornaSuggerimenti, 100));

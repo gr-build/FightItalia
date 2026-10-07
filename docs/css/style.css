@@ -2275,6 +2275,31 @@ a.history-row { color: inherit; text-decoration: none; }
   color-scheme: dark;
 }
 
+/* Data: su iPhone il campo vuoto mostrava la data di oggi e usciva dalla colonna.
+   Largo quanto gli altri, testo a sinistra, e "Data" scritto quando e' vuoto. */
+.filtro-data { position: relative; display: block; }
+.filtri-eventi .filtro-data input {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  height: 41px;
+  text-align: left;
+}
+.filtro-data input::-webkit-date-and-time-value { text-align: left; }
+.filtro-data.vuoto input { color: transparent; }
+.filtro-data.vuoto::before {
+  content: "Data";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font: 14px var(--font-body);
+  pointer-events: none;
+}
+
 .filtri-eventi input:focus,
 .filtri-eventi select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
