@@ -36,7 +36,7 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; overflow-x: clip; max-width: 100%; }
 
 body {
   margin: 0;
@@ -47,6 +47,7 @@ body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -2294,6 +2295,7 @@ a.history-row { color: inherit; text-decoration: none; }
 
 /* Data: su iPhone il campo vuoto mostrava la data di oggi e usciva dalla colonna.
    Largo quanto gli altri, testo a sinistra, e "Data" scritto quando e' vuoto. */
+.filtri-eventi > label { min-width: 0; display: block; }
 .filtro-data { position: relative; display: block; }
 .filtri-eventi .filtro-data input {
   -webkit-appearance: none;
@@ -2302,6 +2304,8 @@ a.history-row { color: inherit; text-decoration: none; }
   min-width: 0;
   max-width: 100%;
   height: 41px;
+  box-sizing: border-box;
+  width: 100%;
   text-align: left;
 }
 .filtro-data input::-webkit-date-and-time-value { text-align: left; }
@@ -2329,7 +2333,7 @@ a.history-row { color: inherit; text-decoration: none; }
    nativo (testo e icona del calendario non ci stanno, tagliati fuori dalla
    colonna e a volte da tutta la pagina): una sotto l'altra, a tutta larghezza. */
 @media (max-width: 480px) {
-  .filtri-eventi { grid-template-columns: 1fr; }
+  .filtri-eventi { grid-template-columns: minmax(0, 1fr); }
 }
 
 .news-lingua {
