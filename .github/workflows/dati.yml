@@ -65,6 +65,9 @@ jobs:
       - name: Genera i dati della Griglia MMA
         run: python build_griglia.py
 
+      - name: Classifica del giorno (Top 10, verificata su due fonti)
+        run: python build_top10.py
+
       - name: Genera roster/eventi KSW e Oktagon (Europa)
         run: python -c "from build_data import genera_europa; genera_europa()"
 
