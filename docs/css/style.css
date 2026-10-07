@@ -2585,3 +2585,11 @@ a.rank-row:hover { color: var(--accent); }
 .t10-ok { color: var(--win); }
 .t10-no { color: var(--accent); }
 @media (max-width: 520px) { .t10-titolo { font-size: 19px; } }
+
+.t10-tabs { display: flex; gap: 6px; background: var(--bg-elevated); padding: 4px; border-radius: 10px; border: 1px solid var(--border); }
+.t10-tab { flex: 1; padding: 9px 10px; border: 0; border-radius: 7px; background: transparent; color: var(--text-secondary); font-family: var(--font-display); font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; }
+.t10-tab.attivo { background: var(--accent); color: #fff; }
+.t10-riga.ordina { cursor: pointer; user-select: none; }
+.t10-riga.ordina.selezionata { border-color: var(--accent); background: rgba(232, 53, 47, 0.12); }
+.t10-riga.ordina.trovato { cursor: default; }
+.t10-tentativi { text-align: center; font-size: 15px; line-height: 1.5; letter-spacing: 1px; }

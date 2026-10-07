@@ -4,8 +4,8 @@
 // build_top10.py (classifica ufficiale UFC oppure numeri controllati su due
 // fonti) e la fissa in data/top10.json.
 
-import { renderChrome, tracciaGioco, fetchJSON } from "./common.js?v=202610071118";
-import { caricaLottatori, leggi, scrivi, iniziali, condividi, oggiItalia, SITO } from "./giochi-comuni.js?v=202610071118";
+import { renderChrome, tracciaGioco, fetchJSON } from "./common.js?v=202610071121";
+import { caricaLottatori, leggi, scrivi, iniziali, condividi, oggiItalia, casualeConSeme, SITO } from "./giochi-comuni.js?v=202610071121";
 
 renderChrome("giochi");
 
@@ -18,6 +18,10 @@ let daSlug = new Map();
 let puzzle = null;
 let stato = null;
 let iniziata = false;
+let modo = "indovina"; // "indovina" | "ordine"
+let ord = null; // stato di "Metti in ordine"
+let scelto = null; // riga selezionata per lo scambio
+const TENTATIVI = 5;
 
 const pulito = (n) => String(n || "").replace(/\s*\*\s*$/, "").trim();
 const norma = (t) => String(t || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
@@ -42,7 +46,26 @@ function nota() {
   return "Tra i lottatori del roster UFC del gioco (numeri controllati su due fonti). Pari merito: valgono tutti.";
 }
 
+function schede() {
+  const tab = (id, testo) => `<button type="button" class="t10-tab${modo === id ? " attivo" : ""}" data-modo="${id}" aria-pressed="${modo === id}">${testo}</button>`;
+  return `<div class="t10-tabs" role="group" aria-label="Modalità">${tab("indovina", "Indovina")}${tab("ordine", "Metti in ordine")}</div>`;
+}
+
+function collegaSchede() {
+  box.querySelectorAll("[data-modo]").forEach((b) => b.addEventListener("click", () => {
+    if (modo === b.dataset.modo) return;
+    modo = b.dataset.modo;
+    scelto = null;
+    mostra();
+  }));
+}
+
 function mostra() {
+  if (modo === "ordine") return mostraOrdine();
+  mostraIndovina();
+}
+
+function mostraIndovina() {
   const finita = !!stato.fine;
   const cuori = Array.from({ length: VITE }, (_, i) => (i < stato.vite ? "❤️" : "🖤")).join("");
   const trovati = new Set(stato.trovati);
@@ -56,6 +79,7 @@ function mostra() {
     </li>`;
   }).join("");
   box.innerHTML = `
+    ${schede()}
     <div class="t10-testa">
       <span class="t10-modo">Classifica n. ${numeroDelGiorno()}</span>
       <span class="t10-cuori" aria-label="${stato.vite} cuori">${cuori}</span>
@@ -71,6 +95,7 @@ function mostra() {
     <div class="t10-azioni"><button type="button" class="btn-gioco secondario" id="t10-resa">Mi arrendo</button></div>`}
     <div id="t10-msg" role="status"></div>
     <div id="t10-fine"></div>`;
+  collegaSchede();
   if (finita) mostraFine();
   else collegaRicerca();
 }
@@ -148,6 +173,117 @@ function mostraFine() {
   document.getElementById("t10-cond").addEventListener("click", (e) => condividi(testo, e.currentTarget));
 }
 
+// ---------------------------------------------------------------- Metti in ordine
+// Gli stessi dieci (o pochi di piu', se ci sono pari merito) della classifica
+// del giorno, mescolati: si toccano due righe per scambiarle e "Controlla"
+// blocca quelle al posto giusto. Cinque controlli. I pari merito sono
+// intercambiabili: conta il posto, non l'ordine tra due uguali.
+
+const chiaveOrd = () => `top10-ordine-${oggiItalia()}`;
+const salvaOrd = () => scrivi(chiaveOrd(), ord);
+
+function mescolato() {
+  const [a, m, g] = oggiItalia().split("-").map(Number);
+  const rnd = casualeConSeme(a * 10000 + m * 100 + g + 4242);
+  const slug = puzzle.v.map(([s]) => s);
+  for (let prova = 0; prova < 50; prova++) {
+    for (let i = slug.length - 1; i > 0; i--) {
+      const j = Math.floor(rnd() * (i + 1));
+      [slug[i], slug[j]] = [slug[j], slug[i]];
+    }
+    const postoDi = new Map(puzzle.v.map(([s, , p]) => [s, p]));
+    const attesi = puzzle.v.map(([, , p]) => p);
+    if (slug.filter((s, i) => postoDi.get(s) === attesi[i]).length === 0) break; // nessuno gia' al suo posto
+  }
+  return slug;
+}
+
+function mostraOrdine() {
+  const postoDi = new Map(puzzle.v.map(([s, , p]) => [s, p]));
+  const attesi = puzzle.v.map(([, , p]) => p);
+  const finita = !!ord.fine;
+  const bloccati = new Set(ord.bloccati);
+  const righe = ord.ordine.map((slug, i) => {
+    const x = daSlug.get(slug) || { n: slug };
+    const v = puzzle.v.find(([s]) => s === slug);
+    const giusto = bloccati.has(slug) || (finita && postoDi.get(slug) === attesi[i]);
+    const sel = scelto === i;
+    const val = finita && v[1] != null ? `<span class="t10-val">${v[1]} <small>${puzzle.u}</small></span>` : "";
+    return `<li class="t10-riga ordina ${giusto ? "trovato" : ""} ${sel ? "selezionata" : ""} ${finita && !giusto ? "mancato" : ""}" data-i="${i}">
+      <span class="t10-posto">${attesi[i]}</span>${foto(x)}<span class="t10-nome">${pulito(x.n)}</span>${val}
+    </li>`;
+  }).join("");
+  const griglia = ord.tentativi.map((t) => t.map((ok) => (ok ? "🟩" : "🟥")).join("")).join("<br>");
+  box.innerHTML = `
+    ${schede()}
+    <div class="t10-testa">
+      <span class="t10-modo">Classifica n. ${numeroDelGiorno()}</span>
+      <span class="t10-cuori">Controlli: ${ord.tentativi.length}/${TENTATIVI}</span>
+    </div>
+    <h2 class="t10-titolo">${puzzle.t}</h2>
+    <p class="t10-nota">Metti i lottatori nell'ordine giusto: tocca una riga e poi un'altra per scambiarle. Le righe verdi sono al posto giusto.${puzzle.c ? ` Il campione, ${puzzle.c}, è già dato.` : ""}</p>
+    <ol class="t10-lista">${righe}</ol>
+    ${finita ? "" : `<div class="t10-azioni"><button type="button" class="btn-gioco" id="t10-controlla">Controlla</button></div>`}
+    ${griglia ? `<div class="t10-tentativi" aria-label="Tentativi">${griglia}</div>` : ""}
+    <div id="t10-msg" role="status"></div>
+    <div id="t10-fine"></div>`;
+  collegaSchede();
+  if (finita) { mostraFineOrdine(); return; }
+  box.querySelectorAll(".t10-riga.ordina").forEach((li) => li.addEventListener("click", () => tocca(Number(li.dataset.i))));
+  document.getElementById("t10-controlla").addEventListener("click", controlla);
+}
+
+function tocca(i) {
+  const slug = ord.ordine[i];
+  if (ord.bloccati.includes(slug)) return;
+  if (scelto == null) { scelto = i; mostraOrdine(); return; }
+  if (scelto !== i) {
+    const a = scelto;
+    const bloccataA = ord.bloccati.includes(ord.ordine[a]);
+    if (!bloccataA) {
+      [ord.ordine[a], ord.ordine[i]] = [ord.ordine[i], ord.ordine[a]];
+      salvaOrd();
+    }
+  }
+  scelto = null;
+  mostraOrdine();
+}
+
+function controlla() {
+  if (!iniziata) { iniziata = true; tracciaGioco("Top 10", "inizio", { modo: "ordine" }); }
+  const postoDi = new Map(puzzle.v.map(([s, , p]) => [s, p]));
+  const attesi = puzzle.v.map(([, , p]) => p);
+  const esito = ord.ordine.map((s, i) => postoDi.get(s) === attesi[i]);
+  ord.tentativi.push(esito);
+  ord.bloccati = ord.ordine.filter((s, i) => esito[i]);
+  if (esito.every(Boolean)) ord.fine = "vinto";
+  else if (ord.tentativi.length >= TENTATIVI) ord.fine = "perso";
+  scelto = null;
+  salvaOrd();
+  mostraOrdine();
+  if (ord.fine) tracciaGioco("Top 10", "fine", { modo: "ordine", esito: ord.fine, tentativi: String(ord.tentativi.length) });
+  else {
+    const m = document.getElementById("t10-msg");
+    if (m) m.innerHTML = `<span class="t10-no">${esito.filter(Boolean).length} su ${esito.length} al posto giusto.</span>`;
+  }
+}
+
+function mostraFineOrdine() {
+  const vinto = ord.fine === "vinto";
+  const t = ord.tentativi.length;
+  const quadri = ord.tentativi.map((x) => x.map((ok) => (ok ? "🟩" : "🟥")).join("")).join("\n");
+  const testo = `MMA Oggi · Top 10 n. ${numeroDelGiorno()} (metti in ordine)\n${puzzle.t}\n${vinto ? `✅ In ${t} ${t === 1 ? "controllo" : "controlli"}` : "❌ Non ce l'ho fatta"}\n${quadri}\nMi batti? ${SITO}top10.html`;
+  document.getElementById("t10-fine").innerHTML = `
+    <div class="chie-fine ${vinto ? "vinto" : "perso"}">
+      <div class="chie-fine-nome">${vinto ? `In ${t} ${t === 1 ? "controllo" : "controlli"}!` : "Non è andata"}</div>
+      <p class="chie-fine-sub">${vinto ? "Classifica in ordine." : "Qui sopra l'ordine giusto."} Una nuova classifica domani, a mezzanotte.</p>
+      <div class="finale-azioni">
+        <button type="button" class="btn-gioco" id="t10-cond">Condividi</button>
+      </div>
+    </div>`;
+  document.getElementById("t10-cond").addEventListener("click", (e) => condividi(testo, e.currentTarget));
+}
+
 async function init() {
   const [dati, programma] = await Promise.all([caricaLottatori(), fetchJSON("data/top10.json").catch(() => null)]);
   lottatori = dati;
@@ -159,6 +295,10 @@ async function init() {
   }
   stato = leggi(chiave(), null);
   if (!stato || !Array.isArray(stato.trovati)) stato = nuovoStato();
+  ord = leggi(chiaveOrd(), null);
+  if (!ord || !Array.isArray(ord.ordine) || ord.ordine.length !== puzzle.v.length) {
+    ord = { ordine: mescolato(), bloccati: [], tentativi: [], fine: null };
+  }
   mostra();
 }
 
