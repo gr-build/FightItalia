@@ -142,6 +142,36 @@ def _paesi(ib):
     return paesi
 
 
+def _slug_link(link):
+    """Come slug_da_link() in build_static.py e slugDaLink() in common.js."""
+    if not link:
+        return None
+    return re.sub(r"[^a-z0-9]+", "-", str(link).rstrip("/").split("/")[-1].lower()).strip("-")
+
+
+def divisioni_dalle_card():
+    """slug -> divisioni in cui ha combattuto in UFC, dalle card degli eventi.
+    L'infobox di Wikipedia elenca solo alcune categorie (Alex Pereira, campione
+    dei mediomassimi, non ha i mediomassimi): chi giocava la risposta giusta
+    se la vedeva rifiutare. Le card dicono dove ha combattuto davvero."""
+    out = defaultdict(set)
+    for f in (DOCS / "data" / "eventi").glob("*.json"):
+        try:
+            card = json.loads(f.read_text(encoding="utf-8"))
+        except ValueError:
+            continue
+        for r in card:
+            cat = (r.get("categoria") or "").lower()
+            for inglese, italiano in DIVISIONI:  # dal piu' specifico: Light Heavyweight prima di Heavyweight
+                if inglese.lower() in cat:
+                    for k in ("fighter1_link", "fighter2_link"):
+                        slug = _slug_link(r.get(k))
+                        if slug:
+                            out[slug].add(italiano)
+                    break
+    return out
+
+
 def _intero(v):
     m = re.match(r"\s*(\d+)", str(v or ""))
     return int(m.group(1)) if m else None
@@ -152,6 +182,7 @@ def genera():
     condizioni = defaultdict(set)  # (famiglia, testo, bandiera) -> ids
     famosi = {_norm(n): n.replace("BJ Penn", "B.J. Penn") for n in FAMOSI}
     visti = {}
+    div_card = divisioni_dalle_card()
 
     for path in sorted(LOTTATORI.glob("*.json")):
         scheda = json.loads(path.read_text(encoding="utf-8"))
@@ -186,6 +217,8 @@ def genera():
             if inglese in divisione:
                 divisione = divisione.replace(inglese, "")  # "Light Heavyweight" non conta come "Heavyweight"
                 metti("divisione", f"Pesi {italiano}")
+        for italiano in div_card.get(path.stem, ()):  # anche dove ha combattuto davvero in UFC
+            metti("divisione", f"Pesi {italiano}")
 
         note = [str(x.get("notes") or "") for x in storico]
         titoli = [n for n in note if re.search(r"\bWon the\b[^.]*Championship", n)]
