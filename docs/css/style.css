@@ -2554,3 +2554,34 @@ a.rank-row:hover { color: var(--accent); }
 .orario-fase[data-fase] { cursor: pointer; }
 .orario-fase.scelta { background: rgba(232, 53, 47, 0.08); }
 .fase-sezione[hidden] { display: none; }
+
+/* ---- Top 10 (docs/top10.html) ---- */
+.top10 { display: flex; flex-direction: column; gap: 14px; max-width: 640px; margin: 0 auto; padding-bottom: 40px; }
+.t10-testa { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-secondary); }
+.t10-cuori { font-size: 20px; letter-spacing: 3px; }
+.t10-titolo { font-family: var(--font-display); font-size: 22px; text-transform: uppercase; text-align: center; margin: 4px 0 0; text-wrap: balance; }
+.t10-nota { font-size: 12.5px; color: var(--text-muted); text-align: center; margin: 0; }
+.t10-lista { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.t10-riga { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 6px 12px; border-radius: 8px; background: var(--bg-elevated); border: 1px solid var(--border); }
+.t10-riga.trovato { border-color: rgba(47, 184, 114, 0.6); background: rgba(47, 184, 114, 0.1); }
+.t10-riga.mancato { opacity: 0.75; border-style: dashed; }
+.t10-posto { width: 22px; font-family: var(--font-display); font-size: 18px; color: var(--text-muted); text-align: center; flex-shrink: 0; }
+.t10-segreto { flex: 1; text-align: center; color: var(--text-muted); font-family: var(--font-display); letter-spacing: 0.2em; }
+.t10-nome { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t10-val { font-family: var(--font-display); font-size: 16px; white-space: nowrap; }
+.t10-val small { color: var(--text-muted); font-size: 11px; font-family: inherit; }
+.t10-foto { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; object-position: top; background: var(--bg-elevated-2); flex-shrink: 0; }
+.t10-vuota { display: inline-flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-muted); }
+.t10-ricerca { position: relative; }
+.t10-ricerca input { width: 100%; box-sizing: border-box; padding: 13px 14px; font-size: 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); }
+.t10-ricerca input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.t10-sug { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.t10-sug-voce { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); font-size: 15px; text-align: left; cursor: pointer; }
+.t10-sug-voce:hover { border-color: var(--accent); }
+.t10-sug-voce small { margin-left: auto; color: var(--text-muted); font-size: 11.5px; }
+.t10-sug-vuoto { padding: 8px 10px; color: var(--text-muted); font-size: 13px; }
+.t10-azioni { display: flex; justify-content: center; }
+#t10-msg { min-height: 20px; text-align: center; font-size: 14px; }
+.t10-ok { color: var(--win); }
+.t10-no { color: var(--accent); }
+@media (max-width: 520px) { .t10-titolo { font-size: 19px; } }
