@@ -205,6 +205,24 @@ export function linkSocial(classe = "social-link") {
   return SOCIAL.map((x) => `<a class="${classe} ${x.id}" href="${x.url}" target="_blank" rel="noopener"><span class="social-nome">${x.nome}</span><span class="social-testo">${x.testo}</span></a>`).join("");
 }
 
+// Nelle schede (lottatore, evento, incontro) una freccia fissa in alto per
+// tornare indietro: nell'app installata non c'e' il tasto del browser.
+function aggiungiIndietro(header) {
+  const m = location.pathname.match(/^\/(lottatore|evento|incontro)(\.html|\/)/);
+  if (!m) return;
+  const genitore = m[1] === "lottatore" ? "lottatori.html" : "eventi.html";
+  const riga = document.createElement("div");
+  riga.className = "container indietro-riga";
+  riga.innerHTML = `<button type="button" class="indietro" aria-label="Torna indietro"><span aria-hidden="true">←</span> Indietro</button>`;
+  riga.querySelector("button").addEventListener("click", () => {
+    // Si torna indietro solo se si arriva da un'altra pagina del sito;
+    // altrimenti (link esterno, ingresso diretto) all'elenco.
+    if (history.length > 1 && document.referrer.startsWith(location.origin)) history.back();
+    else location.href = genitore;
+  });
+  header.appendChild(riga);
+}
+
 export function renderChrome(active) {
   const header = document.getElementById("site-header");
   if (header) {
@@ -230,6 +248,7 @@ export function renderChrome(active) {
       </div>`;
     const sel = header.querySelector("#lingua");
     if (sel) sel.addEventListener("change", () => cambiaLingua(sel.value));
+    aggiungiIndietro(header);
   }
   if (!window.__liveAvviato) {
     window.__liveAvviato = true;
