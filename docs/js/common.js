@@ -260,8 +260,8 @@ export function renderChrome(active) {
         </ul>
         <a href="eventi.html" id="live-badge" class="live-badge" hidden></a>
         <div class="nav-strumenti">
-          <button type="button" class="tema-btn" id="tema-btn" aria-label="Cambia tema, chiaro o scuro">${ICONA_SOLE}${ICONA_LUNA}</button>
           ${selettoreLingua()}
+          <button type="button" class="tema-btn" id="tema-btn" aria-label="Cambia tema, chiaro o scuro">${ICONA_SOLE}${ICONA_LUNA}</button>
         </div>
       </div>`;
     const sel = header.querySelector("#lingua");
