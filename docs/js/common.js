@@ -166,6 +166,21 @@ function avviaTraduzione() {
   document.body.appendChild(s);
 }
 
+// Tema chiaro/scuro: di base scuro (e' l'aspetto di MMA Oggi); la scelta resta sul telefono.
+const ICONA_SOLE = '<svg class="ico-sole" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const ICONA_LUNA = '<svg class="ico-luna" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+
+function temaCorrente() {
+  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
+}
+
+function applicaTema(tema) {
+  document.documentElement.dataset.theme = tema;
+  try { localStorage.setItem("tema", tema); } catch (e) {}
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", tema === "light" ? "#f4f4f6" : "#0a0a0d");
+}
+
 function selettoreLingua() {
   const attuale = linguaAttuale();
   const opzioni = LINGUE.map(([codice, nome]) => `<option value="${codice}"${codice === attuale ? " selected" : ""}>${nome}</option>`).join("");
@@ -244,10 +259,15 @@ export function renderChrome(active) {
           <li><a href="giochi.html" class="nav-gauntlet ${active === "giochi" || active === "gauntlet" ? "active" : ""}">Giochi</a></li>
         </ul>
         <a href="eventi.html" id="live-badge" class="live-badge" hidden></a>
-        ${selettoreLingua()}
+        <div class="nav-strumenti">
+          <button type="button" class="tema-btn" id="tema-btn" aria-label="Cambia tema, chiaro o scuro">${ICONA_SOLE}${ICONA_LUNA}</button>
+          ${selettoreLingua()}
+        </div>
       </div>`;
     const sel = header.querySelector("#lingua");
     if (sel) sel.addEventListener("change", () => cambiaLingua(sel.value));
+    applicaTema(temaCorrente());
+    header.querySelector("#tema-btn").addEventListener("click", () => applicaTema(temaCorrente() === "dark" ? "light" : "dark"));
     aggiungiIndietro(header);
   }
   if (!window.__liveAvviato) {
