@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, debounce } from "./common.js?v=202610071121";
+import { fetchJSON, renderChrome, icon, slugDaLink, debounce } from "./common.js?v=202610081656";
 
 renderChrome("eventi");
 
@@ -38,6 +38,7 @@ function ordinaData(lista, crescente) {
 
 let tutti = [];
 let passati = [];
+let prossimi = [];
 let filtrati = [];
 let mostrati = 15;
 
@@ -84,13 +85,14 @@ function aggiornaSuggerimenti() {
   });
 }
 
-function applicaFiltri() {
+function applicaFiltri(dopoUnaScelta = false) {
   const parole = normalizza(document.getElementById("cerca-evento").value).split(/\s+/).filter(Boolean);
   const anno = document.getElementById("filtro-anno").value;
   const tipo = document.getElementById("filtro-tipo").value;
   const data = document.getElementById("filtro-data").value;
   const giorno = data ? Date.parse(data) : null;
-  filtrati = passati.filter((ev) => {
+  const filtrando = !!(parole.length || anno || tipo || giorno);
+  const passa = (ev) => {
     const d = new Date(ev.data);
     if (anno && d.getFullYear() !== Number(anno)) return false;
     if (tipo && ev.tipo !== tipo) return false;
@@ -102,9 +104,20 @@ function applicaFiltri() {
       if (!parole.every((p) => testo.includes(p))) return false;
     }
     return true;
-  });
+  };
+  // I filtri valgono anche per gli eventi in arrivo (prima toccavano solo i
+  // passati, in fondo alla pagina: sembrava che non succedesse nulla).
+  const inArrivo = prossimi.filter(passa);
+  document.getElementById("eventi-prossimi").innerHTML =
+    inArrivo.map(rigaEvento).join("") ||
+    (filtrando ? `<div class="empty-state">Nessun evento in arrivo con questi filtri.</div>` : `<div class="empty-state">Nessun evento programmato trovato.</div>`);
+  filtrati = passati.filter(passa);
   mostrati = 15;
   renderPassati();
+  if (dopoUnaScelta && filtrando) {
+    const bersaglio = inArrivo.length ? document.querySelector(".section-title") : document.getElementById("titolo-passati");
+    bersaglio.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 function renderPassati() {
@@ -121,7 +134,7 @@ async function init() {
   tutti = eventi;
   // Ordine cronologico crescente: il prossimo evento (il più vicino da
   // oggi) va per primo, non il più lontano nel tempo.
-  const prossimi = ordinaData(eventi.filter((e) => e.stato === "programmato"), true);
+  prossimi = ordinaData(eventi.filter((e) => e.stato === "programmato"), true);
   passati = ordinaData(eventi.filter((e) => e.stato === "passato"), false);
 
   document.getElementById("eventi-prossimi").innerHTML =
@@ -129,8 +142,12 @@ async function init() {
   const anni = [...new Set(passati.map((e) => new Date(e.data).getFullYear()).filter((a) => !isNaN(a)))].sort((a, b) => b - a);
   document.getElementById("filtro-anno").insertAdjacentHTML("beforeend", anni.map((a) => `<option value="${a}">${a}</option>`).join(""));
   ["cerca-evento", "filtro-anno", "filtro-tipo", "filtro-data"].forEach((id) => {
-    document.getElementById(id).addEventListener(id === "cerca-evento" ? "input" : "change", applicaFiltri);
+    document.getElementById(id).addEventListener(id === "cerca-evento" ? "input" : "change", () => applicaFiltri(id !== "cerca-evento"));
   });
+  const campoData = document.getElementById("filtro-data");
+  const aggiornaEtichettaData = () => campoData.parentElement.classList.toggle("vuoto", !campoData.value);
+  ["input", "change"].forEach((ev) => campoData.addEventListener(ev, aggiornaEtichettaData));
+  aggiornaEtichettaData();
   const campoCerca = document.getElementById("cerca-evento");
   const suggerimenti = document.getElementById("cerca-evento-suggerimenti");
   campoCerca.addEventListener("input", debounce(aggiornaSuggerimenti, 100));

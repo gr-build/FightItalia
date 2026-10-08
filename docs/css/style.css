@@ -36,7 +36,7 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; overflow-x: clip; max-width: 100%; }
 
 body {
   margin: 0;
@@ -47,6 +47,7 @@ body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -71,6 +72,23 @@ h1, h2, h3, h4 {
 }
 
 /* ---------- Nav ---------- */
+
+.indietro-riga { padding-top: 0; padding-bottom: 8px; }
+.indietro {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 6px 14px 6px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font: 700 14px var(--font-body);
+  cursor: pointer;
+}
+.indietro span { font-size: 18px; line-height: 1; color: var(--accent); }
+.indietro:hover { border-color: var(--accent); }
 
 .site-header {
   position: sticky;
@@ -211,6 +229,66 @@ h1, h2, h3, h4 {
   /* sulla nav mobile non c'e' spazio accanto ai link: la scheda diventa una striscia a tutta larghezza sotto il menu */
   .live-badge:not([hidden]) { display: flex; order: 99; flex-basis: 100%; max-width: none; justify-content: center; border-radius: 8px; margin: 0 0 8px; padding: 7px 12px; }
 }
+
+.nav-strumenti { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.tema-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: var(--bg-elevated);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.tema-btn:hover { border-color: var(--accent); }
+.tema-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tema-btn .ico-luna { display: none; }
+:root[data-theme="light"] .tema-btn .ico-sole { display: none; }
+:root[data-theme="light"] .tema-btn .ico-luna { display: block; }
+
+/* ---------- Tema chiaro (scelto con il tasto in alto) ---------- */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4f4f6;
+  --bg-elevated: #ffffff;
+  --bg-elevated-2: #ececf1;
+  --border: #d6d6de;
+  --border-soft: #e4e4ea;
+  --text: #15151b;
+  --text-secondary: #4b4b59;
+  --text-muted: #777785;
+  --accent: #d62b25;
+  --accent-hover: #e8352f;
+  --accent-soft: rgba(214, 43, 37, 0.1);
+  --gold: #9a6f0f;
+  --win: #178a4f;
+  --loss: #d62b25;
+  --draw: #6f6f7a;
+  --shadow-card: 0 1px 2px rgba(20, 20, 30, 0.08), 0 8px 24px rgba(20, 20, 30, 0.07);
+  --shadow-card-hover: 0 2px 4px rgba(20, 20, 30, 0.1), 0 16px 40px rgba(20, 20, 30, 0.12);
+}
+:root[data-theme="light"] .champ-overlay,
+:root[data-theme="light"] .chie-contatore {
+  /* testo sopra le foto: lo sfondo resta scuro, quindi i colori restano quelli del tema scuro */
+  --text: #f4f4f6; --text-secondary: #c9c9d3; --text-muted: #9a9aa6; --gold: #e0b44d; --accent: #ff453e;
+}
+:root[data-theme="light"] .champ-overlay { background: linear-gradient(to top, rgba(10, 10, 13, 0.97) 42%, rgba(10, 10, 13, 0.7) 78%, transparent); }
+:root[data-theme="light"] .champ-div { background: rgba(10, 10, 13, 0.75); color: #f0c35a; border: 1px solid rgba(240, 195, 90, 0.45); }
+:root[data-theme="light"] .site-header { background: rgba(244, 244, 246, 0.9); }
+:root[data-theme="light"] .brand-logo { background: #0a0a0d; border-radius: 14px; padding: 4px; filter: none; }
+:root[data-theme="light"] .tag.fight-night { background: rgba(20, 20, 30, 0.07); }
+:root[data-theme="light"] .event-row:hover { border-color: #b9b9c4; }
+:root[data-theme="light"] .scelta:hover { background: #ececf1; }
+:root[data-theme="light"] .esito-badge.sconfitta, :root[data-theme="light"] .pill.active { color: var(--loss); }
+:root[data-theme="light"] .cogn-tasto.no { background: rgba(20, 20, 30, 0.06); }
+:root[data-theme="light"] .ac-sesso.m { color: #2a66b8; }
+:root[data-theme="light"] .ac-sesso.f { color: #b83b73; }
+:root[data-theme="light"] img.foto-bianca { background: linear-gradient(180deg, #ffffff 0%, #e4e4ea 100%); }
 
 .lingua {
   display: inline-flex;
@@ -2275,6 +2353,34 @@ a.history-row { color: inherit; text-decoration: none; }
   color-scheme: dark;
 }
 
+/* Data: su iPhone il campo vuoto mostrava la data di oggi e usciva dalla colonna.
+   Largo quanto gli altri, testo a sinistra, e "Data" scritto quando e' vuoto. */
+.filtri-eventi > label { min-width: 0; display: block; }
+.filtro-data { position: relative; display: block; }
+.filtri-eventi .filtro-data input {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  height: 41px;
+  box-sizing: border-box;
+  width: 100%;
+  text-align: left;
+}
+.filtro-data input::-webkit-date-and-time-value { text-align: left; }
+.filtro-data.vuoto input { color: transparent; }
+.filtro-data.vuoto::before {
+  content: "Data";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font: 14px var(--font-body);
+  pointer-events: none;
+}
+
 .filtri-eventi input:focus,
 .filtri-eventi select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
@@ -2287,7 +2393,7 @@ a.history-row { color: inherit; text-decoration: none; }
    nativo (testo e icona del calendario non ci stanno, tagliati fuori dalla
    colonna e a volte da tutta la pagina): una sotto l'altra, a tutta larghezza. */
 @media (max-width: 480px) {
-  .filtri-eventi { grid-template-columns: 1fr; }
+  .filtri-eventi { grid-template-columns: minmax(0, 1fr); }
 }
 
 .news-lingua {
