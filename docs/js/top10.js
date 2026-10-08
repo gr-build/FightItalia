@@ -4,8 +4,8 @@
 // build_top10.py (classifica ufficiale UFC oppure numeri controllati su due
 // fonti) e la fissa in data/top10.json.
 
-import { renderChrome, tracciaGioco, fetchJSON } from "./common.js?v=202610081638";
-import { caricaLottatori, leggi, scrivi, iniziali, condividi, oggiItalia, casualeConSeme, SITO } from "./giochi-comuni.js?v=202610081638";
+import { renderChrome, tracciaGioco, fetchJSON } from "./common.js?v=202610081654";
+import { caricaLottatori, leggi, scrivi, iniziali, condividi, oggiItalia, casualeConSeme, SITO } from "./giochi-comuni.js?v=202610081654";
 
 renderChrome("giochi");
 
