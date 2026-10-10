@@ -1,4 +1,5 @@
-import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, giornoRoma, oggiRoma, dataSolo, messaggioErrore } from "./common.js?v=202610100950";
+import { partiteLive } from "./live.js?v=202610101009";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, giornoRoma, oggiRoma, dataSolo, messaggioErrore } from "./common.js?v=202610101009";
 
 montaPagina("partite.html");
 
@@ -32,7 +33,8 @@ function disegna(oggi, minimo, massimo) {
   document.getElementById("elenco").innerHTML = lista.length ? `<div class="griglia-partite">${listaPartite(lista, giocatori)}</div>` : `<div class="vuoto">Nessuna partita in questo giorno con questi filtri.</div>`;
 }
 
-Promise.all([fetchJSON("data/partite.json"), caricaGiocatori()]).then(([{ partite }, g]) => {
+let ridisegna = () => {};
+Promise.all([partiteLive((tutte) => { principali = tutte.filter((p) => !p.qualifica); ridisegna(); }), caricaGiocatori()]).then(([{ partite }, g]) => {
   giocatori = g;
   principali = partite.filter((p) => !p.qualifica);
   const oggi = oggiRoma();
@@ -40,7 +42,7 @@ Promise.all([fetchJSON("data/partite.json"), caricaGiocatori()]).then(([{ partit
   const minimo = giorni[0] < oggi ? giorni[0] : oggi, massimo = giorni[giorni.length - 1] > oggi ? giorni[giorni.length - 1] : oggi;
   const dalLink = new URLSearchParams(location.search).get("giorno");
   stato.giorno = dalLink && dalLink >= minimo && dalLink <= massimo ? dalLink : oggi;
-  const ridisegna = () => disegna(oggi, minimo, massimo);
+  ridisegna = () => disegna(oggi, minimo, massimo);
   const vai = (gg) => { if (gg >= minimo && gg <= massimo) { stato.giorno = gg; ridisegna(); } };
   document.getElementById("g-prec").addEventListener("click", () => vai(sposta(stato.giorno, -1)));
   document.getElementById("g-succ").addEventListener("click", () => vai(sposta(stato.giorno, 1)));

@@ -1,12 +1,16 @@
-import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610100950";
+import { partiteLive } from "./live.js?v=202610101009";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610101009";
 
 montaPagina("classifiche.html");
 frecciaIndietro(document.getElementById("indietro"), "classifiche.html", "Classifiche");
 
 const id = new URLSearchParams(location.search).get("id");
 
+// punteggi in diretta: a ogni cambiamento la pagina si ridisegna
+const datiPartite = partiteLive(() => avvia().catch(() => {}));
+
 async function avvia() {
-  const [giocatori, { partite }] = await Promise.all([caricaGiocatori(), fetchJSON("data/partite.json")]);
+  const [giocatori, { partite }] = await Promise.all([caricaGiocatori(), datiPartite]);
   const g = giocatori[id];
   const box = document.getElementById("contenuto-giocatore");
   if (!g) return messaggioErrore(box, "Giocatore non trovato. Le schede sono disponibili per i primi 100 di ATP e WTA.");

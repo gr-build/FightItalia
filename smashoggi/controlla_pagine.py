@@ -1,9 +1,11 @@
 """Controllo visivo: apre ogni pagina a 420px in tema scuro e chiaro, salva gli screenshot e segnala
 scorrimento orizzontale ed errori in console. Uso: python3 controlla_pagine.py [cartella_screenshot]"""
+import os
 import subprocess, sys, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
+UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1"
 OUT = Path(sys.argv[1] if len(sys.argv) > 1 else "/tmp/shots"); OUT.mkdir(parents=True, exist_ok=True)
 PAGINE = ["index.html", "partite.html", "calendario.html", "torneo.html?tour=atp&id=315", "classifiche.html", "giocatore.html?id=3623",
           "notizie.html", "chi-siamo.html", "seguici.html"]
@@ -13,9 +15,11 @@ time.sleep(1)
 problemi = 0
 try:
     with sync_playwright() as p:
-        b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium")
+        proxy = os.environ.get("HTTPS_PROXY")  # nel sandbox la rete passa da un proxy
+        b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium", proxy={"server": proxy, "bypass": "localhost,127.0.0.1"} if proxy else None)
         for tema in ("dark", "light"):
-            ctx = b.new_context(viewport={"width": 420, "height": 900}, device_scale_factor=1, color_scheme=tema)
+            ctx = b.new_context(viewport={"width": 420, "height": 900}, device_scale_factor=1, color_scheme=tema,
+                                 ignore_https_errors=bool(proxy), user_agent=UA)  # ESPN rifiuta il browser "headless": uso quello di un iPhone
             ctx.add_init_script(f"try{{localStorage.setItem('tema','{tema}')}}catch(e){{}}")
             for pag in PAGINE:
                 pg = ctx.new_page()

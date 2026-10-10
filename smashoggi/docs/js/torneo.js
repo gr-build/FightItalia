@@ -1,5 +1,6 @@
+import { partiteLive } from "./live.js?v=202610101009";
 import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, schedaPartita, etichettaCategoria, intervalloDate, nomeTour, frecciaIndietro,
-  messaggioErrore, oggiRoma, giornoRoma, dataBreve, punteggioPartita } from "./common.js?v=202610100950";
+  messaggioErrore, oggiRoma, giornoRoma, dataBreve, punteggioPartita } from "./common.js?v=202610101009";
 
 montaPagina("calendario.html");
 frecciaIndietro(document.getElementById("indietro"), "calendario.html", "Calendario");
@@ -8,8 +9,11 @@ const q = new URLSearchParams(location.search);
 const tour = q.get("tour") === "wta" ? "wta" : "atp";
 const id = q.get("id");
 
+// punteggi in diretta: a ogni cambiamento la pagina si ridisegna
+const datiPartite = partiteLive(() => avvia().catch(() => {}));
+
 async function avvia() {
-  const [{ tornei }, { partite }, giocatori] = await Promise.all([fetchJSON("data/tornei.json"), fetchJSON("data/partite.json"), caricaGiocatori()]);
+  const [{ tornei }, { partite }, giocatori] = await Promise.all([fetchJSON("data/tornei.json"), datiPartite, caricaGiocatori()]);
   const t = tornei.find((x) => x.id === id && x.tour === tour);
   if (!t) return messaggioErrore(document.getElementById("contenuto-torneo"), "Torneo non trovato.");
   document.title = `${t.nome} — Smash Oggi`;

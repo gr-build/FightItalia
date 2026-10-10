@@ -1,5 +1,7 @@
 import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, giornoRoma, oggiRoma, dataLunga, aggiornatoIl,
-  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali } from "./common.js?v=202610100950";
+  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali } from "./common.js?v=202610101009";
+
+import { partiteLive } from "./live.js?v=202610101009";
 
 montaPagina("index.html");
 
@@ -9,7 +11,9 @@ const ordina = (partite, giocatori) => [...partite].sort((a, b) =>
 
 // Blocco di partite con "Solo italiani" e "Mostra tutte"
 function blocco(contenitore, partite, giocatori, vuoto) {
-  let soloIta = false, tutte = false;
+  // lo stato dei bottoni resta sul contenitore: un aggiornamento in diretta non lo azzera
+  const st = (contenitore._stato ??= { soloIta: false, tutte: false });
+  let { soloIta, tutte } = st;
   const ordinate = ordina(partite, giocatori);
   const disegna = () => {
     const base = soloIta ? ordinate.filter((p) => p.giocatori.some((g) => g.paese === "ITA")) : ordinate;
@@ -21,8 +25,8 @@ function blocco(contenitore, partite, giocatori, vuoto) {
       (mostra.length ? `<div class="griglia-partite">${listaPartite(tutte ? perTorneo : mostra, giocatori, { raggruppa: tutte })}</div>` : `<div class="vuoto">${esc(vuoto)}</div>`) +
       (base.length > LIMITE ? `<p><button type="button" class="pill" data-tutte>${tutte ? "Mostra meno" : `Mostra tutte (${base.length})`}</button></p>` : "") +
       (!tutte && base.length > 1 ? `<p class="nota">Prima gli italiani e i giocatori meglio classificati.</p>` : "");
-    contenitore.querySelector("[data-ita]")?.addEventListener("click", () => { soloIta = !soloIta; disegna(); });
-    contenitore.querySelector("[data-tutte]")?.addEventListener("click", () => { tutte = !tutte; disegna(); });
+    contenitore.querySelector("[data-ita]")?.addEventListener("click", () => { st.soloIta = soloIta = !soloIta; disegna(); });
+    contenitore.querySelector("[data-tutte]")?.addEventListener("click", () => { st.tutte = tutte = !tutte; disegna(); });
   };
   disegna();
 }
@@ -67,7 +71,9 @@ function schedaEvidenza(p, giocatori, tornei) {
     </div></a>`;
 }
 
+let timerConto;
 function avviaConto() {
+  clearInterval(timerConto);
   const el = document.getElementById("conto");
   if (!el) return;
   const fine = new Date(el.dataset.quando).getTime();
@@ -80,7 +86,7 @@ function avviaConto() {
     el.textContent = (g ? `${g}g ` : "") + `${h}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
   };
   tic();
-  setInterval(tic, 1000);
+  timerConto = setInterval(tic, 1000);
 }
 
 function miniTorneo(t) {
@@ -96,15 +102,10 @@ function cardGiocatore(g, etichetta) {
     <div class="champ-overlay"><span class="champ-div">${esc(etichetta)}</span><div class="champ-nome">${esc(g.nome)}</div><div class="champ-sub">${esc(sub)}</div></div></a>`;
 }
 
-async function avvia() {
-  const [{ partite, generato }, giocatori, { tornei }, { notizie }, atp, wta] = await Promise.all([
-    fetchJSON("data/partite.json"), caricaGiocatori(), fetchJSON("data/tornei.json"), fetchJSON("data/notizie.json"),
-    fetchJSON("data/classifica-atp.json"), fetchJSON("data/classifica-wta.json"),
-  ]);
-  const oggi = oggiRoma();
-  document.getElementById("agg").textContent = aggiornatoIl(generato);
-  const principali = partite.filter((p) => !p.qualifica);
+let ridisegnaLive = () => {};
 
+// Scheda grande, numeri e partite di oggi: ridisegnati anche quando arrivano i punteggi in diretta
+function disegnaOggi(principali, giocatori, tornei, atp, wta, oggi) {
   // Scheda grande
   const ev = sceltaEvidenza(principali, giocatori);
   document.getElementById("evidenza").innerHTML = ev ? schedaEvidenza(ev, giocatori, tornei) : "";
@@ -129,6 +130,21 @@ async function avvia() {
       blocco(boxOggi, prossime.filter((p) => giornoRoma(p.data) === giorno), giocatori, "Nessuna partita.");
     } else boxOggi.innerHTML = `<div class="vuoto">Oggi non ci sono partite del tabellone principale nei dati disponibili.</div>`;
   }
+
+  return deOggi;
+}
+
+async function avvia() {
+  const [{ partite, generato }, giocatori, { tornei }, { notizie }, atp, wta] = await Promise.all([
+    partiteLive((tutte) => ridisegnaLive(tutte)), caricaGiocatori(), fetchJSON("data/tornei.json"), fetchJSON("data/notizie.json"),
+    fetchJSON("data/classifica-atp.json"), fetchJSON("data/classifica-wta.json"),
+  ]);
+  const oggi = oggiRoma();
+  document.getElementById("agg").textContent = aggiornatoIl(generato);
+  const principali = partite.filter((p) => !p.qualifica);
+
+  ridisegnaLive = (tutte) => disegnaOggi(tutte.filter((p) => !p.qualifica), giocatori, tornei, atp, wta, oggi);
+  const deOggi = disegnaOggi(principali, giocatori, tornei, atp, wta, oggi);
 
   // In evidenza: numero 1 ATP e WTA, e il miglior italiano e la migliore italiana
   const scelti = [[atp.righe[0], "N° 1 ATP"], [wta.righe[0], "N° 1 WTA"],
