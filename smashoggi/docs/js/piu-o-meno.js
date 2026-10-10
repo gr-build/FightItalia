@@ -1,6 +1,6 @@
 // Piu' o meno: due giocatori, una statistica vera. Indovina se il secondo ha un valore piu' alto o piu' basso e allunga la serie.
-import { montaPagina, esc, iniziali } from "./common.js?v=202610101053";
-import { caricaGiocatoriGioco, leggi, scrivi, condividi } from "./giochi-comuni.js?v=202610101053";
+import { montaPagina, esc, iniziali } from "./common.js?v=202610101448";
+import { caricaGiocatoriGioco, leggi, scrivi, condividi } from "./giochi-comuni.js?v=202610101448";
 
 montaPagina("giochi.html");
 

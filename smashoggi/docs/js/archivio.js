@@ -1,13 +1,13 @@
 // Archivio: albo d'oro della stagione, una finale per torneo concluso.
-import { fetchJSON, esc, montaPagina, mesiIt, messaggioErrore } from "./common.js?v=202610101053";
-import { rigaFinale } from "./archivio-comune.js?v=202610101053";
-import { normale } from "./giochi-comuni.js?v=202610101053";
+import { fetchJSON, esc, montaPagina, mesiIt, messaggioErrore } from "./common.js?v=202610101448";
+import { rigaFinale } from "./archivio-comune.js?v=202610101448";
+import { normale } from "./giochi-comuni.js?v=202610101448";
 
 montaPagina("archivio.html");
 
 const stato = { tour: "tutti", cat: "tutti", ita: false, q: "" };
 const TOUR = [["tutti", "Uomini e donne"], ["atp", "Uomini"], ["wta", "Donne"]];
-const CAT = [["tutti", "Tutte"], ["Grand Slam", "Slam"], ["1000", "1000"], ["500", "500"], ["250", "250"], ["Finals", "Finals"], ["altri", "Altri"]];
+const CAT = [["tutti", "Tutte"], ["Grand Slam", "Slam"], ["1000", "1000"], ["500", "500"], ["250", "250"], ["Finals", "Finals"], ["challenger", "Challenger"], ["altri", "Altri"]];
 let finali = [];
 
 const pillole = (k, voci) => `<div class="gruppo-filtri" role="group">${voci.map(([v, t]) =>
@@ -16,7 +16,7 @@ const pillole = (k, voci) => `<div class="gruppo-filtri" role="group">${voci.map
 function disegna() {
   const q = normale(stato.q.trim());
   const lista = finali.filter((a) => (stato.tour === "tutti" || a.tour === stato.tour)
-    && (stato.cat === "tutti" || (stato.cat === "altri" ? !a.categoria : a.categoria === stato.cat))
+    && (stato.cat === "tutti" || (stato.cat === "altri" ? !a.categoria : stato.cat === "challenger" ? a.challenger : a.categoria === stato.cat))
     && (!stato.ita || a.vincitore.paese === "ITA" || a.finalista.paese === "ITA")
     && (!q || [a.nome, a.citta, a.vincitore.nome, a.finalista.nome].some((x) => normale(x).includes(q))));
   let html = "", mese = "";
@@ -34,9 +34,10 @@ fetchJSON("data/archivio.json").then((d) => {
   document.getElementById("anno").textContent = d.anno;
   // numeri della stagione
   const conta = {};
-  for (const a of finali) conta[a.vincitore.id] = { n: (conta[a.vincitore.id]?.n || 0) + 1, g: a.vincitore };
+  for (const a of finali.filter((x) => !x.challenger)) conta[a.vincitore.id] = { n: (conta[a.vincitore.id]?.n || 0) + 1, g: a.vincitore };
   const re = Object.values(conta).sort((a, b) => b.n - a.n)[0];
   const ita = finali.filter((a) => a.vincitore.paese === "ITA").length;
+  // il "piu' vincente" si conta sul circuito principale
   document.getElementById("numeri").innerHTML = [
     ["#elenco", finali.length, "finali giocate", ""],
     ["#elenco", ita, "titoli italiani", "ita"],

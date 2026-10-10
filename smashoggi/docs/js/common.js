@@ -50,6 +50,7 @@ export function etichettaCategoria(t) {
   if (c === "1000") return { testo: t.tour === "atp" ? "Masters 1000" : "WTA 1000", classe: "" };
   if (c === "500" || c === "250") return { testo: `${t.tour === "atp" ? "ATP" : "WTA"} ${c}`, classe: "" };
   if (c === "Finals") return { testo: "Finals", classe: "" };
+  if (c && c.startsWith("Challenger")) return { testo: c, classe: "challenger" };
   return { testo: "Altro torneo", classe: "neutro" };
 }
 export const nomeTour = (t) => (t === "atp" ? "Uomini" : "Donne");

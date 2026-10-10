@@ -1,4 +1,4 @@
-import { fetchJSON, esc, montaPagina, messaggioErrore, avatar } from "./common.js?v=202610101053";
+import { fetchJSON, esc, montaPagina, messaggioErrore, avatar } from "./common.js?v=202610101448";
 
 montaPagina("classifiche.html");
 

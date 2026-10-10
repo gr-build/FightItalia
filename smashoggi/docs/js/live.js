@@ -1,6 +1,6 @@
 // Risultati in diretta: il browser chiede i punteggi a ESPN (che lo consente, CORS aperto) e li unisce ai dati del sito.
 // Se la richiesta non riesce (rete, blocchi) restano i dati dell'ultimo aggiornamento: nessun errore per chi legge.
-import { fetchJSON, oggiRoma } from "./common.js?v=202610101053";
+import { fetchJSON, oggiRoma } from "./common.js?v=202610101448";
 
 const ESPN = "https://site.api.espn.com/apis/site/v2/sports/tennis";
 const OGNI = 30000; // 30 secondi

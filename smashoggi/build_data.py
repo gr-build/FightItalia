@@ -388,6 +388,79 @@ def archivio(tornei, vecchio):
     return sorted(noto.values(), key=lambda a: a["fine"], reverse=True)
 
 
+# ---------------------------------------------------------------- challenger (Wikipedia)
+MESI_EN = {m: i + 1 for i, m in enumerate(["January", "February", "March", "April", "May", "June", "July", "August",
+                                           "September", "October", "November", "December"])}
+RE_FLAG = r"\{\{(?:#invoke:flag\|icon|flagicon)\|([A-Z]{3})?\}\}"
+GRASSETTO = "'" * 3
+
+
+def wiki_persone(cella):
+    """[(nome, paese)] da una cella: bandiera + [[Link|Testo]] oppure testo semplice."""
+    out = []
+    patt = RE_FLAG + r"\s*(?:'{3})?\s*(?:\[\[([^\]|]+)(?:\|[^\]]*)?\]\]|([A-Z][^\[\]{}<|]*?))(?=\s*(?:'{3}|<br|vs\b|$|\{\{|\|\||/))"
+    for m in re.finditer(patt, cella):
+        nome = (m.group(2) or m.group(3) or "").strip()
+        nome = re.sub(r"\s*\((?:tennis|tennis player)\)$", "", nome)
+        if nome:
+            out.append((nome, m.group(1)))
+    return out
+
+
+def wiki_punteggio(t):
+    t = re.sub(r"<sup>\((\d+)[–-](\d+)\)</sup>", lambda m: f"({min(int(m.group(1)), int(m.group(2)))})", t)
+    t = re.sub(r"<[^>]+>", "", t).replace("–", "-").replace(",", "")
+    t = re.sub(r"\bret\.?", "rit.", t)
+    return " ".join(t.split())
+
+
+def _cella(c):
+    return c.split("|", 1)[1] if re.match(r"\s*(rowspan|colspan)", c) else c
+
+
+def challenger():
+    """Stagione ATP Challenger da Wikipedia: torneo, citta', categoria, superficie, campione, finalista, punteggio, semifinali."""
+    t = scarica(f"https://en.wikipedia.org/w/index.php?title={ANNO}_ATP_Challenger_Tour&action=raw", testo=True)
+    if not t:
+        return None
+    oggi = datetime.now(ROMA).date()
+    settimana = None
+    out = []
+    for riga in t.splitlines():
+        m = re.search(r"\|\s*(" + "|".join(MESI_EN) + r") (\d{1,2})\s*\|\|", riga)
+        if m:
+            settimana = datetime(ANNO, MESI_EN[m.group(1)], int(m.group(2))).date()
+        m = re.search(r"\[\[(?:[^\]|]*\|)?([^\]]+)\]\]<br\s*/?>\s*(?:\[\[(?:[^\]|]*\|)?([^\]]+)\]\]|([^<,]+))\s*,?\s*([^<]*?)\s*<br\s*/?>\s*([A-Za-z ()]+?)\s*[–-]\s*Challenger (\d+)", riga)
+        if not m or not settimana:
+            continue
+        celle = [_cella(c) for c in riga[m.end():].split("||")]
+        nome, citta, paese_t, sup, cat = m.group(1), (m.group(2) or m.group(3) or "").strip(), m.group(4).strip(), m.group(5), m.group(6)
+        rec = {"id": "ch-" + re.sub(r"[^a-z0-9]+", "-", norm(nome)).strip("-") + f"-{settimana:%m%d}", "tour": "atp", "nome": nome,
+               "citta": citta.split(",")[0] or None, "paese": paese_t or None, "categoria": f"Challenger {cat}",
+               "superficie": superficie_it(sup.strip()), "inizio": settimana.isoformat(),
+               "fine": (settimana + timedelta(days=6)).isoformat()}
+        camp = celle[1] if len(celle) > 1 else ""
+        if GRASSETTO in camp:   # torneo concluso: campione in grassetto, punteggio dopo <br />
+            v = wiki_persone(camp)
+            f = wiki_persone(celle[2]) if len(celle) > 2 else []
+            sc = re.split(r"<br\s*/?>", camp, maxsplit=1)[1] if re.search(r"<br", camp) else ""
+            if not (v and f):
+                continue
+            rec.update({"stato": "concluso", "vincitore": {"nome": v[0][0], "paese": v[0][1]},
+                        "finalista": {"nome": f[0][0], "paese": f[0][1]}, "punteggioTesto": wiki_punteggio(sc)})
+            semi, quarti = (celle[3] if len(celle) > 3 else ""), (celle[4] if len(celle) > 4 else "")
+        else:
+            fine = settimana + timedelta(days=7)
+            rec["stato"] = "in corso" if settimana <= oggi <= fine else ("programma" if settimana > oggi else "senza risultato")
+            fin = wiki_persone(camp)
+            rec["finale"] = [{"nome": n, "paese": c} for n, c in fin] or None
+            semi, quarti = (celle[2] if len(celle) > 2 else ""), (celle[3] if len(celle) > 3 else "")
+        rec["semifinali"] = [[{"nome": n, "paese": c} for n, c in wiki_persone(x)] for x in re.split(r"<br\s*/?>", semi) if wiki_persone(x)]
+        rec["quarti"] = [{"nome": n, "paese": c} for x in re.split(r"<br\s*/?>", quarti) for n, c in wiki_persone(x)]
+        out.append(rec)
+    return out
+
+
 # ---------------------------------------------------------------- notizie
 FONTI_RSS = [
     ("Ubitennis", "https://www.ubitennis.com/feed/"),
@@ -483,8 +556,13 @@ def main():
     log("Archivio finali...")
     vecchio_path = OUT / "archivio.json"
     vecchio = json.loads(vecchio_path.read_text(encoding="utf-8"))["finali"] if vecchio_path.exists() else []
-    finali = archivio(tornei, vecchio)
-    scrivi("archivio.json", {"anno": ANNO, "finali": finali})
+    finali = archivio(tornei, [a for a in vecchio if not a["torneoId"].startswith("ch-")])
+
+    log("Challenger (Wikipedia)...")
+    ch = challenger()
+    if ch is None:   # Wikipedia non risponde: tengo i Challenger di prima
+        ch = json.loads((OUT / "challenger.json").read_text(encoding="utf-8"))["tornei"] if (OUT / "challenger.json").exists() else []
+    scrivi("challenger.json", {"generato": ora.isoformat(timespec="minutes"), "fonte": "Wikipedia", "tornei": ch})
 
     log("Schede giocatori...")
     # tutti quelli che riusciamo a ricavare: classifica (primi 150), chi ha giocato nelle ultime settimane, chi ha giocato una finale
@@ -510,8 +588,28 @@ def main():
     senza = [(g["tour"], pid) for pid, g in giocatori.items() if "pos" not in g]
     for pid, base in paralleli(dati_base, senza, 12):
         giocatori[pid].update({k: v for k, v in base.items() if v is not None})
-    # titoli vinti nella stagione, dall'archivio
-    for a in finali:
+    # Challenger: vincitori e finalisti, collegati per nome a chi conosciamo gia'; gli altri entrano con un id "w-"
+    per_nome = {norm(g["nome"]).strip(): pid for pid, g in giocatori.items() if g.get("tour") == "atp"}
+    for c in ch:
+        if c.get("stato") != "concluso":
+            continue
+        for ruolo in ("vincitore", "finalista"):
+            p = c[ruolo]
+            pid = per_nome.get(norm(p["nome"]).strip())
+            if not pid:
+                pid = "w-" + re.sub(r"[^a-z0-9]+", "-", norm(p["nome"])).strip("-")
+                per_nome[norm(p["nome"]).strip()] = pid
+                giocatori[pid] = {"id": pid, "nome": p["nome"], "paese": p["paese"], "paeseNome": PAESI.get((p["paese"] or "").lower(), p["paese"]),
+                                  "tour": "atp", "soloChallenger": True}
+            p["id"] = pid
+        giocatori[c["vincitore"]["id"]]["titoliChallenger"] = giocatori[c["vincitore"]["id"]].get("titoliChallenger", 0) + 1
+        finali.append({"tour": "atp", "torneoId": c["id"], "nome": c["nome"], "inizio": c["inizio"], "fine": c["fine"],
+                       "categoria": c["categoria"], "superficie": c["superficie"], "citta": c["citta"], "paese": c["paese"],
+                       "vincitore": c["vincitore"], "finalista": c["finalista"], "punteggioTesto": c["punteggioTesto"], "challenger": True})
+    finali.sort(key=lambda a: a["fine"], reverse=True)
+    scrivi("archivio.json", {"anno": ANNO, "finali": finali})
+    # titoli vinti nella stagione, dall'archivio (circuito principale)
+    for a in [a for a in finali if not a.get("challenger")]:
         g = giocatori.get(a["vincitore"]["id"])
         if g is not None:
             g["titoliAnno"] = g.get("titoliAnno", 0) + 1

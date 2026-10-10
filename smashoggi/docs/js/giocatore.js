@@ -1,6 +1,6 @@
-import { partiteLive } from "./live.js?v=202610101053";
-import { rigaFinale } from "./archivio-comune.js?v=202610101053";
-import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610101053";
+import { partiteLive } from "./live.js?v=202610101448";
+import { rigaFinale } from "./archivio-comune.js?v=202610101448";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610101448";
 
 montaPagina("classifiche.html");
 frecciaIndietro(document.getElementById("indietro"), "tennisti.html", "Indietro");
@@ -44,6 +44,7 @@ async function avvia() {
       ${dato("Titoli in carriera", g.titoli)}
       ${dato("Vittorie e sconfitte", g.vinte != null && g.perse != null ? `${g.vinte} – ${g.perse}` : null)}
       ${dato(`Titoli ${new Date().getFullYear()}`, g.titoliAnno)}
+      ${dato(`Challenger vinti ${new Date().getFullYear()}`, g.titoliChallenger)}
     </div>
     ${(() => {
       const sueFinali = finali.filter((a) => a.vincitore.id === id || a.finalista.id === id);
@@ -55,6 +56,6 @@ async function avvia() {
     <div class="section-title">Ultimi risultati ${forma.length ? `<span class="count">${forma.map((v) => (v ? "V" : "S")).join(" ")}</span>` : ""}</div>
     ${finite.length ? `<div class="griglia-partite">${finite.slice(0, 10).map((p) => schedaPartita(p, giocatori)).join("")}</div>`
       : `<div class="vuoto">Nessuna partita del tabellone principale nelle ultime quattro settimane nei dati disponibili.</div>`}
-    <p class="nota">V = vittoria, S = sconfitta. Singolare, tabellone principale, ultime quattro settimane. Titoli e vittorie in carriera: singolare. ${esc(nomeTour(g.tour))}: dati ESPN.</p>`;
+    <p class="nota">V = vittoria, S = sconfitta. Singolare, tabellone principale, ultime quattro settimane. Titoli e vittorie in carriera: singolare. ${g.soloChallenger ? "Scheda ricavata dalle finali Challenger (Wikipedia)." : `${esc(nomeTour(g.tour))}: dati ESPN.`}</p>`;
 }
 avvia().catch(() => messaggioErrore(document.getElementById("contenuto-giocatore")));

@@ -1,6 +1,6 @@
-import { partiteLive } from "./live.js?v=202610101053";
+import { partiteLive } from "./live.js?v=202610101448";
 import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, schedaPartita, etichettaCategoria, intervalloDate, nomeTour, frecciaIndietro,
-  messaggioErrore, oggiRoma, giornoRoma, dataBreve, punteggioPartita } from "./common.js?v=202610101053";
+  messaggioErrore, oggiRoma, giornoRoma, dataBreve, punteggioPartita } from "./common.js?v=202610101448";
 
 montaPagina("calendario.html");
 frecciaIndietro(document.getElementById("indietro"), "calendario.html", "Calendario");

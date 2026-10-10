@@ -551,3 +551,17 @@ button.gr-cella:hover, .gr-cella.attiva { border-color: var(--accent-text); colo
 .gr-chiede { text-align: center; margin: 14px 0 8px; font-size: 14px; color: var(--text-secondary); }
 .scossa { animation: scossa .4s; }
 @keyframes scossa { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.tag.challenger { background: rgba(120, 160, 255, .16); color: #8fb0ff; }
+:root[data-theme="light"] .tag.challenger { background: #e3eaff; color: #2b4fb3; }
+/* Challenger in corso (pagina Live) */
+.ch-avviso { font-size: 13.5px; color: var(--text-secondary); background: var(--bg-elevated); border: 1px dashed var(--border); border-radius: 10px; padding: 10px 12px; }
+.ch-griglia { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.ch-turno { font: 600 11px var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin: 8px 0 4px; }
+.ch-sfida { display: grid; gap: 4px; padding: 7px 0; border-top: 1px solid var(--border-soft); font-size: 14.5px; }
+.ch-p { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ch-sfida .ch-vs { display: none; }
+.ch-sfida .ch-vs.testo { display: inline; justify-self: start; color: var(--accent-text); font-weight: 700; }
+.ch-p .codice { flex: none; width: 34px; }
+.ch-p.ita .codice { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.ch-p.attesa { color: var(--text-muted); font-style: italic; }
+.ch-vs { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }

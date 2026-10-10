@@ -1,12 +1,12 @@
 // Tennisti: tutti i giocatori che ricaviamo dai dati, con ricerca e filtri.
-import { esc, montaPagina, caricaGiocatori, avatar, messaggioErrore } from "./common.js?v=202610101053";
-import { normale } from "./giochi-comuni.js?v=202610101053";
+import { esc, montaPagina, caricaGiocatori, avatar, messaggioErrore } from "./common.js?v=202610101448";
+import { normale } from "./giochi-comuni.js?v=202610101448";
 
 montaPagina("tennisti.html");
 
 const stato = { tour: "tutti", gruppo: "tutti", ordine: "classifica", q: "" };
 const TOUR = [["tutti", "Tutti"], ["atp", "Uomini"], ["wta", "Donne"]];
-const GRUPPI = [["tutti", "Tutti"], ["ita", "🇮🇹 Italiani"], ["top", "Primi 150"], ["titoli", "Hanno vinto un titolo quest'anno"], ["mancini", "Mancini"]];
+const GRUPPI = [["tutti", "Tutti"], ["ita", "🇮🇹 Italiani"], ["top", "Primi 150"], ["titoli", "Hanno vinto un titolo quest'anno"], ["challenger", "Challenger"], ["mancini", "Mancini"]];
 const ORDINE = [["classifica", "Classifica"], ["az", "A–Z"], ["titoli", "Titoli in carriera"], ["giovani", "Più giovani"]];
 const PASSO = 60;
 let tutti = [], quanti = PASSO;
@@ -23,7 +23,7 @@ function disegna() {
   const q = normale(stato.q.trim());
   const lista = tutti.filter((g) => (stato.tour === "tutti" || g.tour === stato.tour)
     && (stato.gruppo === "tutti" || (stato.gruppo === "ita" && g.paese === "ITA") || (stato.gruppo === "top" && g.pos)
-      || (stato.gruppo === "titoli" && g.titoliAnno) || (stato.gruppo === "mancini" && g.mano === "Sinistra"))
+      || (stato.gruppo === "titoli" && g.titoliAnno) || (stato.gruppo === "challenger" && (g.titoliChallenger || g.soloChallenger)) || (stato.gruppo === "mancini" && g.mano === "Sinistra"))
     && (!q || normale(`${g.nome} ${g.paeseNome || ""} ${g.paese || ""}`).includes(q)));
   const cmp = {
     classifica: (a, b) => (a.pos || 999) - (b.pos || 999) || a.nome.localeCompare(b.nome),

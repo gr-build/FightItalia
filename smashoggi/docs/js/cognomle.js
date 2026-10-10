@@ -1,7 +1,7 @@
 // Cognomle: il cognome di un giocatore dei primi 100 ATP e WTA in 6 tentativi, come Wordle.
 // Verde: lettera giusta al posto giusto. Giallo: c'e' ma in un altro posto. Grigio: non c'e'.
-import { montaPagina, esc } from "./common.js?v=202610101053";
-import { caricaGiocatoriGioco, delGiorno, leggi, scrivi, oggiItalia, condividi, normale } from "./giochi-comuni.js?v=202610101053";
+import { montaPagina, esc } from "./common.js?v=202610101448";
+import { caricaGiocatoriGioco, delGiorno, leggi, scrivi, oggiItalia, condividi, normale } from "./giochi-comuni.js?v=202610101448";
 
 montaPagina("giochi.html");
 

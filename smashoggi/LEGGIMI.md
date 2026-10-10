@@ -43,6 +43,11 @@ punteggio). Le finali già trovate restano nel file e non si riscaricano. Tennis
 finale; per ognuno titoli e vittorie/sconfitte in carriera (ESPN). Foto solo per classificati, italiani e vincitori di titoli.
 Giochi in più: Griglia, Quiz, Ordina.
 
+Challenger (`data/challenger.json`): dalla pagina Wikipedia "2026 ATP Challenger Tour" (licenza CC BY-SA): torneo,
+categoria, superficie, campione, finalista, punteggio, semifinali e quarti. Nessuna diretta: nella pagina Live i Challenger
+in corso mostrano il tabellone, con il risultato disponibile a fine partita. Le finali concluse entrano nell'Archivio e
+vincitori/finalisti nella pagina Tennisti (collegati per nome ai giocatori ESPN, altrimenti con id "w-...").
+
 Altri script:
 - `python3 bump_versione.py` — cambia il numero `?v=` di JS e CSS (da lanciare prima di ogni pubblicazione).
 - `python3 build_sitemap.py` — scrive `sitemap.xml` e `robots.txt` (usa `docs/CNAME` se esiste).
