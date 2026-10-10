@@ -218,7 +218,7 @@ export function montaPagina(paginaCorrente) {
     footer.innerHTML = `<div class="container">
         <div class="footer-social"><span>Segui Smash Oggi</span><a class="social-link" href="seguici.html"><span>Seguici</span></a><a class="social-link" href="chi-siamo.html"><span>Chi siamo</span></a></div>
         <p>I dati riportati hanno scopo informativo e statistico; non costituiscono consiglio di scommessa. Gioca responsabilmente.</p>
-        <p>Smash Oggi — risultati, calendario e classifiche del tennis. Dati da ESPN e Wikipedia, notizie con link alle testate originali, aggiornati periodicamente.</p>
+        <p>Smash Oggi — risultati, calendario e classifiche del tennis. Dati da ESPN e Wikipedia, foto da ESPN e Wikimedia Commons (licenze libere), notizie con link alle testate originali, aggiornati periodicamente.</p>
         <p style="font-size:11.5px">Smash Oggi è un progetto indipendente, non affiliato né sponsorizzato da ATP, WTA, ITF o dai tornei citati.</p>
       </div>`;
   }

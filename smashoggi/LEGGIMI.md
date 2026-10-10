@@ -15,6 +15,7 @@ Poi apri http://localhost:8000 (non funziona aprendo i file con doppio clic: i d
 ```
 cd smashoggi
 python3 build_data.py
+python3 build_foto.py
 ```
 Scrive i file JSON in `docs/data/`. Fonti: ESPN (classifiche, partite, calendario, schede), Wikipedia (categoria e
 superficie dei tornei), RSS di Ubitennis, Tennis Italiano, OA Sport, Gazzetta, Corriere dello Sport, Tuttosport
