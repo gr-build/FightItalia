@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://gr-build.github.io/tennisoggi/sitemap.xml
