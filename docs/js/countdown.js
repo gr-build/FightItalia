@@ -1,4 +1,4 @@
-import { fetchJSON, slugDaLink } from "./common.js?v=202610100416";
+import { fetchJSON, slugDaLink, fotoDi } from "./common.js?v=202610100419";
 
 // Riquadro "Prossimo evento UFC" in cima alla home, con il conto alla rovescia
 // (come il timer del prossimo GP su gpoggi.it). Parte dalla prima fascia della
@@ -51,6 +51,27 @@ const quando = (t) =>
 const ora = (t) => new Date(t).toLocaleTimeString("it-IT", { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit" });
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
+// Foto dei due del main event (ritratti ESPN dal roster del sito): se manca
+// una foto vera il palco non si mostra, resta solo il testo.
+async function palcoMainEvent(e) {
+  try {
+    if (!e.link) return "";
+    const [incontri, roster] = await Promise.all([fetchJSON(`data/eventi/${slugDaLink(e.link)}.json`), fetchJSON("data/roster.json")]);
+    const main = incontri.find((x) => /main/i.test(x.sezione || "")) || incontri[0];
+    if (!main) return "";
+    const lott = [[main.fighter1, main.fighter1_link], [main.fighter2, main.fighter2_link]].map(([nome, link]) => {
+      const r = roster.find((x) => x.slug === slugDaLink(link || "")) || roster.find((x) => x.nome === nome);
+      const foto = fotoDi(r);
+      return { nome, foto: foto && !/Flag_of/i.test(foto) ? foto : null };
+    });
+    if (!lott[0].foto || !lott[1].foto) return "";
+    const fig = (l, lato) => `<span class="cd-lott ${lato}"><img src="${esc(l.foto)}" alt="${esc(l.nome)}" loading="eager"><span class="cd-lott-nome">${esc(l.nome)}</span></span>`;
+    return `<span class="cd-palco"><span class="cd-sigla">Main event</span>${fig(lott[0], "cd-sx")}<span class="cd-vs">VS</span>${fig(lott[1], "cd-dx")}</span>`;
+  } catch {
+    return "";
+  }
+}
+
 async function init() {
   const box = document.getElementById("countdown-evento");
   if (!box) return;
@@ -66,16 +87,20 @@ async function init() {
     .sort((a, b) => a.primo - b.primo)[0];
   if (!prossimo) return;
   const { e, seg, primo } = prossimo;
+  const palco = await palcoMainEvent(e);
   const luogo = [e.sede, e.luogo].filter(Boolean).join(" — ").replace(/\s+,/g, ",");
   const indicativo = e.orari && e.orari.indicativo;
   box.href = e.link ? `evento.html?slug=${slugDaLink(e.link)}` : "eventi.html";
   box.innerHTML = `
-    <span class="cd-kicker">Prossimo evento UFC</span>
-    <strong class="cd-nome">${esc(e.evento)}</strong>
-    <span class="cd-luogo">${esc(luogo)}</span>
-    <span class="cd-orari">${seg.map((s) => `<span>${s.etichetta} <b>${esc(quando(s.inizio))}</b></span>`).join("")}</span>
-    <span class="cd-timer" role="timer"></span>
-    ${indicativo ? '<span class="cd-nota">Orari indicativi, ora italiana</span>' : '<span class="cd-nota">Ora italiana</span>'}`;
+    ${palco}
+    <span class="cd-info">
+      <span class="cd-kicker">Prossimo evento UFC</span>
+      <strong class="cd-nome">${esc(e.evento)}</strong>
+      <span class="cd-luogo">${esc(luogo)}</span>
+      <span class="cd-orari">${seg.map((s) => `<span>${s.etichetta} <b>${esc(quando(s.inizio))}</b></span>`).join("")}</span>
+      <span class="cd-timer" role="timer"></span>
+      ${indicativo ? '<span class="cd-nota">Orari indicativi, ora italiana</span>' : '<span class="cd-nota">Ora italiana</span>'}
+    </span>`;
   box.hidden = false;
   const t = box.querySelector(".cd-timer");
   const aggiorna = () => {
