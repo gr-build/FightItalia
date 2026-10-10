@@ -1,0 +1,221 @@
+/* ============================================================
+   Tennis Oggi — stile
+   Font: Oswald (titoli, numeri) + Inter (testo). Tema scuro di base, chiaro a scelta.
+   Accento: giallo-verde "pallina da tennis".
+   ============================================================ */
+
+:root {
+  --bg: #0a0a0d;
+  --bg-elevated: #16161c;
+  --bg-elevated-2: #1f1f27;
+  --border: #2a2a33;
+  --border-soft: #1e1e26;
+
+  --text: #f4f4f6;
+  --text-secondary: #a6a6b3;
+  --text-muted: #8a8a98;
+
+  --accent: #c6f432;          /* riempimenti e bordi */
+  --accent-text: #c6f432;     /* testo e link: in tema chiaro diventa piu' scuro (contrasto) */
+  --accent-hover: #d8ff58;
+  --accent-ink: #0a0a0d;      /* testo sopra i riempimenti accento */
+  --accent-soft: rgba(198, 244, 50, 0.12);
+  --live: #ff5a4f;
+  --win: #2fb872;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.28);
+
+  --font-display: "Oswald", "Arial Narrow", sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --container: 1100px;
+}
+
+:root[data-theme="light"] {
+  --bg: #f4f4f6;
+  --bg-elevated: #ffffff;
+  --bg-elevated-2: #ececf1;
+  --border: #d6d6de;
+  --border-soft: #e4e4ea;
+  --text: #14141a;
+  --text-secondary: #4a4a58;
+  --text-muted: #5e5e6c;
+  --accent-text: #4d6b00;
+  --accent-hover: #3d5600;
+  --accent-soft: rgba(120, 160, 0, 0.14);
+  --live: #c9302a;
+  --win: #1d8a52;
+  --shadow-card: 0 1px 2px rgba(20, 20, 30, 0.08), 0 8px 24px rgba(20, 20, 30, 0.08);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; overflow-x: clip; max-width: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased; overflow-x: clip;
+}
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.01em; text-transform: uppercase; margin: 0; }
+img { max-width: 100%; }
+.container { max-width: var(--container); margin: 0 auto; padding: 0 16px; }
+.solo-lettori { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; border-radius: 4px; }
+.skip { position: absolute; left: -999px; top: 8px; background: var(--accent); color: var(--accent-ink); padding: 8px 14px; border-radius: 6px; z-index: 100; font-weight: 700; }
+.skip:focus { left: 8px; }
+
+/* ---------- Intestazione ---------- */
+.site-header { position: sticky; top: 0; z-index: 50; background: rgba(10, 10, 13, 0.88); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-soft); }
+:root[data-theme="light"] .site-header { background: rgba(244, 244, 246, 0.92); }
+.nav { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 8px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 24px; letter-spacing: 0.04em; font-weight: 700; white-space: nowrap; text-transform: uppercase; }
+.brand img { width: 38px; height: 38px; display: block; }
+.brand .dot, .brand .oggi { color: var(--accent-text); }
+.brand .oggi { text-transform: none; letter-spacing: 0.02em; }
+.nav-links { display: none; align-items: center; gap: 4px; }
+.nav-links a { padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 14px; color: var(--text-secondary); }
+.nav-links a:hover { color: var(--text); background: var(--bg-elevated); }
+.nav-links a[aria-current="page"] { color: var(--accent-text); background: var(--accent-soft); }
+.nav-azioni { display: flex; align-items: center; gap: 6px; }
+.icon-btn { width: 42px; height: 42px; display: grid; place-items: center; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; color: var(--text); cursor: pointer; }
+.icon-btn:hover { border-color: var(--accent-text); }
+.icon-btn svg { width: 20px; height: 20px; }
+.tema-btn .ico-luna { display: none; }
+:root[data-theme="light"] .tema-btn .ico-sole { display: none; }
+:root[data-theme="light"] .tema-btn .ico-luna { display: block; }
+.menu-mobile { display: none; border-top: 1px solid var(--border-soft); padding: 8px 16px 14px; }
+.menu-mobile.aperto { display: grid; gap: 4px; }
+.menu-mobile a { padding: 12px 12px; border-radius: 8px; font-weight: 600; background: var(--bg-elevated); border: 1px solid var(--border-soft); }
+.menu-mobile a[aria-current="page"] { color: var(--accent-text); border-color: var(--accent-text); }
+@media (min-width: 820px) {
+  .nav-links { display: flex; }
+  .menu-btn { display: none; }
+  .menu-mobile.aperto { display: none; }
+}
+
+/* ---------- Titoli e sezioni ---------- */
+.hero { padding: 26px 0 8px; }
+.hero h1 { font-size: 34px; line-height: 1.1; }
+.hero h1 .accent, .accent { color: var(--accent-text); }
+.hero p { margin: 10px 0 0; color: var(--text-secondary); max-width: 62ch; }
+.agg { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+.section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 30px 0 12px; font-size: 20px; }
+.section-title .count { font-family: var(--font-body); font-size: 13px; color: var(--text-muted); text-transform: none; font-weight: 500; }
+.section-title a.tutti { font-family: var(--font-body); font-size: 13px; color: var(--accent-text); text-transform: none; font-weight: 600; white-space: nowrap; }
+.sottotitolo { margin: 18px 0 8px; font-size: 13px; color: var(--text-secondary); font-family: var(--font-body); text-transform: none; font-weight: 600; letter-spacing: 0; }
+.vuoto { padding: 18px; border: 1px dashed var(--border); border-radius: var(--radius); color: var(--text-secondary); font-size: 14px; }
+.nota { font-size: 12px; color: var(--text-muted); margin: 10px 0 0; }
+
+.indietro-riga { padding: 14px 0 0; }
+.indietro { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 14px 6px 10px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 999px; color: var(--text); font: 700 14px var(--font-body); cursor: pointer; }
+.indietro span { font-size: 18px; line-height: 1; color: var(--accent-text); }
+.indietro:hover { border-color: var(--accent-text); }
+
+/* ---------- Filtri ---------- */
+.filtri { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 6px; }
+.pill { min-height: 38px; padding: 6px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 999px; color: var(--text-secondary); font: 600 13px var(--font-body); cursor: pointer; }
+.pill:hover { border-color: var(--accent-text); color: var(--text); }
+.pill[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.gruppo-filtri { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.cerca { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 420px; padding: 0 12px; min-height: 42px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; }
+.cerca input { flex: 1; min-width: 0; background: none; border: 0; color: var(--text); font: 500 15px var(--font-body); outline: none; padding: 10px 0; }
+.cerca:focus-within { border-color: var(--accent-text); }
+
+/* ---------- Partite ---------- */
+.griglia-partite { display: grid; gap: 12px; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .griglia-partite { grid-template-columns: 1fr 1fr; } }
+.gruppo-torneo { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; margin-top: 8px; font-family: var(--font-display); text-transform: uppercase; font-size: 15px; letter-spacing: .04em; color: var(--text-secondary); }
+.gruppo-torneo a:hover { color: var(--accent-text); }
+.partita { background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 10px 12px 8px; min-width: 0; }
+.partita .meta { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.partita .meta .stato { font-weight: 700; white-space: nowrap; }
+.stato.live { color: var(--live); }
+.stato.live::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--live); margin-right: 5px; vertical-align: 1px; }
+.riga-giocatore { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 5px 0; border-top: 1px solid var(--border-soft); min-height: 38px; }
+.riga-giocatore:first-of-type { border-top: 0; }
+.codice { font: 600 11px var(--font-body); letter-spacing: .04em; color: var(--text-muted); text-align: center; border: 1px solid var(--border); border-radius: 4px; padding: 2px 0; }
+.riga-giocatore.ita .codice { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.nome { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.nome a:hover { color: var(--accent-text); text-decoration: underline; }
+.riga-giocatore.vince .nome { font-weight: 700; }
+.riga-giocatore:not(.vince) .nome { color: var(--text-secondary); }
+.set { display: flex; gap: 4px; }
+.set b { min-width: 24px; text-align: center; font: 600 15px var(--font-display); padding: 2px 4px; border-radius: 4px; color: var(--text-secondary); }
+.set b sup { font-size: 9px; margin-left: 1px; }
+.riga-giocatore.vince .set b.v { background: var(--accent); color: var(--accent-ink); }
+.partita .speciale { font-size: 11px; color: var(--text-muted); text-align: right; padding-bottom: 2px; }
+
+/* ---------- Tornei ---------- */
+.lista-tornei { display: grid; gap: 10px; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .lista-tornei { grid-template-columns: 1fr 1fr; } }
+.torneo-card { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 12px; background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius); align-items: center; }
+.torneo-card:hover { border-color: var(--accent-text); }
+.torneo-card .date { text-align: center; font-family: var(--font-display); line-height: 1.1; }
+.torneo-card .date b { display: block; font-size: 24px; color: var(--accent-text); }
+.torneo-card .date span { font-size: 12px; text-transform: uppercase; color: var(--text-muted); letter-spacing: .05em; }
+.torneo-card h3 { font-size: 16px; line-height: 1.2; text-transform: none; font-family: var(--font-body); font-weight: 700; overflow-wrap: anywhere; }
+.torneo-card .sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.tag { display: inline-block; font: 700 11px var(--font-body); letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); margin-right: 6px; }
+.tag.slam { background: var(--accent); color: var(--accent-ink); }
+.tag.neutro { background: var(--bg-elevated-2); color: var(--text-secondary); }
+.tag.corso { background: var(--live); color: #fff; }
+.mese { grid-column: 1 / -1; margin-top: 10px; font-size: 14px; color: var(--text-secondary); }
+
+/* ---------- Classifiche ---------- */
+.tabella { background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius); overflow: hidden; }
+.riga-class { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 12px; border-top: 1px solid var(--border-soft); min-height: 52px; }
+.riga-class:first-child { border-top: 0; }
+a.riga-class:hover { background: var(--bg-elevated-2); }
+.riga-class.ita { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+.pos { font: 600 20px var(--font-display); text-align: center; }
+.riga-class .chi { min-width: 0; }
+.riga-class .chi b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.riga-class .chi small { color: var(--text-secondary); font-size: 12px; }
+.punti { text-align: right; font: 600 17px var(--font-display); }
+.punti small { display: block; font: 500 11px var(--font-body); color: var(--text-muted); }
+.var { font-size: 12px; font-weight: 700; margin-left: 6px; }
+.var.su { color: var(--win); }
+.var.giu { color: var(--live); }
+
+/* ---------- Giocatore / torneo (dettaglio) ---------- */
+.scheda-testa { display: flex; align-items: center; gap: 16px; padding: 18px 0 4px; }
+.scheda-testa .grande { font: 700 44px var(--font-display); color: var(--accent-text); line-height: 1; min-width: 70px; text-align: center; }
+.scheda-testa .grande small { display: block; font: 600 11px var(--font-body); color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; }
+.scheda-testa h1 { font-size: 30px; line-height: 1.1; overflow-wrap: anywhere; }
+.scheda-testa .sub { color: var(--text-secondary); margin-top: 4px; }
+.dati { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+@media (min-width: 720px) { .dati { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.dato { background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 10px 12px; min-width: 0; }
+.dato span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); font-weight: 600; }
+.dato b { font: 600 20px var(--font-display); overflow-wrap: anywhere; }
+.dato b.testo { font: 600 15px var(--font-body); }
+
+/* ---------- Notizie ---------- */
+.lista-notizie { display: grid; gap: 8px; }
+.notizia { display: block; padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius); }
+.notizia:hover { border-color: var(--accent-text); }
+.notizia b { display: block; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+.notizia small { display: block; margin-top: 4px; color: var(--text-muted); font-size: 12px; }
+.notizia small .fonte { color: var(--accent-text); font-weight: 700; }
+
+/* ---------- Home: due colonne ---------- */
+.due-col { display: grid; gap: 24px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .due-col { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; } }
+.box-italiani { background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 6px 0; }
+.box-italiani .riga-class { grid-template-columns: 44px minmax(0, 1fr) auto; min-height: 44px; padding: 6px 12px; }
+.box-italiani h3 { padding: 10px 12px 4px; font-size: 14px; color: var(--text-secondary); }
+.pagina-testo { max-width: 70ch; }
+.pagina-testo h2 { margin: 26px 0 8px; font-size: 20px; }
+.pagina-testo p, .pagina-testo li { color: var(--text-secondary); }
+.pagina-testo a { color: var(--accent-text); text-decoration: underline; }
+
+/* ---------- Pie' di pagina ---------- */
+.site-footer { margin-top: 56px; border-top: 1px solid var(--border-soft); padding: 26px 0 40px; color: var(--text-muted); font-size: 13px; }
+.site-footer .colonne { display: grid; gap: 18px; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .site-footer .colonne { grid-template-columns: 1.4fr 1fr 1fr; } }
+.site-footer h4 { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+.site-footer a { display: inline-block; padding: 4px 0; color: var(--text-secondary); }
+.site-footer a:hover { color: var(--accent-text); }
+.site-footer .links { display: flex; flex-direction: column; }
+.site-footer .brand { color: var(--text); padding: 0; }

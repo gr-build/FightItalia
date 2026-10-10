@@ -13,6 +13,7 @@ niente quote di scommesse.
 """
 
 import hashlib
+import html
 import json
 import os
 import re
@@ -187,12 +188,13 @@ def estrai_partite(tour, sb):
                 turno = (c.get("round") or {}).get("displayName") or ""
                 note = " ".join(n["text"] for n in c.get("notes", []) if n.get("text"))
                 out.append({
-                    "id": c["id"], "tour": tour, "torneoId": str(c.get("tournamentId") or ev["id"].split("-")[0]),
+                    "id": c["id"], "tour": "atp" if tipo == "mens-singles" else "wta", "torneoId": str(c.get("tournamentId") or ev["id"].split("-")[0]),
                     "torneo": ev["name"], "turno": TURNI.get(turno, turno), "qualifica": "Qualifying" in turno,
                     "data": c.get("startDate") or c.get("date"), "stato": stato["state"],  # pre / in / post
                     "dettaglio": stato.get("detail") if stato["state"] != "pre" else None,
                     "campo": (c.get("venue") or {}).get("court"), "giocatori": giocatori,
-                    "esito": note if stato["state"] == "post" and not note.startswith("bt") else None,
+                    "speciale": ("Ritiro" if note.endswith(" ret") else "Walkover" if note.endswith(" w/o") else None)
+                    if stato["state"] == "post" else None,
                 })
     return out
 
@@ -329,6 +331,10 @@ FONTI_RSS = [
 ]
 
 
+# Divieto di pubblicita' del gioco d'azzardo: via ogni titolo che parla di quote, pronostici, scommesse
+GIOCO = re.compile(r"\bquot[ae]\b|pronostic|scommess|bookmaker|\bodds\b|\bbet(ting)?\b|\bsnai\b|bet365|sisal|lottomatica|planetwin|\bbonus\b|\bgiocata\b", re.I)
+
+
 def notizie_fonte(f):
     nome, url = f
     raw = scarica(url, testo=True)
@@ -341,9 +347,9 @@ def notizie_fonte(f):
         return []
     out = []
     for it in radice.iter("item"):
-        titolo = (it.findtext("title") or "").strip()
+        titolo = re.sub(r"<[^>]+>", " ", html.unescape(it.findtext("title") or "")).strip()
         link = (it.findtext("link") or "").strip()
-        if not titolo or not link.startswith("http"):
+        if not titolo or not link.startswith("http") or GIOCO.search(titolo):
             continue
         try:
             data = parsedate_to_datetime(it.findtext("pubDate")).astimezone(timezone.utc).isoformat(timespec="minutes")
@@ -383,7 +389,10 @@ def main():
         if sb is None:
             mancanti += 1
         for p in estrai_partite(tour, sb):
-            partite[(p["tour"], p["id"])] = p
+            # la stessa partita puo' comparire due volte con id diversi: la riconosco da torneo, turno e giocatori
+            chiave = (p["tour"], p["torneoId"], p["turno"], frozenset(g["id"] for g in p["giocatori"]))
+            if chiave not in partite or p["stato"] == "post":
+                partite[chiave] = p
     # le qualificazioni concluse da piu' di 2 giorni non servono: alleggerisce il file
     limite = (datetime.now(timezone.utc) - timedelta(days=2)).strftime("%Y-%m-%dT%H:%M")
     tutte = sorted((p for p in partite.values() if not (p["qualifica"] and p["stato"] == "post" and (p["data"] or "") < limite)),
@@ -407,14 +416,7 @@ def main():
     for t in TOURS:
         for r in classifiche[t]["righe"]:
             giocatori[r["id"]] = {**r, "tour": t, **schede.get(r["id"], {})}
-    # ultimi risultati: dalle partite concluse nella finestra scaricata (solo tabellone principale)
-    for p in tutte:
-        if p["stato"] != "post":
-            continue
-        for i, g in enumerate(p["giocatori"]):
-            sc = giocatori.get(g["id"])
-            if sc is not None:
-                sc.setdefault("risultati", []).append({"partita": p["id"], "tour": p["tour"]})
+    # gli ultimi risultati di ogni giocatore si ricavano nel browser da partite.json
     scrivi("giocatori.json", giocatori)
 
     log("Notizie...")

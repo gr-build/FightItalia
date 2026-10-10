@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="img/favicon-64.png">
+<link rel="icon" type="image/svg+xml" href="img/logo.svg">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0d">
+<title>Tennis Oggi — Risultati, calendario e classifiche del tennis</title>
+<meta name="description" content="Partite di oggi, risultati recenti, prossimi tornei, classifiche ATP e WTA e notizie dal mondo del tennis, in italiano.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tennis Oggi">
+<meta property="og:title" content="Tennis Oggi — Risultati, calendario e classifiche del tennis">
+<meta property="og:description" content="Partite di oggi, risultati recenti, prossimi tornei, classifiche ATP e WTA e notizie dal mondo del tennis, in italiano.">
+<meta property="og:image" content="https://gr-build.github.io/tennisoggi/img/og-image.png">
+<meta property="og:url" content="https://gr-build.github.io/tennisoggi/index.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://gr-build.github.io/tennisoggi/index.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=202610100420">
+<script>try{var t=localStorage.getItem("tema");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#contenuto">Vai al contenuto</a>
+<header id="site-header" class="site-header"></header>
+<main>
+<div class="container">
+  <section class="hero">
+    <h1>Oggi nel <span class="accent">tennis</span></h1>
+    <p>Partite del giorno, risultati, prossimi tornei e classifiche ATP e WTA. <span id="data-oggi" style="text-transform:capitalize"></span></p>
+    <div class="agg" id="agg"></div>
+  </section>
+  <div class="due-col">
+    <div>
+      <h2 class="section-title" id="titolo-oggi">Partite di oggi</h2>
+      <div id="oggi" data-carica><div class="vuoto">Caricamento…</div></div>
+      <h2 class="section-title">Risultati recenti</h2>
+      <div id="recenti" data-carica></div>
+      <h2 class="section-title">Prossimi tornei <a class="tutti" href="calendario.html">Calendario completo →</a></h2>
+      <div class="lista-tornei" id="tornei" data-carica></div>
+    </div>
+    <aside>
+      <h2 class="section-title" style="margin-top:0">Gli italiani <a class="tutti" href="classifiche.html">Classifiche →</a></h2>
+      <div class="box-italiani" id="italiani" data-carica></div>
+      <h2 class="section-title">Ultime notizie <a class="tutti" href="notizie.html">Tutte →</a></h2>
+      <div class="lista-notizie" id="notizie" data-carica></div>
+    </aside>
+  </div>
+</div>
+</main>
+<footer id="site-footer" class="site-footer"></footer>
+<script type="module" src="js/home.js?v=202610100420"></script>
+</body>
+</html>
