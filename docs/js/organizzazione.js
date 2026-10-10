@@ -1,5 +1,5 @@
-import { fetchJSON, renderChrome, debounce } from "./common.js?v=202610081718";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202610081718";
+import { fetchJSON, renderChrome, debounce } from "./common.js?v=202610100358";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202610100358";
 
 renderChrome("europa");
 
@@ -75,6 +75,7 @@ async function init() {
   // Prossimi (dal piu' vicino) e passati (dal piu' recente) in due liste
   // separate, come in eventi.js: qui non c'era divisione ed erano mischiati.
   const adesso = new Date();
+  adesso.setHours(0, 0, 0, 0); // l'evento di oggi resta tra i prossimi fino a mezzanotte
   const quando = (e) => new Date(e.data);
   const prossimiOrg = eventi.filter((e) => quando(e) >= adesso).sort((a, b) => quando(a) - quando(b));
   const passatiOrg = eventi.filter((e) => !(quando(e) >= adesso)).sort((a, b) => quando(b) - quando(a));
