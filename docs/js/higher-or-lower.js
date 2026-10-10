@@ -1,8 +1,8 @@
 // "Piu' o meno": due lottatori, una statistica. Il secondo ne ha di piu' o
 // di meno del primo? Una risposta sbagliata e la serie finisce.
 
-import { renderChrome, tracciaGioco } from "./common.js?v=202610100358";
-import { caricaLottatori, leggi, scrivi, iniziali, condividi, SITO, bandiera } from "./giochi-comuni.js?v=202610100358";
+import { renderChrome, tracciaGioco } from "./common.js?v=202610100402";
+import { caricaLottatori, leggi, scrivi, iniziali, condividi, SITO, bandiera } from "./giochi-comuni.js?v=202610100402";
 
 renderChrome("giochi");
 

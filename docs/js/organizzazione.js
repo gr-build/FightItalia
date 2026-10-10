@@ -1,5 +1,6 @@
-import { fetchJSON, renderChrome, debounce } from "./common.js?v=202610100358";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202610100358";
+import { fetchJSON, renderChrome, debounce } from "./common.js?v=202610100402";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202610100402";
+import { slug, caricaIncontri } from "./europa-incontri.js?v=202610100402";
 
 renderChrome("europa");
 
@@ -41,7 +42,12 @@ function rigaRisultato(r) {
   return `<div class="risultato-riga"><b>${vincitore}</b> batte ${perdente}${tempo}</div>`;
 }
 
+let orgCorrente = null;
+let conCard = new Set(); // eventi di cui abbiamo la card (evento-europa.html)
+
 function rigaEventoOrg(ev) {
+  const sl = slug(ev.evento);
+  const nomeEvento = conCard.has(sl) ? `<a href="evento-europa.html?org=${orgCorrente}&e=${sl}" style="color:inherit;">${ev.evento}</a>` : ev.evento;
   const luogo = [ev.sede, ev.luogo].filter(Boolean).join(" — ");
   const d = new Date(ev.data);
   const giorno = isNaN(d) ? "?" : d.getDate();
@@ -50,7 +56,7 @@ function rigaEventoOrg(ev) {
     <div class="event-row" style="align-items:start;">
       <div class="event-date"><span class="day">${giorno}</span><span class="month">${mese}</span></div>
       <div class="event-main">
-        <div class="name">${ev.evento}${/italy/i.test(ev.luogo || "") ? ` <span class="tag numerato">In Italia</span>` : ""}</div>
+        <div class="name">${nomeEvento}${/italy/i.test(ev.luogo || "") ? ` <span class="tag numerato">In Italia</span>` : ""}</div>
         ${luogo ? `<div class="venue">${luogo.replace(/Italy/, "Italia")}</div>` : ""}
         ${ev.risultati?.length ? `<div class="risultati-org">${ev.risultati.map(rigaRisultato).join("")}</div>` : ""}
       </div>
@@ -63,6 +69,8 @@ async function init() {
   const orgId = params.get("org");
   const out = document.getElementById("pagina");
 
+  orgCorrente = orgId;
+  if (orgId) conCard = new Set((await caricaIncontri(orgId)).map((e) => e.slug));
   const meta = ORGANIZZAZIONI.find((o) => o.id === orgId);
   if (!orgId) {
     out.innerHTML = `<div class="empty-state">Organizzazione non specificata. <a href="europa.html">Torna a Europa</a>.</div>`;

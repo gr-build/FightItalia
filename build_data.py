@@ -965,3 +965,8 @@ if __name__ == "__main__":
     aggiorna_da_espn()  # dopo Wikipedia: per gli eventi in arrivo vince ESPN
     genera_lottatori_extra()
     genera_dati_giochi()
+    try:
+        import build_europa_incontri
+        build_europa_incontri.main()  # card degli eventi europei (KSW, Oktagon, Cage Warriors)
+    except Exception as errore:  # non deve fermare l'aggiornamento di tutto il resto
+        print(f"  [europa-incontri] saltato: {errore}")

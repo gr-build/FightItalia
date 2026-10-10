@@ -1,5 +1,6 @@
-import { renderChrome } from "./common.js?v=202610100358";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202610100358";
+import { renderChrome } from "./common.js?v=202610100402";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202610100402";
+import { slug, caricaIncontri } from "./europa-incontri.js?v=202610100402";
 
 renderChrome("europa");
 
@@ -46,9 +47,10 @@ async function prossimiEventi() {
     } catch {
       eventi = [];
     }
+    const conCard = new Set((await caricaIncontri(org.id)).map((x) => x.slug));
     for (const e of eventi) {
       const d = new Date(e.data);
-      if (!isNaN(d) && d >= inizioOggi) righe.push({ ...e, d, org });
+      if (!isNaN(d) && d >= inizioOggi) righe.push({ ...e, d, org, href: conCard.has(slug(e.evento)) ? `evento-europa.html?org=${org.id}&e=${slug(e.evento)}` : `organizzazione.html?org=${org.id}` });
     }
   }
   righe.sort((a, b) => a.d - b.d);
@@ -63,7 +65,7 @@ async function prossimiEventi() {
       const luogo = [ev.sede, ev.luogo].filter(Boolean).join(" — ").replace(/Italy/, "Italia");
       const mese = ev.d.toLocaleDateString("it-IT", { month: "short", year: "numeric" });
       return `
-    <a class="event-row" style="align-items:start;text-decoration:none;color:inherit;" href="organizzazione.html?org=${ev.org.id}">
+    <a class="event-row" style="align-items:start;text-decoration:none;color:inherit;" href="${ev.href}">
       <div class="event-date"><span class="day">${ev.d.getDate()}</span><span class="month">${mese}</span></div>
       <div class="event-main">
         <div class="name">${ev.evento} <span class="tag fight-night">${ev.org.nome}</span>${/italy/i.test(ev.luogo || "") ? ` <span class="tag numerato">In Italia</span>` : ""}</div>
