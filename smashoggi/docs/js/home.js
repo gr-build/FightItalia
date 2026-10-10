@@ -1,7 +1,7 @@
 import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, giornoRoma, oggiRoma, dataLunga, aggiornatoIl,
-  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali } from "./common.js?v=202610101019";
+  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali } from "./common.js?v=202610101023";
 
-import { partiteLive } from "./live.js?v=202610101019";
+import { partiteLive } from "./live.js?v=202610101023";
 
 montaPagina("index.html");
 
@@ -90,7 +90,7 @@ function avviaConto() {
 }
 
 function miniTorneo(t) {
-  const inCorso = t.inizio <= oggiRoma() && t.fine >= oggiRoma();
+  const inCorso = !t.concluso && t.inizio <= oggiRoma() && t.fine >= oggiRoma();
   return `<a class="mini" href="torneo.html?tour=${t.tour}&id=${encodeURIComponent(t.id)}"><div class="mini-data">${inCorso ? "In corso · " : ""}${esc(intervalloDate(t.inizio, t.fine))}</div>
     <div class="mini-nome">${esc(t.nome)}</div><div class="mini-sub">${esc(etichettaCategoria(t).testo)} · ${esc(nomeTour(t.tour))}</div></a>`;
 }
@@ -160,7 +160,7 @@ async function avvia() {
     giocatori, "Nessun risultato recente nei dati disponibili.");
 
   // Box laterali
-  const prossimi = tornei.filter((t) => t.categoria && t.fine >= oggi).sort((a, b) => (a.inizio < b.inizio ? -1 : 1)).slice(0, 5);
+  const prossimi = tornei.filter((t) => t.categoria && !t.concluso && t.fine >= oggi).sort((a, b) => (a.inizio < b.inizio ? -1 : 1)).slice(0, 5);
   document.getElementById("tornei").innerHTML = prossimi.length ? prossimi.map(miniTorneo).join("") : `<div class="vuoto">Nessun torneo in calendario.</div>`;
   const riga = (r, t) => `<a class="riga-class ita" href="giocatore.html?id=${encodeURIComponent(r.id)}"><span class="pos">${r.pos}</span>${avatar(r)}<span class="chi"><b>${esc(r.nome)}</b><small>${t}</small></span><span class="punti">${r.punti ?? ""}</span></a>`;
   document.getElementById("italiani").innerHTML = [...atp.righe.filter((r) => r.paese === "ITA").slice(0, 4).map((r) => riga(r, "ATP")),

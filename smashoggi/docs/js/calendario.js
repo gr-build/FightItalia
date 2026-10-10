@@ -1,4 +1,4 @@
-import { fetchJSON, esc, montaPagina, oggiRoma, etichettaCategoria, intervalloDate, nomeTour, mesiIt, messaggioErrore, dataSolo } from "./common.js?v=202610101019";
+import { fetchJSON, esc, montaPagina, oggiRoma, etichettaCategoria, intervalloDate, nomeTour, mesiIt, messaggioErrore, dataSolo } from "./common.js?v=202610101023";
 
 montaPagina("calendario.html");
 
@@ -18,7 +18,7 @@ function card(t, oggi) {
   const cat = etichettaCategoria(t);
   const a = new Date(t.inizio + "T12:00:00Z");
   const mese = new Intl.DateTimeFormat("it-IT", { timeZone: "UTC", month: "short" }).format(a);
-  const inCorso = t.inizio <= oggi && t.fine >= oggi;
+  const inCorso = !t.concluso && t.inizio <= oggi && t.fine >= oggi;
   return `<a class="torneo-card" href="torneo.html?tour=${t.tour}&id=${encodeURIComponent(t.id)}">
     <div class="date"><b>${a.getUTCDate()}</b><span>${esc(mese)}</span></div>
     <div><h3>${esc(t.nome)}</h3>

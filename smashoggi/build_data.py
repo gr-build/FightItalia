@@ -409,6 +409,11 @@ def main():
     tornei = []
     for t in TOURS:
         tornei += calendario(t)
+    # torneo concluso = finale del singolare gia' giocata (le date ESPN a volte finiscono dopo la finale)
+    finite = {(p["tour"], p["torneoId"]) for p in tutte if p["turno"] == "Finale" and p["stato"] == "post"}
+    for t in tornei:
+        if (t["tour"], str(t["id"])) in finite:
+            t["concluso"] = True
     scrivi("tornei.json", {"anno": ANNO, "tornei": tornei})
 
     log("Schede giocatori...")

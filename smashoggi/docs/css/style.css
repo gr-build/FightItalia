@@ -121,7 +121,7 @@ img { max-width: 100%; }
 .vuoto { padding: 18px; border: 1px dashed var(--border); border-radius: var(--radius); color: var(--text-secondary); font-size: 14px; }
 .nota { font-size: 12px; color: var(--text-muted); margin: 10px 0 0; }
 
-.indietro-riga { padding: 14px 0 0; }
+.indietro-riga { padding-top: 14px; }
 .indietro { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 14px 6px 10px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 999px; color: var(--text); font: 700 14px var(--font-body); cursor: pointer; }
 .indietro span { font-size: 18px; line-height: 1; color: var(--accent-text); }
 .indietro:hover { border-color: var(--accent-text); }
@@ -440,3 +440,8 @@ img.avatar { background: linear-gradient(180deg, #ffffff, #e4e4ea); }
 .live-titolo .live-punto { width: 14px; height: 14px; }
 /* Su telefono "Home" e' il logo: la voce si nasconde per far stare Live e Giochi senza scorrere */
 @media (max-width: 440px) { .nav-links li:first-child { display: none; } }
+/* Torneo: scelta del turno, una striscia che scorre di lato */
+.turni-barra { display: flex; gap: 8px; margin: 22px 0 4px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+.turni-barra::-webkit-scrollbar { display: none; }
+.turni-barra .pill { flex: none; white-space: nowrap; }
+.turni-barra { position: relative; }

@@ -30,7 +30,7 @@ try:
                 pg.wait_for_timeout(300)
                 # overflow-x: clip nasconde lo scorrimento: misuro davvero dove finiscono gli elementi
                 larg = pg.evaluate("""Math.ceil(Math.max(...[...document.querySelectorAll('body *')].filter(e => e.offsetParent !== null || e.tagName==='svg')
-                    .filter(e => !e.closest('.nav-links')).map(e => e.getBoundingClientRect().right)))""")
+                    .filter(e => !e.closest('.nav-links, .turni-barra')).map(e => e.getBoundingClientRect().right)))""")
                 nome = pag.split("?")[0].replace(".html", "") + f"-{tema}.png"
                 pg.screenshot(path=str(OUT / nome), full_page=True)
                 stato = "OK" if larg <= 420 and not errori else "PROBLEMA"
