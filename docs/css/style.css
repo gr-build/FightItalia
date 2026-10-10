@@ -2725,3 +2725,9 @@ a.rank-row:hover { color: var(--accent); }
 :root[data-theme="light"] .cd-lott img { filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.25)); }
 @media (max-width: 640px) { .cd-info { padding: 12px 14px 14px; } .cd-orari { gap: 2px 10px; } }
 :root[data-theme="light"] .cd-lott-nome { color: #15151b; text-shadow: 0 1px 8px rgba(255, 255, 255, 0.95); font-weight: 600; }
+
+/* Evento: incontro in corso (da ESPN) */
+.bout-esito.in-corso { color: var(--accent); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.bout-live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: bout-pulsa 1.4s ease-in-out infinite; }
+@keyframes bout-pulsa { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) { .bout-live-dot { animation: none; } }

@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto, traccia } from "./common.js?v=202610100419";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto, traccia } from "./common.js?v=202610102159";
 
 renderChrome(null);
 
@@ -240,8 +240,10 @@ function rigaIncontro(b, roster, posizione = "", contestoEvento, idxClassifiche)
   const rigaA = trovaLottatore(slugA, b.fighter1, roster);
   const rigaB = trovaLottatore(slugB, b.fighter2, roster);
   const esito = haRisultato
-    ? `<span class="bout-esito">${b.metodo} · R${b.round} · ${b.tempo}</span>`
-    : `<span class="bout-esito da-disputare">Da disputare</span>`;
+    ? `<span class="bout-esito">${[b.metodo, b.round ? `R${b.round}` : "", b.tempo].filter(Boolean).join(" · ")}</span>`
+    : b.inCorso
+      ? `<span class="bout-esito in-corso"><span class="bout-live-dot" aria-hidden="true"></span>In corso</span>`
+      : `<span class="bout-esito da-disputare">Da disputare</span>`;
   return `
     <div class="bout-row">
       <div class="bout-head">
@@ -319,20 +321,30 @@ async function conRisultatiEspn(card, ev) {
     const evEspn = ((await r.json()).events || [])[0];
     if (!evEspn) return card;
     const finiti = new Map();
+    const inCorso = new Set(); // incontri che ESPN dice in corso adesso (o in ingresso)
     for (const c of evEspn.competitions || []) {
-      if (c.status?.type?.state !== "post") continue;
       const atleti = c.competitors || [];
-      const vincitore = atleti.find((a) => a.winner);
-      if (atleti.length !== 2 || !vincitore) continue;
+      if (atleti.length !== 2) continue;
       const chiave = atleti.map((a) => chiaveNome(a.athlete?.displayName)).sort().join("|");
+      const stato = c.status?.type?.state;
+      if (stato === "in") { inCorso.add(chiave); continue; }
+      if (stato !== "post") continue;
+      const vincitore = atleti.find((a) => a.winner);
+      // finito senza vincitore: pareggio o no contest (ESPN non dice quale dei due)
+      if (!vincitore) { finiti.set(chiave, { senzaVincitore: true, round: String(c.status.period), tempo: c.status.displayClock }); continue; }
       const periodi = c.format?.regulation?.periods || 3;
       const alLimite = c.status.period === periodi && ["5:00", "0:00"].includes(c.status.displayClock);
-      finiti.set(chiave, { vincitore: chiaveNome(vincitore.athlete.displayName), metodo: alLimite ? "Decision" : "Finish", round: String(c.status.period), tempo: c.status.displayClock });
+      // "5:00" in un round che non e' l'ultimo non e' un orario di finish credibile (ESPN a volte non lo aggiorna): meglio non mostrarlo
+      const tempo = !alLimite && c.status.displayClock === "5:00" ? "" : c.status.displayClock;
+      finiti.set(chiave, { vincitore: chiaveNome(vincitore.athlete.displayName), metodo: alLimite ? "Decision" : "Finish", round: String(c.status.period), tempo });
     }
     return card.map((b) => {
       if ((b.metodo || "").trim()) return b;
-      const x = finiti.get([chiaveNome(b.fighter1), chiaveNome(b.fighter2)].sort().join("|"));
+      const k = [chiaveNome(b.fighter1), chiaveNome(b.fighter2)].sort().join("|");
+      if (inCorso.has(k)) return { ...b, inCorso: true };
+      const x = finiti.get(k);
       if (!x) return b;
+      if (x.senzaVincitore) return { ...b, metodo: "Pareggio o no contest (nessun vincitore indicato da ESPN)", round: x.round, tempo: x.tempo };
       const scambia = chiaveNome(b.fighter1) !== x.vincitore;
       return {
         ...b,
