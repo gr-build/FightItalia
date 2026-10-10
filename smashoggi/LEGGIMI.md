@@ -32,6 +32,10 @@ ogni 30 secondi mentre ci sono partite in corso o in programma oggi, e li unisce
 la pagina mostra "Risultati dell'ultimo aggiornamento del sito". ESPN rifiuta i browser automatici ("headless"):
 per questo `controlla_pagine.py` si presenta come Safari su iPhone.
 
+Giochi (`giochi.html`): **Chi è?** (foto sfocata, 6 tentativi), **Più o meno** (punti, età, altezza) e **Cognomle**
+(Wordle sui cognomi). Usano solo `data/giocatori.json` (primi 100 ATP e WTA) e le foto in `img/giocatori/`: si aggiornano
+da soli con i dati. Giocatore e cognome del giorno sono uguali per tutti e cambiano a mezzanotte italiana.
+
 Altri script:
 - `python3 bump_versione.py` — cambia il numero `?v=` di JS e CSS (da lanciare prima di ogni pubblicazione).
 - `python3 build_sitemap.py` — scrive `sitemap.xml` e `robots.txt` (usa `docs/CNAME` se esiste).
