@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="img/favicon-64.png">
+<link rel="icon" type="image/svg+xml" href="img/logo.svg">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0d">
+<title>Archivio 2026 — Smash Oggi</title>
+<meta name="description" content="Albo d'oro della stagione: vincitori, finalisti e punteggi delle finali di tutti i tornei ATP e WTA conclusi.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Smash Oggi">
+<meta property="og:title" content="Archivio 2026 — Smash Oggi">
+<meta property="og:description" content="Albo d'oro della stagione: vincitori, finalisti e punteggi delle finali di tutti i tornei ATP e WTA conclusi.">
+<meta property="og:image" content="https://gr-build.github.io/smashoggi/img/og-image.png">
+<meta property="og:url" content="https://gr-build.github.io/smashoggi/archivio.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://gr-build.github.io/smashoggi/archivio.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=202610101053">
+<script>try{var t=localStorage.getItem("tema");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#contenuto">Vai al contenuto</a>
+<header id="site-header" class="site-header"></header>
+<main id="contenuto">
+<div class="container">
+<section class="hero"><h1>Archivio <span class="accent" id="anno">della stagione</span></h1>
+  <p>Tutte le finali dei tornei conclusi: chi ha vinto, chi ha perso e con quale punteggio. Cerca un giocatore o un torneo.</p></section>
+<div class="stat-strip" id="numeri"></div>
+<div class="cerca" style="margin:18px 0 10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+  <input type="search" id="cerca" placeholder="Cerca giocatore o torneo…" aria-label="Cerca giocatore o torneo"></div>
+<div id="filtri" style="display:grid;gap:8px"></div>
+<div id="elenco"><div class="vuoto">Caricamento…</div></div>
+<p class="nota">Finali di singolare. Dati ESPN, categorie da Wikipedia.</p>
+</div>
+</main>
+<footer id="site-footer" class="site-footer"></footer>
+<script type="module" src="js/archivio.js?v=202610101053"></script>
+</body>
+</html>

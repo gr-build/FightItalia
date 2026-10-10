@@ -197,7 +197,8 @@ export function avatar(g, grande = false) {
 
 // ---------- Intestazione e pie' di pagina ----------
 const VOCI = [
-  ["index.html", "Home"], ["live.html", "Live"], ["partite.html", "Risultati"], ["calendario.html", "Calendario"], ["classifiche.html", "Classifiche"], ["notizie.html", "News"], ["giochi.html", "Giochi"],
+  ["index.html", "Home"], ["live.html", "Live"], ["partite.html", "Risultati"], ["calendario.html", "Calendario"], ["classifiche.html", "Classifiche"],
+  ["tennisti.html", "Tennisti"], ["archivio.html", "Archivio"], ["notizie.html", "News"], ["giochi.html", "Giochi"],
 ];
 
 export function montaPagina(paginaCorrente) {

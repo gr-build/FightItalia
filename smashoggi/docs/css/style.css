@@ -452,8 +452,16 @@ img.avatar { background: linear-gradient(180deg, #ffffff, #e4e4ea); }
 .nav-links a.voce-live::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 50%; background: #ff4d4d; vertical-align: 2px; }
 .live-titolo { display: inline-flex; vertical-align: middle; margin-right: 12px; }
 .live-titolo .live-punto { width: 14px; height: 14px; }
-/* Su telefono "Home" e' il logo: la voce si nasconde per far stare Live e Giochi senza scorrere */
-@media (max-width: 440px) { .nav-links li:first-child { display: none; } }
+/* Su telefono e tablet le 9 voci vanno su due righe, tutte visibili senza scorrere */
+/* 9 voci: marchio e strumenti sopra, menu sotto, centrato (su computer in una riga, su telefono in due) */
+.nav { flex-wrap: wrap; height: auto; padding-top: 8px; row-gap: 2px; }
+.nav-links { order: 3; width: 100%; flex-wrap: wrap; justify-content: center; overflow: visible; column-gap: 2px; row-gap: 0; padding-bottom: 4px; }
+.nav-links a { white-space: nowrap; }
+@media (min-width: 981px) { .nav-links a { font-size: 15px; padding: 9px 14px; } .brand-logo { width: 46px; height: 46px; } }
+@media (max-width: 1180px) {
+  .nav-links a { font-size: 13px; padding: 7px 8px; letter-spacing: .04em; }
+}
+@media (max-width: 400px) { .nav-links a { font-size: 12.5px; padding: 7px 6px; } }
 /* Torneo: scelta del turno, una striscia che scorre di lato */
 .turni-barra { display: flex; gap: 8px; margin: 22px 0 4px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
 .turni-barra::-webkit-scrollbar { display: none; }
@@ -470,3 +478,76 @@ h2.section-title::before, .section-title::before { content: ""; position: absolu
 .evidenza .corpo { text-align: left; }
 .partita { transition: border-color .15s; }
 .partita:hover { border-color: var(--border); }
+
+/* ---------- Archivio: finali ---------- */
+.lista-finali { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.lista-finali .mese { grid-column: 1 / -1; margin: 18px 0 2px; font-size: 18px; color: var(--text-secondary); }
+.af { padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius); min-width: 0; }
+.af-testa { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.af-torneo { font: 600 16px var(--font-display); text-transform: uppercase; letter-spacing: .02em; line-height: 1.2; overflow-wrap: anywhere; }
+.af-torneo:hover { color: var(--accent-text); }
+.af-data { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.af-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); margin: 4px 0 8px; }
+.af-righe { display: grid; gap: 2px; border-top: 1px solid var(--border-soft); padding-top: 6px; }
+.af-riga { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 34px; }
+.af-coppa { font-size: 16px; text-align: center; }
+.af-persona { display: grid; grid-template-columns: 38px minmax(0, 1fr); align-items: center; gap: 8px; color: var(--text-secondary); min-width: 0; }
+.af-persona.vince { color: var(--text); font-weight: 700; }
+.af-persona.ita .codice { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.af-persona.lui .af-nome { text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+.af-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.af-punteggio { font: 600 14px var(--font-display); letter-spacing: .03em; color: var(--accent-text); white-space: nowrap; }
+
+/* ---------- Tennisti ---------- */
+.tennisti-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; margin-top: 6px; }
+.tennista { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 12px; background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: 14px; transition: border-color .15s; }
+.tennista:hover { border-color: var(--accent-text); }
+.tennista .avatar { width: 56px; height: 56px; font-size: 18px; }
+.tn-chi { min-width: 0; }
+.tn-chi b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
+.tn-chi small { color: var(--text-muted); font-size: 12.5px; }
+.tn-pos { text-align: right; }
+.tn-pos b { display: block; font: 600 22px var(--font-display); color: var(--accent-text); line-height: 1; }
+.tn-pos small { font: 600 10.5px var(--font-body); color: var(--text-muted); letter-spacing: .05em; }
+.tennisti-grid .altri { grid-column: 1 / -1; justify-self: center; margin-top: 8px; }
+.badge-live { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 10px; padding: 4px 12px 4px 10px; border-radius: 999px; background: rgba(255, 77, 77, .14); color: #ff6b6b; font: 700 12px var(--font-body); letter-spacing: .08em; text-transform: uppercase; }
+:root[data-theme="light"] .badge-live { color: #c62828; }
+/* Ordina */
+.ord-lista { display: grid; gap: 8px; }
+.ord-carta { display: grid; grid-template-columns: 30px 48px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 12px; min-height: 64px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; color: var(--text); text-align: left; cursor: pointer; font: inherit; }
+.ord-carta:hover:not([disabled]) { border-color: var(--accent-text); }
+.ord-carta[disabled] { cursor: default; }
+.ord-carta.scelta { opacity: .55; }
+.ord-carta.giusta { border-color: #1f8a4c; opacity: 1; }
+.ord-carta.sbagliata { border-color: #d64545; opacity: 1; }
+.ord-num { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--bg-elevated-2); font: 700 15px var(--font-display); }
+.ord-carta.scelta .ord-num, .ord-carta.giusta .ord-num { background: var(--accent); color: var(--accent-ink); }
+.ord-carta.sbagliata .ord-num { background: #d64545; color: #fff; }
+.ord-carta img, .ord-ini { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; object-position: top; background: linear-gradient(180deg, #fff, #e4e4ea); display: grid; place-items: center; font: 600 16px var(--font-display); color: #555; }
+.ord-nome { min-width: 0; }
+.ord-nome b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ord-nome small { color: var(--text-muted); font-size: 12px; }
+.ord-val { font: 600 15px var(--font-display); color: var(--accent-text); white-space: nowrap; }
+/* Quiz */
+.quiz-barra { height: 6px; background: var(--bg-elevated-2); border-radius: 3px; overflow: hidden; margin-bottom: 18px; }
+.quiz-barra i { display: block; height: 100%; background: var(--accent); transition: width .3s; }
+.quiz-domanda { font-size: 19px; line-height: 1.35; text-align: center; margin: 6px 0 18px; }
+.quiz-opzioni { display: grid; gap: 8px; }
+.quiz-opz { min-height: 52px; padding: 10px 16px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font: 600 16px var(--font-body); text-align: left; cursor: pointer; }
+.quiz-opz:hover:not([disabled]) { border-color: var(--accent-text); }
+.quiz-opz.giusta { background: #1f8a4c; border-color: #1f8a4c; color: #fff; }
+.quiz-opz.sbagliata { background: #b93a3a; border-color: #b93a3a; color: #fff; }
+/* Griglia */
+.griglia-gioco { display: grid; grid-template-columns: minmax(64px, .8fr) repeat(3, minmax(0, 1fr)); gap: 6px; }
+.gr-testa { display: grid; place-items: center; text-align: center; padding: 6px 4px; font: 600 12px/1.25 var(--font-body); color: var(--text-secondary); }
+.gr-testa.riga { justify-items: start; text-align: left; }
+.gr-cella { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 4px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; color: var(--text-muted); font: 600 26px var(--font-display); cursor: pointer; overflow: hidden; min-width: 0; }
+button.gr-cella:hover, .gr-cella.attiva { border-color: var(--accent-text); color: var(--accent-text); }
+.gr-cella.piena { border-color: #1f8a4c; background: rgba(31, 138, 76, .15); color: var(--text); font: 600 12px var(--font-body); cursor: default; }
+.gr-cella.piena img { width: 58%; aspect-ratio: 1; border-radius: 50%; object-fit: cover; object-position: top; background: #fff; }
+.gr-cella.piena span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gr-cella.rivelata { cursor: default; font: 600 11.5px/1.2 var(--font-body); color: var(--text-secondary); text-align: center; }
+.gr-cella.rivelata small { font-size: 10px; color: var(--text-muted); }
+.gr-chiede { text-align: center; margin: 14px 0 8px; font-size: 14px; color: var(--text-secondary); }
+.scossa { animation: scossa .4s; }
+@keyframes scossa { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }

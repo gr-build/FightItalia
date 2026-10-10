@@ -37,6 +37,12 @@ Giochi (`giochi.html`): **Chi è?** (foto sfocata, 6 tentativi), **Più o meno**
 (Wordle sui cognomi). Usano solo `data/giocatori.json` (primi 100 ATP e WTA) e le foto in `img/giocatori/`: si aggiornano
 da soli con i dati. Giocatore e cognome del giorno sono uguali per tutti e cambiano a mezzanotte italiana.
 
+Archivio (`archivio.html`, `data/archivio.json`): la finale di ogni torneo concluso della stagione (vincitore, finalista,
+punteggio). Le finali già trovate restano nel file e non si riscaricano. Tennisti (`tennisti.html`): tutti i giocatori in
+`data/giocatori.json`, cioè i primi 150 delle classifiche ESPN, chi ha giocato nelle ultime 4 settimane e chi ha giocato una
+finale; per ognuno titoli e vittorie/sconfitte in carriera (ESPN). Foto solo per classificati, italiani e vincitori di titoli.
+Giochi in più: Griglia, Quiz, Ordina.
+
 Altri script:
 - `python3 bump_versione.py` — cambia il numero `?v=` di JS e CSS (da lanciare prima di ogni pubblicazione).
 - `python3 build_sitemap.py` — scrive `sitemap.xml` e `robots.txt` (usa `docs/CNAME` se esiste).

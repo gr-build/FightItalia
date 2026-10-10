@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="img/favicon-64.png">
+<link rel="icon" type="image/svg+xml" href="img/logo.svg">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0d">
+<title>Tennisti — Smash Oggi</title>
+<meta name="description" content="Tutti i tennisti di Smash Oggi: classifica, paese, foto e scheda di ognuno, uomini e donne.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Smash Oggi">
+<meta property="og:title" content="Tennisti — Smash Oggi">
+<meta property="og:description" content="Tutti i tennisti di Smash Oggi: classifica, paese, foto e scheda di ognuno, uomini e donne.">
+<meta property="og:image" content="https://gr-build.github.io/smashoggi/img/og-image.png">
+<meta property="og:url" content="https://gr-build.github.io/smashoggi/tennisti.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://gr-build.github.io/smashoggi/tennisti.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=202610101053">
+<script>try{var t=localStorage.getItem("tema");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#contenuto">Vai al contenuto</a>
+<header id="site-header" class="site-header"></header>
+<main id="contenuto">
+<div class="container">
+<section class="hero"><h1>I <span class="accent">tennisti</span></h1>
+  <p>Tutti quelli che riusciamo a ricavare dai dati: i primi 150 delle classifiche, chi ha giocato nelle ultime settimane e chi ha giocato una finale quest'anno.</p></section>
+<div class="cerca" style="margin:6px 0 10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+  <input type="search" id="cerca" placeholder="Cerca un tennista o un paese…" aria-label="Cerca un tennista o un paese"></div>
+<div id="filtri" style="display:grid;gap:8px"></div>
+<p class="nota" id="conta" aria-live="polite"></p>
+<div id="elenco" class="tennisti-grid"><div class="vuoto">Caricamento…</div></div>
+<p class="nota">Dati ESPN. Foto da ESPN e Wikimedia Commons, dove disponibili.</p>
+</div>
+</main>
+<footer id="site-footer" class="site-footer"></footer>
+<script type="module" src="js/tennisti.js?v=202610101053"></script>
+</body>
+</html>

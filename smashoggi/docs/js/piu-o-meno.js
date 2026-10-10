@@ -1,6 +1,6 @@
 // Piu' o meno: due giocatori, una statistica vera. Indovina se il secondo ha un valore piu' alto o piu' basso e allunga la serie.
-import { montaPagina, esc, iniziali } from "./common.js?v=202610101026";
-import { caricaGiocatoriGioco, leggi, scrivi, condividi } from "./giochi-comuni.js?v=202610101026";
+import { montaPagina, esc, iniziali } from "./common.js?v=202610101053";
+import { caricaGiocatoriGioco, leggi, scrivi, condividi } from "./giochi-comuni.js?v=202610101053";
 
 montaPagina("giochi.html");
 
@@ -10,6 +10,8 @@ const DOMANDE = [
   { k: "punti", testo: "punti in classifica", fmt: (v) => v.toLocaleString("it-IT"), stessoTour: true },
   { k: "eta", testo: "anni", fmt: (v) => String(v) },
   { k: "altezzaCm", testo: "cm di altezza", fmt: (v) => String(v) },
+  { k: "titoli", testo: "titoli in carriera", fmt: (v) => String(v) },
+  { k: "vinte", testo: "partite vinte in carriera", fmt: (v) => v.toLocaleString("it-IT") },
 ];
 
 const foto = (g) => (g.foto ? `<img src="${esc(g.foto)}" alt="" width="120" height="120">` : `<span class="pom-iniziali" aria-hidden="true">${esc(iniziali(g.nome))}</span>`);

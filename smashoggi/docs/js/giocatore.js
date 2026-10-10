@@ -1,8 +1,9 @@
-import { partiteLive } from "./live.js?v=202610101026";
-import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610101026";
+import { partiteLive } from "./live.js?v=202610101053";
+import { rigaFinale } from "./archivio-comune.js?v=202610101053";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610101053";
 
 montaPagina("classifiche.html");
-frecciaIndietro(document.getElementById("indietro"), "classifiche.html", "Classifiche");
+frecciaIndietro(document.getElementById("indietro"), "tennisti.html", "Indietro");
 
 const id = new URLSearchParams(location.search).get("id");
 
@@ -10,10 +11,10 @@ const id = new URLSearchParams(location.search).get("id");
 const datiPartite = partiteLive(() => avvia().catch(() => {}));
 
 async function avvia() {
-  const [giocatori, { partite }] = await Promise.all([caricaGiocatori(), datiPartite]);
+  const [giocatori, { partite }, { finali }] = await Promise.all([caricaGiocatori(), datiPartite, fetchJSON("data/archivio.json").catch(() => ({ finali: [] }))]);
   const g = giocatori[id];
   const box = document.getElementById("contenuto-giocatore");
-  if (!g) return messaggioErrore(box, "Giocatore non trovato. Le schede sono disponibili per i primi 100 di ATP e WTA.");
+  if (!g) return messaggioErrore(box, "Giocatore non trovato.");
   document.title = `${g.nome} — Smash Oggi`;
   const dato = (k, v, testo) => (v || v === 0 ? `<div class="dato"><span>${k}</span><b class="${testo ? "testo" : ""}">${esc(v)}</b></div>` : "");
   const sue = partite.filter((p) => !p.qualifica && p.giocatori.some((x) => x.id === id));
@@ -25,13 +26,13 @@ async function avvia() {
 
   box.innerHTML = `
     <div class="scheda-testa">
-      <div class="grande">${g.pos}<small>${g.tour === "atp" ? "ATP" : "WTA"}</small></div>
+      ${g.pos ? `<div class="grande">${g.pos}<small>${g.tour === "atp" ? "ATP" : "WTA"}</small></div>` : ""}
       ${avatar(g, true)}
       <div><h1>${esc(g.nome)}</h1>
         <div class="sub">${g.paese === "ITA" ? '<span class="tag slam">Italia</span>' : ""}${esc(g.paese !== "ITA" ? g.paeseNome || g.paese || "" : "")}${g.eta ? ` · ${g.eta} anni` : ""}</div></div>
     </div>
     <div class="dati">
-      ${dato("Classifica", `${g.pos}º ${g.tour === "atp" ? "ATP" : "WTA"}${delta ? (delta > 0 ? ` (▲${delta})` : ` (▼${-delta})`) : ""}`)}
+      ${dato("Classifica", g.pos && `${g.pos}º ${g.tour === "atp" ? "ATP" : "WTA"}${delta ? (delta > 0 ? ` (▲${delta})` : ` (▼${-delta})`) : ""}`)}
       ${dato("Punti", g.punti)}
       ${dato("Paese", g.paeseNome, true)}
       ${dato("Età", g.eta)}
@@ -40,11 +41,20 @@ async function avvia() {
       ${dato("Altezza", g.altezzaCm ? `${g.altezzaCm} cm` : null)}
       ${dato("Mano", g.mano, true)}
       ${dato("Esordio", g.esordio)}
+      ${dato("Titoli in carriera", g.titoli)}
+      ${dato("Vittorie e sconfitte", g.vinte != null && g.perse != null ? `${g.vinte} – ${g.perse}` : null)}
+      ${dato(`Titoli ${new Date().getFullYear()}`, g.titoliAnno)}
     </div>
+    ${(() => {
+      const sueFinali = finali.filter((a) => a.vincitore.id === id || a.finalista.id === id);
+      if (!sueFinali.length) return "";
+      return `<div class="section-title">Finali della stagione <span class="count">${sueFinali.filter((a) => a.vincitore.id === id).length} vinte su ${sueFinali.length}</span></div>
+        <div class="lista-finali">${sueFinali.map((a) => rigaFinale(a, id)).join("")}</div>`;
+    })()}
     ${prossime.length ? `<div class="section-title">Prossima partita</div><div class="griglia-partite">${prossime.slice(0, 2).map((p) => schedaPartita(p, giocatori)).join("")}</div>` : ""}
     <div class="section-title">Ultimi risultati ${forma.length ? `<span class="count">${forma.map((v) => (v ? "V" : "S")).join(" ")}</span>` : ""}</div>
     ${finite.length ? `<div class="griglia-partite">${finite.slice(0, 10).map((p) => schedaPartita(p, giocatori)).join("")}</div>`
       : `<div class="vuoto">Nessuna partita del tabellone principale nelle ultime quattro settimane nei dati disponibili.</div>`}
-    <p class="nota">V = vittoria, S = sconfitta. Singolare, tabellone principale, ultime quattro settimane. ${esc(nomeTour(g.tour))}: dati ESPN.</p>`;
+    <p class="nota">V = vittoria, S = sconfitta. Singolare, tabellone principale, ultime quattro settimane. Titoli e vittorie in carriera: singolare. ${esc(nomeTour(g.tour))}: dati ESPN.</p>`;
 }
 avvia().catch(() => messaggioErrore(document.getElementById("contenuto-giocatore")));

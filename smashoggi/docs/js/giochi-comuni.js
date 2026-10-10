@@ -1,11 +1,20 @@
 // Utilita' condivise dai giochi di Smash Oggi: dati dei giocatori, memoria locale, giocatore del giorno, condivisione.
-import { fetchJSON, esc } from "./common.js?v=202610101026";
+import { fetchJSON, esc } from "./common.js?v=202610101053";
 
-// Tutti i giochi usano i primi 100 di ATP e WTA (data/giocatori.json, dati ESPN veri).
+// I giochi usano i primi 100 di ATP e WTA (data/giocatori.json, dati ESPN veri); la Griglia accetta tutti i classificati.
 let cache;
-export async function caricaGiocatoriGioco() {
-  cache ??= fetchJSON("data/giocatori.json").then((g) => Object.values(g).filter((x) => x.nome && x.pos));
+export async function caricaTuttiGioco() {
+  cache ??= fetchJSON("data/giocatori.json").then((g) => Object.values(g).filter((x) => x.nome));
   return cache;
+}
+export async function caricaGiocatoriGioco() {
+  return (await caricaTuttiGioco()).filter((x) => x.pos && x.pos <= 100);
+}
+// mescola con un generatore dato (stesso seme, stesso ordine)
+export function mescola(lista, r = Math.random) {
+  const a = [...lista];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
 }
 
 // La memoria del telefono puo' mancare (navigazione privata): i giochi funzionano lo stesso, senza record.

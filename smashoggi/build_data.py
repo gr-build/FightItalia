@@ -139,7 +139,7 @@ def classifica(tour):
         return None
     blocco = d["rankings"][0]
     righe = []
-    for r in blocco["ranks"][:100]:
+    for r in blocco["ranks"][:150]:   # ESPN ne da' 150: nel file classifica ne vanno 100, in giocatori.json tutti
         a = r["athlete"]
         cod, nome_paese = paese(a.get("flag"), a.get("flagAltText"))
         righe.append({
@@ -250,6 +250,7 @@ def trova_wiki(wiki, nome, citta, ini):
 
 
 SLAM = {"Australian Open", "Roland Garros", "Wimbledon", "US Open"}
+SUPERFICIE_SLAM = {"Australian Open": "Cemento", "Roland Garros": "Terra battuta", "Wimbledon": "Erba", "US Open": "Cemento"}
 SUPERFICI = {"hard": "Cemento", "clay": "Terra battuta", "grass": "Erba", "carpet": "Sintetico"}
 
 
@@ -294,10 +295,10 @@ def calendario(tour):
         categoria = superficie = None
         ini = datetime.fromisoformat(inizio).date()
         w = trova_wiki(wiki, d["name"], citta, ini)
-        if w:
+        if d["name"] in SLAM:   # gli Slam li riconosco dal nome: il confronto per citta' puo' sbagliare (Londra = Queen's)
+            categoria, superficie = "Grand Slam", SUPERFICIE_SLAM[d["name"]]
+        elif w:
             categoria, superficie = w[3], superficie_it(w[4])
-        elif d["name"] in SLAM:
-            categoria = "Grand Slam"
         elif "Finals" in d["name"]:
             categoria = "Finals"
         out.append({
@@ -322,6 +323,69 @@ def scheda_giocatore(args):
         "altezzaCm": cm, "pesoKg": kg, "esordio": d.get("debutYear"),
         "nascita": (d.get("dateOfBirth") or "")[:10] or None,
     }
+
+
+def statistiche_giocatore(args):
+    tour, pid = args
+    d = scarica(f"{CORE}/{tour}/athletes/{pid}/statistics?lang=en")
+    out = {}
+    for c in ((d or {}).get("splits") or {}).get("categories", []):
+        for st in c.get("stats", []):
+            if st.get("name") in ("singlesWon", "singlesLost", "singlesTitles") and st.get("value") is not None:
+                out[{"singlesWon": "vinte", "singlesLost": "perse", "singlesTitles": "titoli"}[st["name"]]] = int(st["value"])
+    return pid, out
+
+
+def dati_base(args):
+    """Nome e dati di chi non e' in classifica (lo conosciamo dalle partite)."""
+    tour, pid = args
+    d = scarica(f"{CORE}/{tour}/athletes/{pid}?lang=en")
+    if not d:
+        return pid, {}
+    return pid, {"nome": d.get("displayName"), "cognome": d.get("lastName"), "eta": d.get("age"),
+                 "luogoNascita": next((v for v in [(d.get("birthPlace") or {}).get("summary")] if v and "\ufffd" not in v), None)}
+
+
+# ---------------------------------------------------------------- archivio
+def archivio(tornei, vecchio):
+    """Finali dei tornei conclusi della stagione: vincitore, finalista, punteggio. Le finali gia' trovate non si riscaricano."""
+    noto = {(a["tour"], a["torneoId"]): a for a in vecchio}
+    oggi = datetime.now(ROMA).strftime("%Y-%m-%d")
+    da_cercare = [t for t in tornei if t["fine"] < oggi and (t["tour"], str(t["id"])) not in noto]
+    giorni = set()
+    for t in da_cercare:
+        f = datetime.strptime(t["fine"], "%Y-%m-%d")
+        for d in (f, f - timedelta(days=1), f + timedelta(days=1)):
+            giorni.add((t["tour"], d))
+    finali = {}
+    for tour, sb in paralleli(partite_giorno, sorted(giorni), 8):
+        for p in estrai_partite(tour, sb):
+            if p["turno"] == "Finale" and p["stato"] == "post":
+                finali[(p["tour"], p["torneoId"])] = p
+    for t in da_cercare:
+        p = finali.get((t["tour"], str(t["id"])))
+        if not p:
+            continue
+        v = next((g for g in p["giocatori"] if g["vince"]), None)
+        f = next((g for g in p["giocatori"] if not g["vince"]), None)
+        if not v or not f:
+            continue
+        persona = lambda g: {"id": g["id"], "nome": g["nome"], "paese": g["paese"]}
+        noto[(t["tour"], str(t["id"]))] = {
+            "tour": t["tour"], "torneoId": str(t["id"]), "nome": t["nome"], "inizio": t["inizio"], "fine": t["fine"],
+            "categoria": t.get("categoria"), "superficie": t.get("superficie"), "citta": t.get("citta"), "paese": t.get("paese"),
+            "vincitore": persona(v), "finalista": persona(f),
+            # set dal punto di vista del vincitore: [giochi vincitore, giochi finalista, tie-break del perdente del set]
+            "punteggio": [[a["g"], b["g"], *([min(a.get("tb", 99), b.get("tb", 99))] if "tb" in a or "tb" in b else [])]
+                          for a, b in zip(v["set"], f["set"])],
+            "speciale": p["speciale"],
+        }
+    per_id = {(t["tour"], str(t["id"])): t for t in tornei}
+    for k, a in noto.items():
+        t = per_id.get(k)
+        if t:
+            a.update({"categoria": t.get("categoria"), "superficie": t.get("superficie"), "nome": t["nome"]})
+    return sorted(noto.values(), key=lambda a: a["fine"], reverse=True)
 
 
 # ---------------------------------------------------------------- notizie
@@ -383,7 +447,7 @@ def main():
     for t, c in classifiche.items():
         if not c:
             sys.exit(f"Classifica {t} non scaricata: mi fermo senza toccare i dati vecchi.")
-        scrivi(f"classifica-{t}.json", c)
+        scrivi(f"classifica-{t}.json", {**c, "righe": c["righe"][:100]})
 
     log("Partite...")
     giorni = [(t, g) for t in TOURS for g in lista_giorni()]
@@ -416,15 +480,41 @@ def main():
             t["concluso"] = True
     scrivi("tornei.json", {"anno": ANNO, "tornei": tornei})
 
+    log("Archivio finali...")
+    vecchio_path = OUT / "archivio.json"
+    vecchio = json.loads(vecchio_path.read_text(encoding="utf-8"))["finali"] if vecchio_path.exists() else []
+    finali = archivio(tornei, vecchio)
+    scrivi("archivio.json", {"anno": ANNO, "finali": finali})
+
     log("Schede giocatori...")
-    richieste = [(t, r["id"]) for t in TOURS for r in classifiche[t]["righe"]]
-    schede = {}
-    for pid, s in paralleli(scheda_giocatore, richieste, 12):
-        schede[pid] = s
+    # tutti quelli che riusciamo a ricavare: classifica (primi 150), chi ha giocato nelle ultime settimane, chi ha giocato una finale
     giocatori = {}
     for t in TOURS:
         for r in classifiche[t]["righe"]:
-            giocatori[r["id"]] = {**r, "tour": t, **schede.get(r["id"], {})}
+            giocatori[r["id"]] = {**r, "tour": t}
+    for p in tutte:
+        for g in p["giocatori"]:
+            if g.get("id") and g["id"] not in giocatori and g.get("nome") and g["nome"] != "TBD":
+                cod = g.get("paese")
+                giocatori[g["id"]] = {"id": g["id"], "nome": g["nome"], "paese": cod, "paeseNome": PAESI.get((cod or "").lower(), cod), "tour": p["tour"]}
+    for a in finali:
+        for g in (a["vincitore"], a["finalista"]):
+            if g.get("id") and g["id"] not in giocatori:
+                cod = g.get("paese")
+                giocatori[g["id"]] = {"id": g["id"], "nome": g["nome"], "paese": cod, "paeseNome": PAESI.get((cod or "").lower(), cod), "tour": a["tour"]}
+    richieste = [(g["tour"], pid) for pid, g in giocatori.items()]
+    for pid, sch in paralleli(scheda_giocatore, richieste, 12):
+        giocatori[pid].update({k: v for k, v in sch.items() if v is not None})
+    for pid, st in paralleli(statistiche_giocatore, richieste, 12):
+        giocatori[pid].update(st)
+    senza = [(g["tour"], pid) for pid, g in giocatori.items() if "pos" not in g]
+    for pid, base in paralleli(dati_base, senza, 12):
+        giocatori[pid].update({k: v for k, v in base.items() if v is not None})
+    # titoli vinti nella stagione, dall'archivio
+    for a in finali:
+        g = giocatori.get(a["vincitore"]["id"])
+        if g is not None:
+            g["titoliAnno"] = g.get("titoliAnno", 0) + 1
     # gli ultimi risultati di ogni giocatore si ricavano nel browser da partite.json
     scrivi("giocatori.json", giocatori)
 

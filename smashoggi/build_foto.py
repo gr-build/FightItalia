@@ -47,38 +47,40 @@ def salva(url, dest, lato=280):
         print("  foto non scaricata:", url[:80], e)
         return False
 
+# Foto per: classificati (primi 150), italiani e vincitori di un torneo della stagione.
+# Gli altri restano con le iniziali: tiene il sito leggero (e sotto i limiti di file della demo).
+def merita(g):
+    return bool(g.get("pos")) or g.get("paese") == "ITA" or bool(g.get("titoliAnno"))
+
+
 def main():
     memo = json.load(open(MEMO, encoding="utf-8")) if os.path.exists(MEMO) else {}
     classifiche = {t: carica(f"classifica-{t}.json") for t in ("atp", "wta")}
     giocatori = carica("giocatori.json")
-    for c in classifiche.values():
-        for r in c["righe"]:
-            if r.get("foto") or r["nome"] in memo: continue
-            f = cerca(r["nome"])
-            if f != "ERRORE": memo[r["nome"]] = f
-            time.sleep(0.4)
+    scelti = [g for g in giocatori.values() if merita(g)]
+    for g in scelti:
+        if (g.get("foto") or "").startswith("http") or g["nome"] in memo: continue
+        f = cerca(g["nome"])
+        if f != "ERRORE": memo[g["nome"]] = f
+        time.sleep(0.4)
     json.dump(memo, open(MEMO, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     cartella = os.path.join(os.path.dirname(DATA), "img", "giocatori")
     os.makedirs(cartella, exist_ok=True)
-    locali = {}
-    for c in classifiche.values():
-        for r in c["righe"]:
-            src = r.get("foto") if (r.get("foto") or "").startswith("http") else memo.get(r["nome"])
-            if r.get("foto") and not r["foto"].startswith("http"): src = None
-            dest = os.path.join(cartella, f"{r['id']}.webp")
-            if src and not os.path.exists(dest) and not salva(src, dest): src = None
-            if os.path.exists(dest): r["foto"] = f"img/giocatori/{r['id']}.webp"; locali[str(r["id"])] = r["foto"]
-            else: r.pop("foto", None)
-    n = len(locali)
-    for t, c in classifiche.items():
-        json.dump(c, open(os.path.join(DATA, f"classifica-{t}.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
-    items = giocatori.values() if isinstance(giocatori, dict) else giocatori
-    for g in items:
-        if not isinstance(g, dict): continue
-        if str(g.get("id")) in locali: g["foto"] = locali[str(g["id"])]
+    for g in giocatori.values():
+        dest = os.path.join(cartella, f"{g['id']}.webp")
+        if merita(g) and not os.path.exists(dest):
+            src = g.get("foto") if (g.get("foto") or "").startswith("http") else memo.get(g["nome"])
+            if src: salva(src, dest)
+        if os.path.exists(dest): g["foto"] = f"img/giocatori/{g['id']}.webp"
         else: g.pop("foto", None)
+    for t, c in classifiche.items():
+        for r in c["righe"]:
+            f = giocatori.get(str(r["id"]), {}).get("foto")
+            if f: r["foto"] = f
+            else: r.pop("foto", None)
+        json.dump(c, open(os.path.join(DATA, f"classifica-{t}.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     json.dump(giocatori, open(os.path.join(DATA, "giocatori.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
-    tot = sum(1 for c in classifiche.values() for r in c["righe"] if r.get("foto"))
-    print(f"Foto salvate nel sito: {n}. Giocatori con foto: {tot}/200")
+    con = sum(1 for g in giocatori.values() if g.get("foto"))
+    print(f"Giocatori: {len(giocatori)}, con foto: {con} (cercate per {len(scelti)})")
 
 main()
