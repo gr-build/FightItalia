@@ -183,6 +183,8 @@ const temaCorrente = () => (document.documentElement.dataset.theme === "light" ?
 function applicaTema(tema) {
   document.documentElement.dataset.theme = tema;
   try { localStorage.setItem("tema", tema); } catch (e) { /* senza memoria locale il tema vale solo per questa visita */ }
+  const b = document.getElementById("tema-btn");
+  if (b) b.setAttribute("aria-checked", tema === "light" ? "true" : "false");
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", tema === "light" ? "#f4f4f6" : "#0a0a0d");
 }
 
@@ -205,7 +207,7 @@ export function montaPagina(paginaCorrente) {
         <a href="index.html" class="brand notranslate" translate="no" aria-label="Smash Oggi, home"><img src="img/logo.svg" alt="" class="brand-logo" width="56" height="56"><span>SMASH<span class="dot">•</span><span class="oggi">Oggi</span></span></a>
         <ul class="nav-links">${VOCI.map(([h, t]) => `<li><a href="${h}" class="${h === paginaCorrente ? "active" : ""}"${h === paginaCorrente ? ' aria-current="page"' : ""}>${t}</a></li>`).join("")}</ul>
         <div class="nav-strumenti">${selettoreLingua()}
-          <button type="button" class="tema-btn" id="tema-btn" aria-label="Cambia tema, chiaro o scuro">${SOLE}${LUNA}</button></div>
+          <button type="button" class="tema-btn" id="tema-btn" role="switch" aria-label="Tema chiaro" title="Chiaro / scuro">${SOLE}${LUNA}<span class="tema-pallino" aria-hidden="true"></span></button></div>
       </div>`;
     header.querySelector("#lingua").addEventListener("change", (e) => cambiaLingua(e.target.value));
     applicaTema(temaCorrente());
