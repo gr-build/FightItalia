@@ -1,7 +1,7 @@
 import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, giornoRoma, oggiRoma, dataLunga, aggiornatoIl,
-  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali } from "./common.js?v=202610101023";
+  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali } from "./common.js?v=202610101026";
 
-import { partiteLive } from "./live.js?v=202610101023";
+import { partiteLive } from "./live.js?v=202610101026";
 
 montaPagina("index.html");
 
@@ -52,12 +52,17 @@ function schedaEvidenza(p, giocatori, tornei) {
   };
   const [a, b] = p.giocatori;
   const etichetta = p.stato === "in" ? `<span class="etichetta live">In corso</span>` : p.stato === "post" ? `<span class="etichetta">Risultato</span>` : `<span class="etichetta">Partita in evidenza</span>`;
-  const sets = (g) => g.set.map((s) => `${s.g}${s.tb !== undefined ? `<sup>${s.tb}</sup>` : ""}`).join(" ");
   let extra = "";
-  if (p.stato === "pre") extra = `<div class="conto" id="conto" data-quando="${esc(p.data)}">…</div><div class="conto-nota">All'inizio previsto · ora italiana</div>`;
+  if (p.stato === "pre") extra = `<div class="conto-box"><div class="conto-nota">Inizio tra</div><div class="conto" id="conto" data-quando="${esc(p.data)}">…</div><div class="conto-nota">ore ${esc(oraRoma(p.data))} · ora italiana</div></div>`;
   else {
-    const zero = p.giocatori.every((g) => g.set.length <= 1 && g.set.every((s) => s.g === 0));
-    if (!zero) extra = `<div class="punteggio-grande">${[a, b].map((g) => `<div><span class="${g.vince ? "accent" : ""}"><b>${esc(g.breve || g.nome)}</b></span><span>${sets(g)}</span></div>`).join("")}</div>`;
+    {
+      // tabellone: set vinti evidenziati, chi conduce o ha vinto in grassetto
+      const [x, y] = [a, b].map((g) => g.set.map((s) => ({ ...s })));
+      x.forEach((s, i) => { const o = y[i]; if (o) { s.v = s.g > o.g; o.v = o.g > s.g; } });
+      const riga = (g, sets) => `<div class="tb-riga${g.vince ? " vince" : ""}"><span class="tb-codice">${esc(g.paese || "")}</span><span class="tb-nome">${esc(g.breve || g.nome)}</span>
+        <span class="tb-set">${(sets.length ? sets : [{ g: 0 }]).map((s) => `<b class="${s.v ? "v" : ""}">${s.g}${s.tb !== undefined ? `<sup>${s.tb}</sup>` : ""}</b>`).join("")}</span></div>`;
+      extra = `<div class="tabellone">${riga(a, x)}${riga(b, y)}${p.speciale ? `<div class="tb-nota">${esc(p.speciale)}</div>` : ""}</div>`;
+    }
   }
   return `<a class="evidenza" href="${t ? `torneo.html?tour=${p.tour}&id=${encodeURIComponent(p.torneoId)}` : "partite.html"}" style="display:block">
     ${etichetta}
@@ -65,8 +70,8 @@ function schedaEvidenza(p, giocatori, tornei) {
     <div class="corpo">
       <div class="piccolo">${p.tour === "atp" ? "ATP" : "WTA"}${t ? ` · ${esc(etichettaCategoria(t).testo)}` : ""}</div>
       <h2>${esc(p.torneo)}</h2>
-      <div class="luogo">${esc(p.turno)}${p.campo ? ` · ${esc(p.campo)}` : ""}${t && t.citta ? ` — ${esc(t.citta)}` : ""}</div>
-      <div class="quando"><b>${esc(dataLunga(p.data))}</b>${p.stato === "pre" ? ` · ore <b>${esc(oraRoma(p.data))}</b>` : ""}</div>
+      <div class="luogo">${esc(p.turno)}${p.campo ? ` · ${esc(p.campo)}` : ""}</div>
+      ${p.stato === "pre" ? `<div class="quando">${esc(dataLunga(p.data))}</div>` : ""}
       ${extra}
     </div></a>`;
 }
@@ -114,10 +119,10 @@ function disegnaOggi(principali, giocatori, tornei, atp, wta, oggi) {
   // Numeri grandi (tutti calcolati dai dati)
   const deOggi = principali.filter((p) => p.stato === "in" || giornoRoma(p.data) === oggi);
   const itaTop = [...atp.righe, ...wta.righe].filter((r) => r.paese === "ITA").length;
-  const principaliTornei = tornei.filter((t) => t.categoria && t.fine >= oggi).length;
+  const inCorso = principali.filter((p) => p.stato === "in").length;
   document.getElementById("stat-strip").innerHTML = [
-    [deOggi.length, "partite oggi"], [itaTop, "italiani nei primi 100"], [principaliTornei, "tornei da giocare"],
-  ].map(([v, l]) => `<div class="stat"><div class="value">${v}</div><div class="label">${l}</div></div>`).join("");
+    ["live.html", inCorso, "in corso adesso", inCorso ? "live" : ""], ["partite.html", deOggi.length, "partite oggi", ""], ["classifiche.html", itaTop, "italiani nei primi 100", "ita"],
+  ].map(([h, v, l, c]) => `<a class="stat ${c}" href="${h}"><span class="value">${c === "live" ? '<i class="live-punto" aria-hidden="true"></i>' : ""}${v}</span><span class="label">${l}</span></a>`).join("");
 
   // Partite di oggi (o le prossime, se oggi non ce ne sono)
   const boxOggi = document.getElementById("oggi");

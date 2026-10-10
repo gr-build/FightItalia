@@ -1,5 +1,5 @@
-import { partiteLive } from "./live.js?v=202610101023";
-import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610101023";
+import { partiteLive } from "./live.js?v=202610101026";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610101026";
 
 montaPagina("classifiche.html");
 frecciaIndietro(document.getElementById("indietro"), "classifiche.html", "Classifiche");
