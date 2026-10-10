@@ -1,4 +1,4 @@
-# Tennis Oggi — prototipo
+# Smash Oggi — prototipo
 
 Sito statico (HTML, CSS e JavaScript semplici, nessun framework) per seguire il tennis in italiano:
 partite di oggi, risultati, calendario tornei, classifiche ATP/WTA con scheda giocatore, notizie.
@@ -20,7 +20,7 @@ Scrive i file JSON in `docs/data/`. Fonti: ESPN (classifiche, partite, calendari
 superficie dei tornei), RSS di Ubitennis, Tennis Italiano, OA Sport, Gazzetta, Corriere dello Sport, Tuttosport
 (solo titolo + link). Se una classifica non si scarica lo script si ferma senza toccare i dati vecchi.
 Titoli di notizie che parlano di quote, pronostici o scommesse vengono scartati (divieto pubblicità gioco d'azzardo).
-Per sviluppare senza riscaricare tutto: `TENNIS_CACHE=/tmp/cache python3 build_data.py`.
+Per sviluppare senza riscaricare tutto: `SMASH_CACHE=/tmp/cache python3 build_data.py`.
 
 Altri script:
 - `python3 bump_versione.py` — cambia il numero `?v=` di JS e CSS (da lanciare prima di ogni pubblicazione).
@@ -38,13 +38,13 @@ I percorsi sono tutti relativi e il codice non cita MMA Oggi, quindi non serve c
 sostituisci l'indirizzo provvisorio come spiegato qui sotto.
 
 ## Come collegare un dominio
-1. Scegli il dominio (vedi sotto) e crea `docs/CNAME` con una sola riga, per esempio `tennisoggi.net`.
+1. Scegli il dominio (vedi sotto) e crea `docs/CNAME` con una sola riga, per esempio `smashoggi.net`.
 2. Dal registrar punta il DNS a GitHub Pages (record A/CNAME come da guida GitHub) e attiva "Enforce HTTPS".
-3. Sostituisci l'indirizzo provvisorio `https://gr-build.github.io/tennisoggi` nelle pagine HTML (tag canonical, og:url, og:image):
-   `grep -rl "gr-build.github.io/tennisoggi" docs | xargs sed -i 's#https://gr-build.github.io/tennisoggi#https://TUODOMINIO#g'`
+3. Sostituisci l'indirizzo provvisorio `https://gr-build.github.io/smashoggi` nelle pagine HTML (tag canonical, og:url, og:image):
+   `grep -rl "gr-build.github.io/smashoggi" docs | xargs sed -i 's#https://gr-build.github.io/smashoggi#https://TUODOMINIO#g'`
    poi `python3 build_sitemap.py`.
 
-**Nome e dominio:** il nome è Smash Oggi (Tennis Oggi era già occupato). [Ipotesi] smashoggi.it / .com / .net / .org: dal mio ambiente
+**Nome e dominio:** il nome è Smash Oggi (il nome precedente era già occupato). [Ipotesi] smashoggi.it / .com / .net / .org: dal mio ambiente
 non riesco a controllare i domini (nessuna risoluzione DNS), quindi non so se siano liberi. Controllali dal registrar prima di scegliere. Non ho comprato nulla.
 
 ## Cosa resta da fare

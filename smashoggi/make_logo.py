@@ -51,7 +51,7 @@ def svg(w, h, corpo, titolo):
 IMG.mkdir(parents=True, exist_ok=True)
 (IMG / "logo.svg").write_text(svg(120, 120, emblema(), "Smash Oggi"), encoding="utf-8")
 
-# versione orizzontale: emblema + marchio "TENNIS•Oggi" (testo bianco, per fondi scuri)
+# versione orizzontale: emblema + marchio "SMASH•Oggi" (testo bianco, per fondi scuri)
 dt, wt = testo_path("SMASH", 54, 2)
 dd, wd = testo_path("•", 54)
 do, wo = testo_path("Oggi", 54, 1)
