@@ -8,16 +8,16 @@
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a0a0d">
-<title>Più o meno — Smash Oggi</title>
-<meta name="description" content="Più o meno: punti in classifica, età e altezza dei tennisti. Allunga la serie.">
+<title>Live: partite di tennis in corso — Smash Oggi</title>
+<meta name="description" content="Partite di tennis in corso adesso, ATP e WTA, con il punteggio in diretta.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Smash Oggi">
-<meta property="og:title" content="Più o meno — Smash Oggi">
-<meta property="og:description" content="Più o meno: punti in classifica, età e altezza dei tennisti. Allunga la serie.">
+<meta property="og:title" content="Partite di tennis — Smash Oggi">
+<meta property="og:description" content="Tutte le partite di tennis del giorno e dei giorni scorsi: risultati e orari, ATP e WTA, con gli italiani in evidenza.">
 <meta property="og:image" content="https://gr-build.github.io/smashoggi/img/og-image.png">
-<meta property="og:url" content="https://gr-build.github.io/smashoggi/piu-o-meno.html">
+<meta property="og:url" content="https://gr-build.github.io/smashoggi/live.html">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="canonical" href="https://gr-build.github.io/smashoggi/piu-o-meno.html">
+<link rel="canonical" href="https://gr-build.github.io/smashoggi/live.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -29,12 +29,16 @@
 <header id="site-header" class="site-header"></header>
 <main id="contenuto">
 <div class="container">
-<div class="indietro-riga"><a class="indietro" href="giochi.html"><span aria-hidden="true">‹</span> Giochi</a></div>
-<section class="hero gioco-hero"><h1>Più o <span class="accent">meno</span></h1></section>
-<div id="gioco" class="gioco"><div class="vuoto">Caricamento…</div></div>
+  <section class="hero"><h1><span class="live-titolo"><i class="live-punto" aria-hidden="true"></i></span>Partite <span class="accent">live</span></h1>
+    <p>Tutte le partite in corso adesso, ATP e WTA, con il punteggio che si aggiorna da solo ogni 30 secondi.</p></section>
+  <div id="filtri" class="filtri"></div>
+  <p data-live hidden></p>
+  <div id="elenco"><div class="vuoto">Caricamento…</div></div>
+  <p class="nota">Dati ESPN in diretta. Singolare; le qualificazioni sono indicate nel turno.</p>
 </div>
 </main>
+
 <footer id="site-footer" class="site-footer"></footer>
-<script type="module" src="js/piu-o-meno.js?v=202610101019"></script>
+<script type="module" src="js/live-pagina.js?v=202610101019"></script>
 </body>
 </html>

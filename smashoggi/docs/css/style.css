@@ -435,3 +435,8 @@ img.avatar { background: linear-gradient(180deg, #ffffff, #e4e4ea); }
 }
 .widget-giochi { display: block; border-color: var(--accent-text); }
 .widget-giochi p { margin: 4px 0 8px; font-size: 14px; color: var(--text-secondary); }
+.nav-links a.voce-live::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 50%; background: #ff4d4d; vertical-align: 2px; }
+.live-titolo { display: inline-flex; vertical-align: middle; margin-right: 12px; }
+.live-titolo .live-punto { width: 14px; height: 14px; }
+/* Su telefono "Home" e' il logo: la voce si nasconde per far stare Live e Giochi senza scorrere */
+@media (max-width: 440px) { .nav-links li:first-child { display: none; } }

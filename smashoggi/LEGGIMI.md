@@ -27,6 +27,7 @@ hanno licenze libere (credito nel piè di pagina); **quelle ESPN sono di ESPN**:
 sostituirle con foto Commons o con foto proprie.
 Per sviluppare senza riscaricare tutto: `SMASH_CACHE=/tmp/cache python3 build_data.py`.
 
+Pagina **Live** (`live.html`): solo le partite in corso, aggiornate ogni 30 secondi; se non ce ne sono mostra le prossime.
 Risultati in diretta: `docs/js/live.js` chiede i punteggi a ESPN direttamente dal browser di chi legge (ESPN lo consente),
 ogni 30 secondi mentre ci sono partite in corso o in programma oggi, e li unisce ai dati del sito. Se la richiesta non riesce
 la pagina mostra "Risultati dell'ultimo aggiornamento del sito". ESPN rifiuta i browser automatici ("headless"):

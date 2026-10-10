@@ -1,6 +1,6 @@
 // Risultati in diretta: il browser chiede i punteggi a ESPN (che lo consente, CORS aperto) e li unisce ai dati del sito.
 // Se la richiesta non riesce (rete, blocchi) restano i dati dell'ultimo aggiornamento: nessun errore per chi legge.
-import { fetchJSON, oggiRoma } from "./common.js?v=202610101015";
+import { fetchJSON, oggiRoma } from "./common.js?v=202610101019";
 
 const ESPN = "https://site.api.espn.com/apis/site/v2/sports/tennis";
 const OGNI = 30000; // 30 secondi
@@ -48,9 +48,12 @@ async function scaricaLive() {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 8000);
   try {
-    const risposte = await Promise.all(["atp", "wta"].map((tour) =>
-      fetch(`${ESPN}/${tour}/scoreboard?dates=${giorno}`, { signal: ctrl.signal, cache: "no-store" }).then((r) => (r.ok ? r.json() : Promise.reject(r.status)))));
-    return risposte.flatMap(estrai);
+    // il giorno italiano e, senza data, quello "corrente" di ESPN (copre le partite serali in America)
+    const url = ["atp", "wta"].flatMap((tour) => [`${ESPN}/${tour}/scoreboard?dates=${giorno}`, `${ESPN}/${tour}/scoreboard`]);
+    const risposte = await Promise.allSettled(url.map((u) =>
+      fetch(u, { signal: ctrl.signal, cache: "no-store" }).then((r) => (r.ok ? r.json() : Promise.reject(r.status)))));
+    if (!risposte.some((r) => r.status === "fulfilled")) throw new Error("ESPN non raggiungibile");
+    return risposte.filter((r) => r.status === "fulfilled").flatMap((r) => estrai(r.value));
   } finally { clearTimeout(t); }
 }
 
@@ -82,7 +85,7 @@ function mostraStato(live) {
 }
 
 // Dati del sito + punteggi in diretta. aggiorna() viene chiamata a ogni cambiamento successivo.
-export async function partiteLive(aggiorna) {
+export async function partiteLive(aggiorna, { sempre = false } = {}) {
   const dati = await fetchJSON("data/partite.json");
   let live = null;
   try { unisci(dati.partite, await scaricaLive()); live = new Date(); } catch (e) { /* restano i dati del sito */ }
@@ -91,12 +94,12 @@ export async function partiteLive(aggiorna) {
     if (document.hidden) return;
     const oggi = oggiRoma();
     const attese = dati.partite.some((p) => p.stato === "in" || (p.stato === "pre" && p.data.slice(0, 10) <= oggi));
-    if (!attese) return;
+    if (!attese && !sempre) return;
     try {
       const cambiato = unisci(dati.partite, await scaricaLive());
       live = new Date();
       mostraStato(live);
-      if (cambiato && aggiorna) aggiorna(dati.partite);
+      if ((cambiato || sempre) && aggiorna) aggiorna(dati.partite);
     } catch (e) { /* riprova al prossimo giro */ }
   };
   setInterval(giro, OGNI);

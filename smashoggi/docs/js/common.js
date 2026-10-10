@@ -197,7 +197,7 @@ export function avatar(g, grande = false) {
 
 // ---------- Intestazione e pie' di pagina ----------
 const VOCI = [
-  ["index.html", "Home"], ["partite.html", "Risultati"], ["calendario.html", "Calendario"], ["classifiche.html", "Classifiche"], ["notizie.html", "News"], ["giochi.html", "Giochi"],
+  ["index.html", "Home"], ["live.html", "Live"], ["partite.html", "Risultati"], ["calendario.html", "Calendario"], ["classifiche.html", "Classifiche"], ["notizie.html", "News"], ["giochi.html", "Giochi"],
 ];
 
 export function montaPagina(paginaCorrente) {
@@ -205,7 +205,7 @@ export function montaPagina(paginaCorrente) {
   if (header) {
     header.innerHTML = `<div class="container nav">
         <a href="index.html" class="brand notranslate" translate="no" aria-label="Smash Oggi, home"><img src="img/logo.svg" alt="" class="brand-logo" width="56" height="56"><span>SMASH<span class="dot">•</span><span class="oggi">Oggi</span></span></a>
-        <ul class="nav-links">${VOCI.map(([h, t]) => `<li><a href="${h}" class="${h === paginaCorrente ? "active" : ""}${h === "giochi.html" ? " voce-giochi" : ""}"${h === paginaCorrente ? ' aria-current="page"' : ""}>${t}</a></li>`).join("")}</ul>
+        <ul class="nav-links">${VOCI.map(([h, t]) => `<li><a href="${h}" class="${h === paginaCorrente ? "active" : ""}${h === "giochi.html" ? " voce-giochi" : ""}${h === "live.html" ? " voce-live" : ""}"${h === paginaCorrente ? ' aria-current="page"' : ""}>${t}</a></li>`).join("")}</ul>
         <div class="nav-strumenti">${selettoreLingua()}
           <button type="button" class="tema-btn" id="tema-btn" role="switch" aria-label="Tema chiaro" title="Chiaro / scuro">${SOLE}${LUNA}<span class="tema-pallino" aria-hidden="true"></span></button></div>
       </div>`;
