@@ -125,6 +125,8 @@ def paese(url, alt=None):
 
 
 def scrivi(nome, dati):
+    if "\ufffd" in json.dumps(dati, ensure_ascii=False):
+        log(f"  ! {nome}: contiene caratteri rotti (U+FFFD), controlla la fonte")
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / nome).write_text(json.dumps(dati, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     log(f"  scritto {nome} ({(OUT / nome).stat().st_size // 1024} KB)")
@@ -144,7 +146,8 @@ def classifica(tour):
             "pos": r["current"], "prec": r.get("previous"), "punti": int(r["points"]) if r.get("points") is not None else None,
             "id": a["id"], "nome": a["displayName"], "cognome": a.get("lastName"),
             "paese": cod, "paeseNome": nome_paese, "eta": a.get("age"),
-            "luogoNascita": (a.get("birthPlace") or {}).get("summary"),
+            # a volte ESPN manda caratteri rotti (es. "S??vres"): meglio nessun dato che un dato sbagliato
+            "luogoNascita": next((v for v in [(a.get("birthPlace") or {}).get("summary")] if v and "\ufffd" not in v), None),
             "foto": a.get("headshot"),   # ritratto ESPN: c'e' solo per una parte dei giocatori
         })
     return {"tour": tour, "aggiornata": blocco.get("update"), "righe": righe}
