@@ -21,6 +21,10 @@ Scrive i file JSON in `docs/data/`. Fonti: ESPN (classifiche, partite, calendari
 superficie dei tornei), RSS di Ubitennis, Tennis Italiano, OA Sport, Gazzetta, Corriere dello Sport, Tuttosport
 (solo titolo + link). Se una classifica non si scarica lo script si ferma senza toccare i dati vecchi.
 Titoli di notizie che parlano di quote, pronostici o scommesse vengono scartati (divieto pubblicità gioco d'azzardo).
+`build_foto.py` (serve `pip install pillow`) cerca su Wikipedia le foto che ESPN non ha e copia tutte le foto in
+`docs/img/giocatori/ID.webp` (280x280): il sito non carica immagini da server esterni. Le foto di Wikimedia Commons
+hanno licenze libere (credito nel piè di pagina); **quelle ESPN sono di ESPN**: prima di andare online davvero conviene
+sostituirle con foto Commons o con foto proprie.
 Per sviluppare senza riscaricare tutto: `SMASH_CACHE=/tmp/cache python3 build_data.py`.
 
 Altri script:

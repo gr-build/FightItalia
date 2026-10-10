@@ -1,4 +1,4 @@
-import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610100823";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610100950";
 
 montaPagina("classifiche.html");
 frecciaIndietro(document.getElementById("indietro"), "classifiche.html", "Classifiche");

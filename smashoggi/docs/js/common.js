@@ -80,7 +80,7 @@ export function schedaPartita(p, giocatori) {
     : finita ? `<span class="stato">Finita</span>` : `<span class="stato">${esc(oraRoma(p.data))}</span>`;
   const riga = (g) => `<div class="riga-giocatore${g.paese === "ITA" ? " ita" : ""}${g.vince ? " vince" : ""}">
       <span class="codice" title="${esc(g.paese || "")}">${esc(g.paese || "–")}</span>
-      <span class="nome">${linkGiocatore(g, giocatori)}</span>
+      ${giocatori[g.id]?.foto ? `<img class="mini-foto" src="${esc(giocatori[g.id].foto)}" alt="" loading="lazy" width="26" height="26">` : `<span class="mini-foto" aria-hidden="true">${esc(iniziali(g.nome))}</span>`}<span class="nome">${linkGiocatore(g, giocatori)}</span>
       <span class="set">${setHtml(g)}</span></div>`;
   return `<article class="partita">
     <div class="meta"><span>${esc(p.turno)}${p.campo ? ` · ${esc(p.campo)}` : ""}</span>${stato}</div>
@@ -197,7 +197,7 @@ export function avatar(g, grande = false) {
 
 // ---------- Intestazione e pie' di pagina ----------
 const VOCI = [
-  ["index.html", "Home"], ["partite.html", "Partite"], ["calendario.html", "Calendario"], ["classifiche.html", "Classifiche"], ["notizie.html", "News"],
+  ["index.html", "Home"], ["partite.html", "Risultati"], ["calendario.html", "Calendario"], ["classifiche.html", "Classifiche"], ["notizie.html", "News"],
 ];
 
 export function montaPagina(paginaCorrente) {

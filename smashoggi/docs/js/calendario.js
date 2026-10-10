@@ -1,4 +1,4 @@
-import { fetchJSON, esc, montaPagina, oggiRoma, etichettaCategoria, intervalloDate, nomeTour, mesiIt, messaggioErrore } from "./common.js?v=202610100823";
+import { fetchJSON, esc, montaPagina, oggiRoma, etichettaCategoria, intervalloDate, nomeTour, mesiIt, messaggioErrore, dataSolo } from "./common.js?v=202610100950";
 
 montaPagina("calendario.html");
 
@@ -51,8 +51,79 @@ function disegna() {
   document.querySelectorAll(".pill[data-k]").forEach((b) => b.setAttribute("aria-pressed", String(stato[b.dataset.k] === b.dataset.v)));
 }
 
+// ---------- Agenda del mese (stesso schema del calendario di GP Oggi) ----------
+const agenda = { mese: null, giorno: null, tour: { atp: true, wta: true }, limiti: null };
+const GIORNI_SETT = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
+const iso = (d) => d.toISOString().slice(0, 10);
+const principali = () => tornei.filter((t) => t.categoria && agenda.tour[t.tour]);
+const inCorsoIl = (g) => principali().filter((t) => t.inizio <= g && t.fine >= g);
+const pesante = (t) => ["Grand Slam", "Finals", "1000"].includes(t.categoria);
+
+function disegnaAgenda() {
+  const oggi = oggiRoma();
+  const [y, m] = agenda.mese.split("-").map(Number);
+  document.getElementById("mese-titolo").textContent = mesiIt(`${agenda.mese}-01`);
+  document.getElementById("mese-prec").disabled = agenda.mese <= agenda.limiti[0];
+  document.getElementById("mese-succ").disabled = agenda.mese >= agenda.limiti[1];
+  const primo = new Date(Date.UTC(y, m - 1, 1));
+  const vuoti = (primo.getUTCDay() + 6) % 7;
+  const nGiorni = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  let html = GIORNI_SETT.map((g) => `<div class="ag-sett" aria-hidden="true">${g}</div>`).join("") + "<div></div>".repeat(vuoti);
+  for (let d = 1; d <= nGiorni; d++) {
+    const g = iso(new Date(Date.UTC(y, m - 1, d)));
+    const lista = inCorsoIl(g);
+    const tours = ["atp", "wta"].filter((t) => lista.some((x) => x.tour === t));
+    const cls = ["ag-giorno", lista.length ? "pieno" : "", lista.some(pesante) ? "grande" : "", g === oggi ? "oggi" : "", g === agenda.giorno ? "scelto" : ""].filter(Boolean).join(" ");
+    const descr = `${d} ${mesiIt(g)}: ${lista.length ? `${lista.length} tornei in corso` : "nessun torneo"}`;
+    html += `<button type="button" class="${cls}" data-g="${g}" aria-label="${esc(descr)}" aria-pressed="${g === agenda.giorno}"><span class="ag-num">${d}</span><span class="ag-pallini">${tours.map((t) => `<i class="pallino ${t}"></i>`).join("")}</span></button>`;
+  }
+  document.getElementById("agenda").innerHTML = html;
+  disegnaDettaglio();
+}
+
+function disegnaDettaglio() {
+  const el = document.getElementById("dettaglio");
+  if (!agenda.giorno) { el.innerHTML = `<p class="nota">Tocca un giorno per vedere i tornei in corso.</p>`; return; }
+  const oggi = oggiRoma();
+  const lista = inCorsoIl(agenda.giorno).sort((a, b) => Number(pesante(b)) - Number(pesante(a)) || a.tour.localeCompare(b.tour));
+  const titolo = new Intl.DateTimeFormat("it-IT", { timeZone: "UTC", weekday: "long", day: "numeric", month: "long" }).format(dataSolo(agenda.giorno));
+  el.innerHTML = `<h3 class="ag-titolo">${esc(titolo)}</h3>
+    ${lista.length ? `<div class="lista-tornei">${lista.map((t) => card(t, oggi)).join("")}</div>` : `<div class="vuoto">Nessun torneo del circuito principale in questo giorno.</div>`}
+    <a class="widget-tutti" href="partite.html?giorno=${agenda.giorno}">Risultati e partite di questo giorno →</a>`;
+}
+
+function montaAgenda() {
+  const mesi = tornei.map((t) => t.inizio.slice(0, 7)).concat(tornei.map((t) => t.fine.slice(0, 7))).sort();
+  agenda.limiti = [mesi[0], mesi[mesi.length - 1]];
+  const oggi = oggiRoma();
+  agenda.mese = oggi.slice(0, 7);
+  agenda.giorno = oggi;
+  const sposta = (n) => { const [y, m] = agenda.mese.split("-").map(Number); agenda.mese = iso(new Date(Date.UTC(y, m - 1 + n, 1))).slice(0, 7); disegnaAgenda(); };
+  document.getElementById("mese-prec").addEventListener("click", () => sposta(-1));
+  document.getElementById("mese-succ").addEventListener("click", () => sposta(1));
+  document.getElementById("mese-oggi").addEventListener("click", () => { agenda.mese = oggi.slice(0, 7); agenda.giorno = oggi; disegnaAgenda(); });
+  document.getElementById("agenda").addEventListener("click", (e) => {
+    const b = e.target.closest(".ag-giorno");
+    if (!b) return;
+    agenda.giorno = b.dataset.g;
+    disegnaAgenda();
+    if (matchMedia("(max-width: 980px)").matches) document.getElementById("dettaglio").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+  document.getElementById("filtri-tour").addEventListener("click", (e) => {
+    const b = e.target.closest(".pill[data-t]");
+    if (!b) return;
+    const t = b.dataset.t, altro = t === "atp" ? "wta" : "atp";
+    agenda.tour[t] = !agenda.tour[t];
+    if (!agenda.tour[t] && !agenda.tour[altro]) agenda.tour[altro] = true; // almeno un circuito resta acceso
+    document.querySelectorAll("#filtri-tour .pill").forEach((p) => p.setAttribute("aria-pressed", String(agenda.tour[p.dataset.t])));
+    disegnaAgenda();
+  });
+  disegnaAgenda();
+}
+
 fetchJSON("data/tornei.json").then((d) => {
   tornei = d.tornei;
+  montaAgenda();
   document.getElementById("filtri").innerHTML = pillole("periodo", PERIODO) + pillole("cat", CATEGORIE) + pillole("tour", TOUR);
   document.getElementById("filtri").addEventListener("click", (e) => {
     const b = e.target.closest(".pill[data-k]");

@@ -1,5 +1,5 @@
 import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, schedaPartita, etichettaCategoria, intervalloDate, nomeTour, frecciaIndietro,
-  messaggioErrore, oggiRoma, giornoRoma, dataBreve, punteggioPartita } from "./common.js?v=202610100823";
+  messaggioErrore, oggiRoma, giornoRoma, dataBreve, punteggioPartita } from "./common.js?v=202610100950";
 
 montaPagina("calendario.html");
 frecciaIndietro(document.getElementById("indietro"), "calendario.html", "Calendario");
