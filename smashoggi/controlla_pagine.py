@@ -7,7 +7,7 @@ from playwright.sync_api import sync_playwright
 
 UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1"
 OUT = Path(sys.argv[1] if len(sys.argv) > 1 else "/tmp/shots"); OUT.mkdir(parents=True, exist_ok=True)
-PAGINE = ["tennisti.html", "archivio.html", "griglia.html", "quiz.html", "ordina.html", "live.html", "giochi.html", "chi-e.html", "piu-o-meno.html", "cognomle.html", "index.html", "partite.html", "calendario.html", "torneo.html?tour=atp&id=315", "classifiche.html", "giocatore.html?id=3623",
+PAGINE = ["confronto.html?a=3623&b=3782", "tennisti.html", "archivio.html", "griglia.html", "quiz.html", "ordina.html", "live.html", "giochi.html", "chi-e.html", "piu-o-meno.html", "cognomle.html", "index.html", "partite.html", "calendario.html", "torneo.html?tour=atp&id=315", "classifiche.html", "giocatore.html?id=3623",
           "notizie.html", "chi-siamo.html", "seguici.html"]
 srv = subprocess.Popen([sys.executable, "-m", "http.server", "8765", "-d", str(Path(__file__).parent / "docs")],
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

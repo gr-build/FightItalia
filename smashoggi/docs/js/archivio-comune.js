@@ -1,5 +1,5 @@
 // Riga di una finale dell'archivio: usata dalla pagina Archivio e dalle schede dei giocatori.
-import { esc, etichettaCategoria, intervalloDate } from "./common.js?v=202610101448";
+import { esc, etichettaCategoria, intervalloDate } from "./common.js?v=202610101452";
 
 export const punteggioFinale = (a) => a.punteggioTesto ?? a.punteggio.map(([v, f, tb]) => `${v}-${f}${tb !== undefined ? `(${tb})` : ""}`).join(" ")
   + (a.speciale === "Ritiro" ? " rit." : a.speciale === "Walkover" ? " w.o." : "");

@@ -1,6 +1,6 @@
-import { partiteLive } from "./live.js?v=202610101448";
-import { rigaFinale } from "./archivio-comune.js?v=202610101448";
-import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610101448";
+import { partiteLive } from "./live.js?v=202610101452";
+import { rigaFinale } from "./archivio-comune.js?v=202610101452";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610101452";
 
 montaPagina("classifiche.html");
 frecciaIndietro(document.getElementById("indietro"), "tennisti.html", "Indietro");
@@ -31,6 +31,7 @@ async function avvia() {
       <div><h1>${esc(g.nome)}</h1>
         <div class="sub">${g.paese === "ITA" ? '<span class="tag slam">Italia</span>' : ""}${esc(g.paese !== "ITA" ? g.paeseNome || g.paese || "" : "")}${g.eta ? ` · ${g.eta} anni` : ""}</div></div>
     </div>
+    <p style="margin:14px 0 0"><a class="pill attiva btn-confronta" href="confronto.html?a=${encodeURIComponent(g.id)}">⚖️ Confronta con un altro tennista</a></p>
     <div class="dati">
       ${dato("Classifica", g.pos && `${g.pos}º ${g.tour === "atp" ? "ATP" : "WTA"}${delta ? (delta > 0 ? ` (▲${delta})` : ` (▼${-delta})`) : ""}`)}
       ${dato("Punti", g.punti)}

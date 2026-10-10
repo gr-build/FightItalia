@@ -1,5 +1,5 @@
-import { partiteLive } from "./live.js?v=202610101448";
-import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, giornoRoma, oggiRoma, dataSolo, messaggioErrore } from "./common.js?v=202610101448";
+import { partiteLive } from "./live.js?v=202610101452";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, giornoRoma, oggiRoma, dataSolo, messaggioErrore } from "./common.js?v=202610101452";
 
 montaPagina("partite.html");
 

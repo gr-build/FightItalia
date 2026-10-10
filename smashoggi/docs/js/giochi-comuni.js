@@ -1,5 +1,5 @@
 // Utilita' condivise dai giochi di Smash Oggi: dati dei giocatori, memoria locale, giocatore del giorno, condivisione.
-import { fetchJSON, esc } from "./common.js?v=202610101448";
+import { fetchJSON, esc } from "./common.js?v=202610101452";
 
 // I giochi usano i primi 100 di ATP e WTA (data/giocatori.json, dati ESPN veri); la Griglia accetta tutti i classificati.
 let cache;

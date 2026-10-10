@@ -565,3 +565,31 @@ button.gr-cella:hover, .gr-cella.attiva { border-color: var(--accent-text); colo
 .ch-p.ita .codice { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .ch-p.attesa { color: var(--text-muted); font-style: italic; }
 .ch-vs { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+
+/* ---------- Confronto ---------- */
+.cf-scelta { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: stretch; }
+.cf-vs { align-self: center; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font: 700 14px var(--font-display); margin-top: 40px; }
+.cf-slot { min-width: 0; padding: 12px; background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius); min-height: 150px; }
+.cf-gioc { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
+.cf-gioc b { font: 600 17px/1.15 var(--font-display); text-transform: uppercase; overflow-wrap: anywhere; }
+.cf-gioc small { color: var(--text-muted); font-size: 12px; }
+.cf-vuoto { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; text-align: center; }
+.cf-cerca .cerca { min-height: 40px; }
+.cf-cerca .cerca input { font-size: 14px; }
+.cf-cerca .suggerimenti button { font-size: 13px; min-height: 40px; padding: 6px 10px; flex-wrap: wrap; }
+.cf-tabella { margin-top: 18px; background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius); overflow: hidden; }
+.cf-riga { display: grid; grid-template-columns: 1fr 1.2fr 1fr; align-items: center; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--border-soft); text-align: center; }
+.cf-riga:first-child { border-top: 0; }
+.cf-testa { background: var(--bg-elevated-2); }
+.cf-testa b { font: 600 16px var(--font-display); text-transform: uppercase; overflow-wrap: anywhere; }
+.cf-testa .cf-nome { font: 700 20px var(--font-display); color: var(--text); }
+.cf-testa small { display: block; font: 500 10.5px var(--font-body); color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+.cf-nome { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+.cf-v { font: 600 18px var(--font-display); color: var(--text-secondary); }
+.cf-v.meglio { color: var(--accent-ink); background: var(--accent); border-radius: 8px; padding: 2px 6px; justify-self: center; }
+.cf-scontri { display: grid; gap: 6px; }
+.cf-scontro { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 10px 12px; background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: 10px; font-size: 13.5px; }
+.cf-scontro span:first-child { color: var(--text-muted); }
+.cf-ris { color: var(--accent-text); font-weight: 600; white-space: nowrap; }
+@media (max-width: 480px) { .cf-scontro { grid-template-columns: minmax(0, 1fr) auto; } .cf-scontro span:first-child { grid-column: 1 / -1; font-size: 12px; } }
+.btn-confronta { display: inline-flex; align-items: center; gap: 8px; }
