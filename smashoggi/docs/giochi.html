@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=202610101452">
+<link rel="stylesheet" href="css/style.css?v=202610110114">
 <script>try{var t=localStorage.getItem("tema");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body>
@@ -30,24 +30,28 @@
 <main id="contenuto">
 <div class="container">
 <section class="hero"><h1>I <span class="accent">giochi</span></h1>
-  <p>Quanto conosci il tennis? Sei giochi con i tennisti veri, uomini e donne. Dati veri, aggiornati con le classifiche.</p></section>
+  <p>Dieci giochi con i tennisti veri: dati aggiornati con le classifiche e i risultati della stagione.</p></section>
+<h2 class="section-title">Ogni giorno</h2>
+<p class="nota" style="margin:-8px 0 14px">Un gioco nuovo ogni mezzanotte, uguale per tutti: confronta il risultato con gli amici.</p>
 <div class="giochi-grid">
-  <a class="gioco-card top" href="griglia.html"><span class="gioco-tag">Nuovo · ogni giorno</span><h2>Griglia</h2>
-    <p>Nove caselle: in ognuna un tennista che rispetta riga e colonna (paese, classifica, titoli, mancini…). Tre errori e sei fuori.</p><span class="gioco-cta">Gioca →</span></a>
-  <a class="gioco-card" href="quiz.html"><span class="gioco-tag">Nuovo · ogni giorno</span><h2>Quiz</h2>
-    <p>Dieci domande sulla stagione: chi ha vinto quel torneo, di che paese è, quanti titoli ha. Tutto dai dati veri.</p><span class="gioco-cta">Gioca →</span></a>
-  <a class="gioco-card" href="ordina.html"><span class="gioco-tag">Nuovo · ogni giorno</span><h2>Ordina</h2>
-    <p>Cinque tennisti da mettere in fila: per classifica, titoli, età o altezza. Tocca nell'ordine giusto.</p><span class="gioco-cta">Gioca →</span></a>
-  <a class="gioco-card" href="chi-e.html"><span class="gioco-tag">Ogni giorno</span><h2>Chi è?</h2>
-    <p>Una foto sfocata e 6 tentativi. A ogni errore la foto si schiarisce e gli indizi ti dicono paese, classifica ed età.</p><span class="gioco-cta">Gioca →</span></a>
-  <a class="gioco-card" href="piu-o-meno.html"><span class="gioco-tag">Serie</span><h2>Più o meno</h2>
-    <p>Chi ha più punti in classifica? Chi è più alto? Indovina e allunga la serie finché non sbagli.</p><span class="gioco-cta">Gioca →</span></a>
-  <a class="gioco-card" href="cognomle.html"><span class="gioco-tag">Ogni giorno</span><h2>Cognomle</h2>
-    <p>Il cognome di un tennista in 6 tentativi, come Wordle: lettera giusta al posto giusto, nel posto sbagliato, o niente.</p><span class="gioco-cta">Gioca →</span></a>
+  <a class="gioco-card" href="griglia.html" style="--gc:#3d8bfd"><span class="gc-icona" aria-hidden="true">🔲</span><h2>Griglia</h2><p>Nove caselle, in ognuna un tennista che rispetta riga e colonna. Tre errori.</p><span class="gioco-cta">Gioca →</span></a>
+  <a class="gioco-card" href="top10.html" style="--gc:#e8c34a"><span class="gc-icona" aria-hidden="true">🔟</span><h2>Top 10</h2><p>Completa una classifica vera: primi 10 ATP, più titolati, più giovani…</p><span class="gioco-cta">Gioca →</span></a>
+  <a class="gioco-card" href="quiz.html" style="--gc:#a66bff"><span class="gc-icona" aria-hidden="true">❓</span><h2>Quiz</h2><p>Dieci domande sulla stagione, tutte dai dati veri.</p><span class="gioco-cta">Gioca →</span></a>
+  <a class="gioco-card" href="chi-e.html" style="--gc:#ff6f91"><span class="gc-icona" aria-hidden="true">🕵️</span><h2>Chi è?</h2><p>Foto sfocata e indizi: indovina il tennista in 6 tentativi.</p><span class="gioco-cta">Gioca →</span></a>
+  <a class="gioco-card" href="cognomle.html" style="--gc:#4caf50"><span class="gc-icona" aria-hidden="true">🔤</span><h2>Cognomle</h2><p>Il cognome di un tennista in 6 tentativi, come Wordle.</p><span class="gioco-cta">Gioca →</span></a>
+  <a class="gioco-card" href="ordina.html" style="--gc:#d9773f"><span class="gc-icona" aria-hidden="true">📶</span><h2>Ordina</h2><p>Cinque tennisti da mettere in fila per classifica, titoli, età o altezza.</p><span class="gioco-cta">Gioca →</span></a>
+  <a class="gioco-card" href="memory.html" style="--gc:#22b8cf"><span class="gc-icona" aria-hidden="true">🃏</span><h2>Memory</h2><p>Trova le coppie foto + cognome nel minor numero di mosse.</p><span class="gioco-cta">Gioca →</span></a>
+</div>
+<h2 class="section-title">Sfide a serie</h2>
+<p class="nota" style="margin:-8px 0 14px">Vai avanti finché non sbagli e batti il tuo record.</p>
+<div class="giochi-grid">
+  <a class="gioco-card" href="piu-o-meno.html" style="--gc:#c6f432"><span class="gc-icona" aria-hidden="true">⬆️</span><h2>Più o meno</h2><p>Punti, titoli, vittorie, età, altezza: il secondo ha di più o di meno?</p><span class="gioco-cta">Gioca →</span></a>
+  <a class="gioco-card" href="finali.html" style="--gc:#e8c34a"><span class="gc-icona" aria-hidden="true">🏆</span><h2>Chi ha vinto la finale?</h2><p>Le finali vere del 2026, ATP, WTA e Challenger: scegli il vincitore.</p><span class="gioco-cta">Gioca →</span></a>
+  <a class="gioco-card" href="paesi.html" style="--gc:#3d8bfd"><span class="gc-icona" aria-hidden="true">🌍</span><h2>Da dove viene?</h2><p>Foto e nome: indovina il paese del tennista.</p><span class="gioco-cta">Gioca →</span></a>
 </div>
 </div>
 </main>
 <footer id="site-footer" class="site-footer"></footer>
-<script type="module" src="js/pagina-statica.js?v=202610101452"></script>
+<script type="module" src="js/pagina-statica.js?v=202610110114"></script>
 </body>
 </html>

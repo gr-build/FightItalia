@@ -1,6 +1,6 @@
 // Pagina Live: solo le partite in corso adesso, aggiornate ogni 30 secondi.
-import { partiteLive } from "./live.js?v=202610101452";
-import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, dataBreve, oraRoma, messaggioErrore } from "./common.js?v=202610101452";
+import { partiteLive } from "./live.js?v=202610110114";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, dataBreve, oraRoma, messaggioErrore, superficie } from "./common.js?v=202610110114";
 
 montaPagina("live.html");
 
@@ -52,8 +52,8 @@ fetchJSON("data/challenger.json").then(({ tornei }) => {
   document.getElementById("challenger").innerHTML = `<h2 class="section-title">Challenger in corso <span class="count">${ora.length} tornei</span></h2>
     <p class="ch-avviso"><b>Live senza punteggio punto per punto:</b> per i Challenger il risultato è disponibile a fine partita.</p>
     <div class="ch-griglia">${ora.map((t) => `<article class="af ch-torneo">
-      <div class="af-testa"><span class="af-torneo">${esc(t.nome)}</span><span class="af-data">${esc(t.citta || "")}</span></div>
-      <div class="af-sub"><span class="tag challenger">${esc(t.categoria)}</span>${esc(t.superficie || "")}</div>
+      <div class="af-testa"><a class="af-torneo" href="torneo.html?ch=${encodeURIComponent(t.id)}">${esc(t.nome)}</a><span class="af-data">${esc(t.citta || "")}</span></div>
+      <div class="af-sub"><span class="tag challenger">${esc(t.categoria)}</span>${superficie(t.superficie)}</div>
       ${t.finale ? `<div class="ch-turno">Finale</div>${sfida(t.finale)}` : ""}
       ${t.semifinali?.length ? `<div class="ch-turno">Semifinali</div>${t.semifinali.map((s) => (s.length === 2 ? sfida(s) : `<div class="ch-sfida">${persona(s[0])}<span class="ch-vs testo">in finale</span></div>`)).join("")}` : ""}
     </article>`).join("")}</div>`;

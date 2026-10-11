@@ -41,7 +41,7 @@ Archivio (`archivio.html`, `data/archivio.json`): la finale di ogni torneo concl
 punteggio). Le finali già trovate restano nel file e non si riscaricano. Tennisti (`tennisti.html`): tutti i giocatori in
 `data/giocatori.json`, cioè i primi 150 delle classifiche ESPN, chi ha giocato nelle ultime 4 settimane e chi ha giocato una
 finale; per ognuno titoli e vittorie/sconfitte in carriera (ESPN). Foto solo per classificati, italiani e vincitori di titoli.
-Giochi in più: Griglia, Quiz, Ordina. Confronto (`confronto.html?a=ID&b=ID`): due tennisti fianco a fianco e scontri diretti presenti nei dati.
+Giochi (10): Griglia, Top 10, Quiz, Chi è?, Cognomle, Ordina, Memory, Più o meno, Chi ha vinto la finale?, Da dove viene?. Confronto (`confronto.html?a=ID&b=ID`): due tennisti fianco a fianco e scontri diretti presenti nei dati.
 
 Challenger (`data/challenger.json`): dalla pagina Wikipedia "2026 ATP Challenger Tour" (licenza CC BY-SA): torneo,
 categoria, superficie, campione, finalista, punteggio, semifinali e quarti. Nessuna diretta: nella pagina Live i Challenger

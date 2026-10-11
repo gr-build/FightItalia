@@ -53,6 +53,12 @@ export function etichettaCategoria(t) {
   if (c && c.startsWith("Challenger")) return { testo: c, classe: "challenger" };
   return { testo: "Altro torneo", classe: "neutro" };
 }
+// superficie con il quadratino del colore del campo (terra arancione, erba verde, cemento blu, indoor viola)
+export function superficie(s) {
+  if (!s) return "";
+  const c = /indoor/i.test(s) ? "indoor" : /terra/i.test(s) ? "terra" : /erba/i.test(s) ? "erba" : "cemento";
+  return `<span class="sup sup-${c}">${esc(s)}</span>`;
+}
 export const nomeTour = (t) => (t === "atp" ? "Uomini" : "Donne");
 
 // ---------- Giocatori e partite ----------

@@ -1,6 +1,6 @@
-import { partiteLive } from "./live.js?v=202610101452";
-import { rigaFinale } from "./archivio-comune.js?v=202610101452";
-import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610101452";
+import { partiteLive } from "./live.js?v=202610110114";
+import { rigaFinale } from "./archivio-comune.js?v=202610110114";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610110114";
 
 montaPagina("classifiche.html");
 frecciaIndietro(document.getElementById("indietro"), "tennisti.html", "Indietro");
@@ -25,12 +25,21 @@ async function avvia() {
   const anni = g.nascita ? new Intl.DateTimeFormat("it-IT", { timeZone: "UTC", day: "numeric", month: "long", year: "numeric" }).format(new Date(g.nascita + "T12:00:00Z")) : null;
 
   box.innerHTML = `
-    <div class="scheda-testa">
-      ${g.pos ? `<div class="grande">${g.pos}<small>${g.tour === "atp" ? "ATP" : "WTA"}</small></div>` : ""}
-      ${avatar(g, true)}
-      <div><h1>${esc(g.nome)}</h1>
-        <div class="sub">${g.paese === "ITA" ? '<span class="tag slam">Italia</span>' : ""}${esc(g.paese !== "ITA" ? g.paeseNome || g.paese || "" : "")}${g.eta ? ` · ${g.eta} anni` : ""}</div></div>
+    <div class="gioc-hero${g.paese === "ITA" ? " ita" : ""}">
+      <div class="gh-foto">${g.foto ? `<img src="${esc(g.foto)}" alt="">` : `<span>${esc(g.nome.split(" ").map((x) => x[0]).join("").slice(0, 2))}</span>`}</div>
+      <div class="gh-testo">
+        <div class="gh-tag">${g.pos ? `<span class="gh-rank">N° ${g.pos} <small>${g.tour.toUpperCase()}</small></span>` : `<span class="gh-rank muto">${g.soloChallenger ? "Challenger" : g.tour.toUpperCase()}</span>`}${delta ? `<span class="var ${delta > 0 ? "su" : "giu"}">${delta > 0 ? `▲${delta}` : `▼${-delta}`}</span>` : ""}</div>
+        <h1>${esc(g.nome)}</h1>
+        <div class="gh-sub"><span class="codice">${esc(g.paese || "–")}</span>${esc(g.paeseNome || "")}${g.eta ? ` · ${g.eta} anni` : ""}${g.mano ? ` · ${g.mano === "Sinistra" ? "mancino" : "destrorso"}` : ""}</div>
+      </div>
     </div>
+    ${g.vinte != null && g.perse != null && g.vinte + g.perse > 0 ? (() => {
+      const pc = Math.round((g.vinte / (g.vinte + g.perse)) * 100);
+      return `<div class="gh-bilancio"><div class="gh-num"><b>${g.titoli ?? 0}</b><small>titoli in carriera</small></div>
+        <div class="gh-barra"><div class="gh-barra-testo"><span><b>${g.vinte}</b> vinte</span><span>${pc}%</span><span><b>${g.perse}</b> perse</span></div>
+        <div class="gh-barra-fondo"><i style="width:${pc}%"></i></div></div>
+        ${forma.length ? `<div class="gh-forma" aria-label="Forma: ultime partite">${forma.map((v) => `<span class="${v ? "v" : "s"}">${v ? "V" : "S"}</span>`).join("")}</div>` : ""}</div>`;
+    })() : ""}
     <p style="margin:14px 0 0"><a class="pill attiva btn-confronta" href="confronto.html?a=${encodeURIComponent(g.id)}">⚖️ Confronta con un altro tennista</a></p>
     <div class="dati">
       ${dato("Classifica", g.pos && `${g.pos}º ${g.tour === "atp" ? "ATP" : "WTA"}${delta ? (delta > 0 ? ` (▲${delta})` : ` (▼${-delta})`) : ""}`)}
@@ -42,8 +51,6 @@ async function avvia() {
       ${dato("Altezza", g.altezzaCm ? `${g.altezzaCm} cm` : null)}
       ${dato("Mano", g.mano, true)}
       ${dato("Esordio", g.esordio)}
-      ${dato("Titoli in carriera", g.titoli)}
-      ${dato("Vittorie e sconfitte", g.vinte != null && g.perse != null ? `${g.vinte} – ${g.perse}` : null)}
       ${dato(`Titoli ${new Date().getFullYear()}`, g.titoliAnno)}
       ${dato(`Challenger vinti ${new Date().getFullYear()}`, g.titoliChallenger)}
     </div>
