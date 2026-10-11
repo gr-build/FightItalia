@@ -89,10 +89,11 @@ export function schedaPartita(p, giocatori) {
       <span class="codice" title="${esc(g.paese || "")}">${esc(g.paese || "–")}</span>
       ${giocatori[g.id]?.foto ? `<img class="mini-foto" src="${esc(giocatori[g.id].foto)}" alt="" loading="lazy" width="26" height="26">` : `<span class="mini-foto" aria-hidden="true">${esc(iniziali(g.nome))}</span>`}<span class="nome">${linkGiocatore(g, giocatori)}</span>
       <span class="set">${setHtml(g)}</span></div>`;
-  return `<article class="partita">
+  return `<article class="partita" data-href="partita.html?tour=${p.tour}&id=${encodeURIComponent(p.id)}">
     <div class="meta"><span>${esc(p.turno)}${p.campo ? ` · ${esc(p.campo)}` : ""}</span>${stato}</div>
     ${riga(a)}${riga(b)}
     ${p.speciale ? `<div class="speciale">${esc(p.speciale)}</div>` : ""}
+    <div class="dettagli-link">Dati della partita <span aria-hidden="true">›</span></div>
   </article>`;
 }
 
@@ -207,6 +208,13 @@ const VOCI = [
   ["index.html", "Home"], ["live.html", "Live"], ["partite.html", "Risultati"], ["calendario.html", "Calendario"], ["classifiche.html", "Classifiche"],
   ["tennisti.html", "Tennisti"], ["archivio.html", "Archivio"], ["notizie.html", "News"], ["giochi.html", "Giochi"],
 ];
+
+// tocco su una scheda partita (fuori dai nomi dei giocatori) = apre la pagina con i dati della partita
+document.addEventListener("click", (e) => {
+  const a = e.target.closest(".partita[data-href]");
+  if (!a || e.target.closest("a, button")) return;
+  location.href = a.dataset.href;
+});
 
 export function montaPagina(paginaCorrente) {
   const header = document.getElementById("site-header");

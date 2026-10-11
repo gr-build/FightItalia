@@ -48,6 +48,10 @@ categoria, superficie, campione, finalista, punteggio, semifinali e quarti. Ness
 in corso mostrano il tabellone, con il risultato disponibile a fine partita. Le finali concluse entrano nell'Archivio e
 vincitori/finalisti nella pagina Tennisti (collegati per nome ai giocatori ESPN, altrimenti con id "w-...").
 
+Pagina partita (`partita.html?tour=&id=`): tocca una partita per aprirla. Mostra tabellone, bilancio dei game e set
+(calcolati dal punteggio), confronto dei giocatori, forma e scontri diretti presenti nei dati. ESPN non dà le statistiche
+punto per punto del tennis (ace, break, % prime): per averle serve un fornitore a pagamento.
+
 Altri script:
 - `python3 bump_versione.py` — cambia il numero `?v=` di JS e CSS (da lanciare prima di ogni pubblicazione).
 - `python3 build_sitemap.py` — scrive `sitemap.xml` e `robots.txt` (usa `docs/CNAME` se esiste).

@@ -1,6 +1,6 @@
 // Risultati in diretta: il browser chiede i punteggi a ESPN (che lo consente, CORS aperto) e li unisce ai dati del sito.
 // Se la richiesta non riesce (rete, blocchi) restano i dati dell'ultimo aggiornamento: nessun errore per chi legge.
-import { fetchJSON, oggiRoma } from "./common.js?v=202610110114";
+import { fetchJSON, oggiRoma } from "./common.js?v=202610110916";
 
 const ESPN = "https://site.api.espn.com/apis/site/v2/sports/tennis";
 const OGNI = 30000; // 30 secondi
@@ -24,7 +24,7 @@ function estrai(sb) {
           const cod = /\/countries\/\d+\/([a-z]+)\.png/.exec(a.flag?.href || "")?.[1];
           return {
             id: p.id, nome: a.displayName || a.fullName, breve: a.shortName, paese: cod ? cod.toUpperCase() : null,
-            vince: Boolean(p.winner),
+            vince: Boolean(p.winner), seed: p.curatedRank?.current ?? null,
             set: (p.linescores || []).map((s) => ({ g: Math.trunc(s.value), ...("tiebreak" in s ? { tb: Math.trunc(s.tiebreak) } : {}) })),
           };
         });
@@ -67,7 +67,7 @@ function unisci(partite, nuove) {
     if (v.stato === "post" && n.stato !== "post") continue; // un risultato finale non torna indietro
     const prima = JSON.stringify([v.stato, v.dettaglio, v.giocatori.map((g) => [g.set, g.vince]), v.speciale]);
     Object.assign(v, { stato: n.stato, dettaglio: n.dettaglio, speciale: n.speciale, data: n.data || v.data, campo: n.campo || v.campo });
-    n.giocatori.forEach((g, i) => { const w = v.giocatori.find((x) => String(x.id) === String(g.id)) || v.giocatori[i]; if (w) Object.assign(w, { set: g.set, vince: g.vince }); });
+    n.giocatori.forEach((g, i) => { const w = v.giocatori.find((x) => String(x.id) === String(g.id)) || v.giocatori[i]; if (w) Object.assign(w, { set: g.set, vince: g.vince, seed: g.seed ?? w.seed }); });
     if (prima !== JSON.stringify([v.stato, v.dettaglio, v.giocatori.map((g) => [g.set, g.vince]), v.speciale])) cambiato = true;
   }
   return cambiato;

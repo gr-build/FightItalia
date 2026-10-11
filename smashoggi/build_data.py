@@ -185,7 +185,7 @@ def estrai_partite(tour, sb):
                     giocatori.append({
                         "id": p.get("id"), "nome": a.get("displayName") or a.get("fullName"),
                         "breve": a.get("shortName"), "paese": cod,
-                        "vince": bool(p.get("winner")),
+                        "vince": bool(p.get("winner")), "seed": (p.get("curatedRank") or {}).get("current"),
                         "set": [{"g": int(s["value"]), **({"tb": int(s["tiebreak"])} if "tiebreak" in s else {})}
                                 for s in p.get("linescores", [])],
                     })
