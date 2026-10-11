@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto, traccia } from "./common.js?v=202610102159";
+import { fetchJSON, renderChrome, icon, slugDaLink, classeRisultato, impostaMetaPagina, fotoDi, classeFoto, traccia } from "./common.js?v=202610110106";
 
 renderChrome(null);
 
@@ -334,9 +334,8 @@ async function conRisultatiEspn(card, ev) {
       if (!vincitore) { finiti.set(chiave, { senzaVincitore: true, round: String(c.status.period), tempo: c.status.displayClock }); continue; }
       const periodi = c.format?.regulation?.periods || 3;
       const alLimite = c.status.period === periodi && ["5:00", "0:00"].includes(c.status.displayClock);
-      // "5:00" in un round che non e' l'ultimo non e' un orario di finish credibile (ESPN a volte non lo aggiorna): meglio non mostrarlo
-      const tempo = !alLimite && c.status.displayClock === "5:00" ? "" : c.status.displayClock;
-      finiti.set(chiave, { vincitore: chiaveNome(vincitore.athlete.displayName), metodo: alLimite ? "Decision" : "Finish", round: String(c.status.period), tempo });
+      // "5:00" prima dell'ultimo round e' un ritiro a fine round (es. angolo o medico): resta com'e'
+      finiti.set(chiave, { vincitore: chiaveNome(vincitore.athlete.displayName), metodo: alLimite ? "Decision" : "Finish", round: String(c.status.period), tempo: c.status.displayClock });
     }
     return card.map((b) => {
       if ((b.metodo || "").trim()) return b;
