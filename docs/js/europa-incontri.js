@@ -1,6 +1,6 @@
 // Aiuti condivisi per le card degli eventi europei (data/europa/<org>-incontri.json,
 // prodotto da build_europa_incontri.py). slug() deve restare identico a quello Python.
-import { fetchJSON } from "./common.js?v=202610110106";
+import { fetchJSON } from "./common.js?v=202610110113";
 
 export function slug(testo) {
   return (testo || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");

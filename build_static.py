@@ -293,6 +293,15 @@ def nome_pulito(nome):
     return re.sub(r"\s*\((?:c|ic)\)\s*$", "", str(nome or "")).strip()
 
 
+DETTAGLI_FINISH = {
+    "head kick": "calcio alla testa", "punches": "pugni", "punch": "pugno", "punch and knee": "pugno e ginocchio",
+    "head kick and punches": "calcio alla testa e pugni", "guillotine choke": "ghigliottina", "rear-naked choke": "strangolamento",
+    "retirement": "ritiro", "doctor stoppage": "stop del medico", "elbows": "gomitate", "knee": "ginocchiata", "knees": "ginocchiate",
+    "body kick": "calcio al corpo", "leg kicks": "calci alle gambe", "kick": "calcio", "armbar": "leva al braccio", "triangle choke": "triangolo",
+    "kimura": "kimura", "heel hook": "leva alla gamba", "arm-triangle choke": "strangolamento a triangolo", "slam": "proiezione", "elbow": "gomitata",
+}
+
+
 def esito_incontro(c):
     """(tipo, descrizione, cartellini): tipo = 'vittoria', 'pareggio' o 'no contest'."""
     metodo = (c.get("metodo") or "").strip()
@@ -313,6 +322,11 @@ def esito_incontro(c):
                 break
     if not desc:
         desc = "decisione dei giudici" if basso.startswith("decision") else re.sub(r"\s*\(.*", "", metodo) or "vittoria"
+    # dettaglio del finish, solo se lo so tradurre ("KO (head kick)" -> "KO (calcio alla testa)")
+    if not desc.startswith("decisione"):
+        m = re.search(r"\(([^)]*)\)", metodo)
+        if m and m.group(1).strip().lower() in DETTAGLI_FINISH:
+            desc = f"{desc} ({DETTAGLI_FINISH[m.group(1).strip().lower()]})"
     return "vittoria", desc, _cartellini(metodo)
 
 
@@ -420,8 +434,8 @@ def genera_incontri(base, roster_by_slug, anagrafica):
     out.mkdir(exist_ok=True)
     vivi = set()
     for ev in eventi:
-        if ev.get("stato") == "programmato":
-            continue
+        # anche un evento ancora "programmato" (in corso stanotte) ha le schede dei match gia' finiti:
+        # il filtro sul metodo qui sotto lascia fuori quelli che non hanno un risultato
         try:
             data_iso = datetime.strptime(str(ev.get("data")).strip(), "%b %d, %Y").date()
         except ValueError:

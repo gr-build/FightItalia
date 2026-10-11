@@ -34,11 +34,18 @@ jobs:
       - name: Aggiorna live.json
         run: python live.py
 
+      # Risultati degli incontri appena finiti (metodo, round, tempo) da Wikipedia e schede incontro
+      # subito, senza aspettare l'aggiornamento giornaliero. Solo requests + libreria standard.
+      - name: Risultati dell'evento e schede incontro
+        run: |
+          python risultati_live.py | tee /tmp/risultati.txt
+          if grep -q CAMBIATO /tmp/risultati.txt; then python build_static.py; fi
+
       - name: Commit e push se cambia
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/data/live.json
+          git add docs/data/live.json docs/data/eventi docs/data/incontri.json docs/evento docs/incontro
           if git diff --staged --quiet; then
             echo "Nessuna novita' da committare."
           else

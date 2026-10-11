@@ -1,6 +1,6 @@
-import { renderChrome } from "./common.js?v=202610110106";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202610110106";
-import { caricaIncontri, linkLottatore, dataIt } from "./europa-incontri.js?v=202610110106";
+import { renderChrome } from "./common.js?v=202610110113";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202610110113";
+import { caricaIncontri, linkLottatore, dataIt } from "./europa-incontri.js?v=202610110113";
 
 renderChrome("europa");
 

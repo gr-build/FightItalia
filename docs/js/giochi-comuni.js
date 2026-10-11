@@ -1,7 +1,7 @@
 // Utility condivise dai giochi (Chi e'?, Piu' o meno).
 // Versione negli import: vedi bump_versione.py.
 
-import { fetchJSON } from "./common.js?v=202610110106";
+import { fetchJSON } from "./common.js?v=202610110113";
 
 let cacheLottatori = null;
 
