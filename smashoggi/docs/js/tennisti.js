@@ -1,6 +1,6 @@
 // Tennisti: tutti i giocatori che ricaviamo dai dati, con ricerca e filtri.
-import { esc, montaPagina, caricaGiocatori, avatar, messaggioErrore } from "./common.js?v=202610110916";
-import { normale } from "./giochi-comuni.js?v=202610110916";
+import { esc, montaPagina, caricaGiocatori, avatar, messaggioErrore } from "./common.js?v=202610120416";
+import { normale } from "./giochi-comuni.js?v=202610120416";
 
 montaPagina("tennisti.html");
 

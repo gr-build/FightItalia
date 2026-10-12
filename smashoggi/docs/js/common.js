@@ -221,10 +221,16 @@ export function montaPagina(paginaCorrente) {
   if (header) {
     header.innerHTML = `<div class="container nav">
         <a href="index.html" class="brand notranslate" translate="no" aria-label="Smash Oggi, home"><img src="img/logo.svg" alt="" class="brand-logo" width="56" height="56"><span>SMASH<span class="dot">•</span><span class="oggi">Oggi</span></span></a>
-        <ul class="nav-links">${VOCI.map(([h, t]) => `<li><a href="${h}" class="${h === paginaCorrente ? "active" : ""}${h === "giochi.html" ? " voce-giochi" : ""}${h === "live.html" ? " voce-live" : ""}"${h === paginaCorrente ? ' aria-current="page"' : ""}>${t}</a></li>`).join("")}</ul>
+        <div class="nav-menu" id="nav-menu"><ul class="nav-links" id="nav-links">${VOCI.map(([h, t]) => `<li><a href="${h}" class="${h === paginaCorrente ? "active" : ""}${h === "giochi.html" ? " voce-giochi" : ""}${h === "live.html" ? " voce-live" : ""}"${h === paginaCorrente ? ' aria-current="page"' : ""}>${t}</a></li>`).join("")}</ul></div>
         <div class="nav-strumenti">${selettoreLingua()}
           <button type="button" class="tema-btn" id="tema-btn" role="switch" aria-label="Tema chiaro" title="Chiaro / scuro">${SOLE}${LUNA}<span class="tema-pallino" aria-hidden="true"></span></button></div>
       </div>`;
+    // la barra scorre: porta la voce attiva al centro e toglie la sfumatura quando si e' arrivati in fondo
+    const lista = header.querySelector("#nav-links"), menu = header.querySelector("#nav-menu"), attiva = lista.querySelector(".active");
+    const fondo = () => menu.classList.toggle("fine", lista.scrollLeft + lista.clientWidth >= lista.scrollWidth - 4);
+    if (attiva) lista.scrollLeft = attiva.offsetLeft - (lista.clientWidth - attiva.offsetWidth) / 2;
+    lista.addEventListener("scroll", fondo, { passive: true });
+    requestAnimationFrame(fondo);
     header.querySelector("#lingua").addEventListener("change", (e) => cambiaLingua(e.target.value));
     applicaTema(temaCorrente());
     header.querySelector("#tema-btn").addEventListener("click", () => applicaTema(temaCorrente() === "dark" ? "light" : "dark"));
