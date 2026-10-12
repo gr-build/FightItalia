@@ -1,6 +1,6 @@
 // Quiz: 10 domande al giorno costruite dai dati veri (paesi, titoli, finali della stagione, citta' dei tornei).
-import { montaPagina, esc, fetchJSON } from "./common.js?v=202610120418";
-import { caricaGiocatoriGioco, casualeConSeme, numeroGiorno, mescola, leggi, scrivi, oggiItalia, condividi } from "./giochi-comuni.js?v=202610120418";
+import { montaPagina, esc, fetchJSON } from "./common.js?v=202610120726";
+import { caricaGiocatoriGioco, casualeConSeme, numeroGiorno, mescola, leggi, scrivi, oggiItalia, condividi } from "./giochi-comuni.js?v=202610120726";
 
 montaPagina("giochi.html");
 const box = document.getElementById("gioco");

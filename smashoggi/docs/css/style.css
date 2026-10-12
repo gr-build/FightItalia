@@ -20,6 +20,8 @@
   --accent-hover: #d8ff58;
   --accent-ink: #0a0a0d;      /* testo sopra i riempimenti accento */
   --accent-soft: rgba(198, 244, 50, 0.12);
+  --racchetta: rgba(198, 244, 50, 0.075);
+  --alone: rgba(198, 244, 50, 0.07);
   --live: #ff5a4f;
   --win: #2fb872;
 
@@ -33,17 +35,19 @@
 }
 
 :root[data-theme="light"] {
-  --bg: #f4f4f6;
-  --bg-elevated: #ffffff;
-  --bg-elevated-2: #ececf1;
-  --border: #d6d6de;
-  --border-soft: #e4e4ea;
+  --bg: #eaeee1;
+  --bg-elevated: #fbfcf7;
+  --bg-elevated-2: #e1e7d6;
+  --border: #ccd4be;
+  --border-soft: #dce2d0;
   --text: #14141a;
   --text-secondary: #4a4a58;
   --text-muted: #5e5e6c;
   --accent-text: #4d6b00;
   --accent-hover: #3d5600;
   --accent-soft: rgba(120, 160, 0, 0.14);
+  --racchetta: rgba(77, 107, 0, 0.12);
+  --alone: rgba(120, 160, 0, 0.16);
   --live: #c9302a;
   --win: #1d8a52;
   --shadow-card: 0 1px 2px rgba(20, 20, 30, 0.08), 0 8px 24px rgba(20, 20, 30, 0.08);
@@ -67,7 +71,7 @@ img { max-width: 100%; }
 
 /* ---------- Intestazione (stesso schema di MMA Oggi e GP Oggi) ---------- */
 .site-header { position: sticky; top: 0; z-index: 50; background: rgba(10, 10, 13, 0.86); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-soft); }
-:root[data-theme="light"] .site-header { background: rgba(244, 244, 246, 0.9); }
+:root[data-theme="light"] .site-header { background: rgba(234, 238, 225, 0.92); }
 .nav { display: flex; align-items: center; justify-content: space-between; height: 66px; gap: 12px; }
 .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 23px; letter-spacing: 0.04em; font-weight: 700; white-space: nowrap; text-transform: uppercase; }
 .brand .dot, .brand .oggi { color: var(--accent-text); }
@@ -773,3 +777,15 @@ button.gr-cella:hover, .gr-cella.attiva { border-color: var(--accent-text); colo
 .pg-forma .gh-forma { gap: 4px; flex-wrap: nowrap; }
 .pg-forma .gh-forma span { width: 24px; height: 24px; flex: none; }
 .pg-forma b { overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Sfondo: racchetta in filigrana (il colore segue il tema, chiaro e scuro) + alone alla pallina ---------- */
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-color: var(--racchetta);
+  -webkit-mask: url("../img/racchetta.svg") no-repeat right -2vw bottom -4vh / auto min(88vh, 720px);
+          mask: url("../img/racchetta.svg") no-repeat right -2vw bottom -4vh / auto min(88vh, 720px);
+  transform: rotate(0deg); }
+body::after { content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background: radial-gradient(ellipse 60% 45% at 8% 0%, var(--alone), transparent 70%); }
+@media (max-width: 700px) {
+  body::before { -webkit-mask-position: right -22vw bottom -3vh; mask-position: right -22vw bottom -3vh; -webkit-mask-size: auto 80vh; mask-size: auto 80vh; }
+}
