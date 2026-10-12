@@ -919,3 +919,58 @@ body::after { content: ""; position: fixed; inset: 0; z-index: -3; pointer-event
 .brand-logo { height: 84px; }
 @media (max-width: 980px) { .brand-logo { height: 66px; } }
 @media (max-width: 380px) { .brand-logo { height: 58px; } }
+
+/* ---------- Home per telefono ---------- */
+.home-mobile { display: none; }
+@media (max-width: 700px) {
+  .home-layout, .banner-tennisti { display: none; }
+  .home-mobile { display: block; padding-top: 14px; }
+  /* il campo di sfondo e' piu' discreto: non deve tagliare le schede */
+  html::before { opacity: .35; } body::before { opacity: .5; }
+}
+.hm-titolo { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.hm-titolo h1 { font-size: 30px; line-height: 1; } .hm-titolo h1 span { color: var(--accent-text); }
+.hm-titolo small { color: var(--text-muted); font-size: 12.5px; text-transform: capitalize; text-align: right; }
+.hm-sez { margin: 20px 0 0; }
+.hm-testa { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.hm-testa h2 { display: flex; align-items: center; gap: 8px; font-size: 19px; }
+.hm-testa a { font-size: 13px; font-weight: 600; color: var(--accent-text); }
+.hm-lista { display: grid; gap: 8px; }
+.hm-scorri { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; margin-inline: -16px; padding-inline: 16px; padding-bottom: 4px; scrollbar-width: none; }
+.hm-scorri::-webkit-scrollbar { display: none; }
+.hm-scorri .hm-card { flex: 0 0 82%; scroll-snap-align: start; }
+.hm-card { display: block; padding: 10px 12px; background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: 14px; box-shadow: var(--shadow-card); min-width: 0; }
+.hm-meta { display: flex; justify-content: space-between; gap: 10px; font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px; }
+.hm-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hm-meta em { font-style: normal; font-weight: 700; white-space: nowrap; color: var(--text-secondary); }
+.hm-live { display: inline-flex; align-items: center; gap: 5px; color: var(--live); }
+.hm-live i { width: 7px; height: 7px; border-radius: 50%; background: var(--live); animation: pulsa 1.6s infinite; }
+.hm-riga { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 30px; color: var(--text-secondary); font-size: 15px; }
+.hm-riga .flag { margin: 0; width: 20px; height: 14px; }
+.hm-riga.vince { color: var(--text); font-weight: 700; }
+.hm-riga.ita .hm-nome { color: var(--accent-text); }
+.hm-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hm-set { display: flex; gap: 10px; font: 600 17px var(--font-display); font-variant-numeric: tabular-nums; }
+.hm-set b.vince { color: var(--accent-text); }
+.hm-set sup { font-size: 9px; }
+.hm-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 20px; }
+.hm-tile { display: flex; flex-direction: column; justify-content: space-between; gap: 4px; min-height: 76px; padding: 10px 11px; background: var(--bg-elevated); border: 1px solid var(--border-soft); border-top: 3px solid var(--tc); border-radius: 12px; min-width: 0; }
+.hm-tile b { font: 600 17px var(--font-display); text-transform: uppercase; letter-spacing: .02em; }
+.hm-tile small { font-size: 11.5px; color: var(--text-muted); line-height: 1.25; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.hm-giochi { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding: 14px 16px; border-radius: 14px; background: linear-gradient(135deg, var(--giochi-a), var(--giochi-b)); color: var(--giochi-ink); box-shadow: 0 6px 18px var(--giochi-glow); }
+.hm-giochi b { display: block; font: 600 20px var(--font-display); text-transform: uppercase; letter-spacing: .03em; }
+.hm-giochi small { font-size: 12.5px; opacity: .9; }
+.hm-giochi strong { font: 700 15px var(--font-display); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+.hm-notizie { display: grid; gap: 0; background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: 14px; overflow: hidden; }
+.hm-notizie a { display: block; padding: 11px 14px; border-top: 1px solid var(--border-soft); }
+.hm-notizie a:first-child { border-top: 0; }
+.hm-notizie b { display: block; font-size: 14.5px; font-weight: 600; line-height: 1.3; }
+.hm-notizie small { color: var(--text-muted); font-size: 12px; }
+
+@media (max-width: 700px) {
+  .footer-colonne { grid-template-columns: 1fr 1fr; gap: 18px 14px; }
+  .footer-colonne > div:first-child { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .footer-colonne > div:first-child h3 { width: 100%; }
+  .footer-colonne > div:first-child a { padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; }
+  .footer-colonne span { font-size: 12.5px; }
+}

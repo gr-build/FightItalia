@@ -1,7 +1,7 @@
 // Archivio: albo d'oro della stagione, una finale per torneo concluso.
-import { fetchJSON, esc, montaPagina, mesiIt, messaggioErrore } from "./common.js?v=202610121044";
-import { rigaFinale } from "./archivio-comune.js?v=202610121044";
-import { normale } from "./giochi-comuni.js?v=202610121044";
+import { fetchJSON, esc, montaPagina, mesiIt, messaggioErrore } from "./common.js?v=202610121145";
+import { rigaFinale } from "./archivio-comune.js?v=202610121145";
+import { normale } from "./giochi-comuni.js?v=202610121145";
 
 montaPagina("archivio.html");
 

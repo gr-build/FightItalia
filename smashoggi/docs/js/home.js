@@ -1,7 +1,7 @@
 import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, giornoRoma, oggiRoma, dataLunga, aggiornatoIl,
-  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali, bandiera } from "./common.js?v=202610121044";
+  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali, bandiera } from "./common.js?v=202610121145";
 
-import { partiteLive } from "./live.js?v=202610121044";
+import { partiteLive } from "./live.js?v=202610121145";
 
 montaPagina("index.html");
 
@@ -107,10 +107,54 @@ function cardGiocatore(g, etichetta) {
     <div class="champ-overlay"><span class="champ-div">${esc(etichetta)}</span><div class="champ-nome">${esc(g.nome)}</div><div class="champ-sub">${sub}</div></div></a>`;
 }
 
+
+// ---------- Home per telefono: poche cose, grandi e in ordine ----------
+let NOTIZIE = [];
+const PUNTO = (v) => (v ? `<span class="hm-num">${v}</span>` : "");
+function cardCompatta(p, giocatori) {
+  const [a, b] = p.giocatori;
+  const set = (g) => g.set.map((x) => `<b class="${g.vince ? "vince" : ""}">${x.g}${x.tb !== undefined ? `<sup>${x.tb}</sup>` : ""}</b>`).join("");
+  const stato = p.stato === "in" ? `<span class="hm-live"><i></i>In corso</span>` : p.stato === "post" ? "Finita" : esc(oraRoma(p.data));
+  const riga = (g) => `<div class="hm-riga${g.vince ? " vince" : ""}${g.paese === "ITA" ? " ita" : ""}">${bandiera(g.paese)}<span class="hm-nome">${esc(g.breve || g.nome)}</span><span class="hm-set">${set(g)}</span></div>`;
+  return `<a class="hm-card" href="partita.html?tour=${p.tour}&id=${encodeURIComponent(p.id)}">
+    <div class="hm-meta"><span>${esc(p.torneo)}</span><em>${stato}</em></div>${riga(a)}${riga(b)}</a>`;
+}
+function disegnaMobile(principali, giocatori, tornei, atp, wta, oggi) {
+  const box = document.getElementById("home-mobile");
+  if (!box) return;
+  const inCampo = principali.filter((p) => p.stato === "in");
+  const deOggi = principali.filter((p) => p.stato === "in" || giornoRoma(p.data) === oggi);
+  const ita = principali.filter((p) => p.giocatori.some((g) => g.paese === "ITA") && (p.stato === "in" || giornoRoma(p.data) === oggi))
+    .sort((x, y) => (y.stato === "in") - (x.stato === "in") || (x.data < y.data ? -1 : 1));
+  const torneoCorso = tornei.filter((t) => t.categoria && !t.concluso && t.inizio <= oggi && t.fine >= oggi).sort((x, y) => (y.categoria === "1000") - (x.categoria === "1000"))[0];
+  const mostrate = new Set([...ordina(inCampo, giocatori).slice(0, 3), ...ita.slice(0, 8)].map((p) => p.id));   // gia' sopra: non si ripetono
+  const tile = (h, t, sub, c) => `<a class="hm-tile" href="${h}" style="--tc:${c}"><b>${t}</b><small>${sub}</small></a>`;
+  box.innerHTML = `
+    <div class="hm-titolo"><h1>Oggi nel <span>tennis</span></h1><small>${esc(dataLunga(new Date().toISOString()))}</small></div>
+    ${inCampo.length ? `<section class="hm-sez"><div class="hm-testa"><h2><i class="live-punto" aria-hidden="true"></i>In campo adesso</h2><a href="live.html">Tutte ${inCampo.length} ›</a></div>
+      <div class="hm-lista">${ordina(inCampo, giocatori).slice(0, 3).map((p) => cardCompatta(p, giocatori)).join("")}</div></section>` : ""}
+    ${ita.length ? `<section class="hm-sez"><div class="hm-testa"><h2>🇮🇹 Gli italiani oggi</h2></div>
+      <div class="hm-scorri">${ita.slice(0, 8).map((p) => cardCompatta(p, giocatori)).join("")}</div></section>` : ""}
+    <div class="hm-tiles">
+      ${tile("live.html", "Live", inCampo.length ? `${inCampo.length} in corso` : "partite in corso", "#ff5a4f")}
+      ${tile("partite.html", "Risultati", `${deOggi.length} oggi`, "var(--accent)")}
+      ${tile("calendario.html", "Calendario", torneoCorso ? esc(torneoCorso.nome.replace(/ presented by.*$/i, "")) : "tornei", "#e8c34a")}
+      ${tile("classifiche.html", "Classifiche", "ATP · WTA", "#a66bff")}
+      ${tile("tennisti.html", "Tennisti", "schede e foto", "#22b8cf")}
+      ${tile("archivio.html", "Archivio", "finali 2026", "#d9622b")}
+    </div>
+    <a class="hm-giochi" href="giochi.html"><span><b>Giochi del giorno</b><small>Griglia, Top 10, Quiz, Chi è?</small></span><strong>Gioca ›</strong></a>
+    <section class="hm-sez"><div class="hm-testa"><h2>Altre partite di oggi</h2><a href="partite.html">Tutte ›</a></div>
+      <div class="hm-lista">${(deOggi.length ? ordina(deOggi, giocatori) : ordina(principali.filter((p) => p.stato === "pre"), giocatori)).filter((p) => !mostrate.has(p.id)).slice(0, 5).map((p) => cardCompatta(p, giocatori)).join("") || `<div class="vuoto">Oggi non ci sono partite nei dati disponibili.</div>`}</div></section>
+    ${NOTIZIE.length ? `<section class="hm-sez"><div class="hm-testa"><h2>Notizie</h2><a href="notizie.html">Tutte ›</a></div>
+      <div class="hm-notizie">${NOTIZIE.slice(0, 4).map((n) => `<a href="${esc(n.link)}" target="_blank" rel="noopener noreferrer"><b>${esc(n.titolo)}</b><small>${esc(n.fonte)}</small></a>`).join("")}</div></section>` : ""}`;
+}
+
 let ridisegnaLive = () => {};
 
 // Scheda grande, numeri e partite di oggi: ridisegnati anche quando arrivano i punteggi in diretta
 function disegnaOggi(principali, giocatori, tornei, atp, wta, oggi) {
+  disegnaMobile(principali, giocatori, tornei, atp, wta, oggi);
   // Scheda grande
   const ev = sceltaEvidenza(principali, giocatori);
   document.getElementById("evidenza").innerHTML = ev ? schedaEvidenza(ev, giocatori, tornei) : "";
@@ -148,6 +192,7 @@ async function avvia() {
   document.getElementById("agg").textContent = aggiornatoIl(generato);
   const principali = partite.filter((p) => !p.qualifica);
 
+  NOTIZIE = notizie;
   ridisegnaLive = (tutte) => disegnaOggi(tutte.filter((p) => !p.qualifica), giocatori, tornei, atp, wta, oggi);
   const deOggi = disegnaOggi(principali, giocatori, tornei, atp, wta, oggi);
 

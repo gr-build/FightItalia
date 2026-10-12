@@ -64,6 +64,8 @@ Il modulo "Aiutaci a migliorare" nel piè di pagina non invia ancora nulla: serv
 
 Logo: `make_logo.py` (stile GP Oggi / MMA Oggi): riquadro scuro SMASH + riquadro lime OGGI, sotto campo in prospettiva, racchetta e pallina. Genera `logo.svg` (usato nell'intestazione), `logo-orizzontale.svg`, `icona*.svg` e i PNG.
 
+Home per telefono (fino a 700px): un blocco a parte (`#home-mobile` in `index.html`, disegnato da `disegnaMobile()` in `docs/js/home.js`) con partite in campo, italiani oggi, 6 scorciatoie, Giochi, altre partite e 4 notizie. Da computer resta la home di sempre.
+
 Altri script:
 - `python3 bump_versione.py` — cambia il numero `?v=` di JS e CSS (da lanciare prima di ogni pubblicazione).
 - `python3 build_sitemap.py` — scrive `sitemap.xml` e `robots.txt` (usa `docs/CNAME` se esiste).

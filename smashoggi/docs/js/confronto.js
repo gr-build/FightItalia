@@ -1,6 +1,6 @@
 // Confronto: due tennisti fianco a fianco, il valore migliore evidenziato. L'indirizzo (?a=..&b=..) si puo' condividere.
-import { fetchJSON, esc, montaPagina, caricaGiocatori, avatar, messaggioErrore, bandiera } from "./common.js?v=202610121044";
-import { cercaGiocatore, condividi } from "./giochi-comuni.js?v=202610121044";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, avatar, messaggioErrore, bandiera } from "./common.js?v=202610121145";
+import { cercaGiocatore, condividi } from "./giochi-comuni.js?v=202610121145";
 
 montaPagina("tennisti.html");
 

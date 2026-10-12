@@ -1,8 +1,8 @@
 // Pagina di una partita: tabellone, bilancio dei game (calcolato dal punteggio), confronto, scontri diretti, forma.
 // ESPN non da' statistiche punto per punto per il tennis (ace, break, % prime): qui solo dati veri.
-import { partiteLive } from "./live.js?v=202610121044";
-import { fetchJSON, esc, montaPagina, caricaGiocatori, avatar, frecciaIndietro, messaggioErrore, etichettaCategoria, oraRoma, dataLunga, schedaPartita, bandiera } from "./common.js?v=202610121044";
-import { punteggioFinale } from "./archivio-comune.js?v=202610121044";
+import { partiteLive } from "./live.js?v=202610121145";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, avatar, frecciaIndietro, messaggioErrore, etichettaCategoria, oraRoma, dataLunga, schedaPartita, bandiera } from "./common.js?v=202610121145";
+import { punteggioFinale } from "./archivio-comune.js?v=202610121145";
 
 montaPagina("live.html");
 frecciaIndietro(document.getElementById("indietro"), "partite.html", "Indietro");
