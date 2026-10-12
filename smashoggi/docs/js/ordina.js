@@ -1,6 +1,6 @@
 // Ordina: cinque tennisti veri da mettere in ordine (classifica, titoli, eta' o altezza). Uno al giorno, uguale per tutti.
-import { montaPagina, esc, iniziali } from "./common.js?v=202610120732";
-import { caricaGiocatoriGioco, casualeConSeme, numeroGiorno, mescola, leggi, scrivi, oggiItalia, condividi } from "./giochi-comuni.js?v=202610120732";
+import { montaPagina, esc, iniziali, bandiera } from "./common.js?v=202610120738";
+import { caricaGiocatoriGioco, casualeConSeme, numeroGiorno, mescola, leggi, scrivi, oggiItalia, condividi, htmlAiuti, ascoltaAiuti } from "./giochi-comuni.js?v=202610120738";
 
 montaPagina("giochi.html");
 
@@ -28,11 +28,12 @@ async function avvia() {
   const tutti = await caricaGiocatoriGioco();
   let modo = "giorno", partita = pesca(tutti, casualeConSeme(numeroGiorno() * 31 + 5));
   const chiave = `smash-ordina-${oggiItalia()}`;
-  let scelta = leggi(chiave, []);
+  let scelta = leggi(chiave, []), rivelata = leggi(chiave + "-r", false);
 
   const disegna = () => {
     const { c, scelti } = partita;
     const giusto = [...scelti].sort((a, b) => (c.cresce ? a[c.k] - b[c.k] : b[c.k] - a[c.k]));
+    if (rivelata) scelta = giusto.map((g) => g.id);
     const finito = scelta.length === 5;
     const esatti = finito ? scelta.filter((id, i) => id === giusto[i].id).length : 0;
     box.innerHTML = `
@@ -44,19 +45,21 @@ async function avvia() {
         return `<button type="button" class="ord-carta${n >= 0 ? " scelta" : ""}${finito ? (ok ? " giusta" : " sbagliata") : ""}" data-id="${g.id}" ${finito || n >= 0 ? "disabled" : ""}>
           <span class="ord-num">${n >= 0 ? n + 1 : ""}</span>
           ${g.foto ? `<img src="${esc(g.foto)}" alt="" width="48" height="48">` : `<span class="ord-ini">${esc(iniziali(g.nome))}</span>`}
-          <span class="ord-nome"><b>${esc(g.nome)}</b><small>${esc(g.paeseNome || g.paese || "")}</small></span>
+          <span class="ord-nome"><b>${esc(g.nome)}</b><small>${bandiera(g.paese)}${esc(g.paeseNome || g.paese || "")}</small></span>
           ${finito ? `<span class="ord-val">${esc(c.valore(g))}</span>` : ""}</button>`;
       }).join("")}</div>
+      ${finito ? "" : htmlAiuti({ rivela: true })}
       ${!finito && scelta.length ? `<p style="text-align:center"><button type="button" class="pill" id="annulla">Annulla l'ultimo</button></p>` : ""}
-      ${finito ? `<div class="esito ${esatti === 5 ? "vinto" : ""}"><h2>${esatti}/5 al posto giusto</h2>
+      ${finito ? `<div class="esito ${esatti === 5 ? "vinto" : ""}"><h2>${rivelata ? "Soluzione rivelata" : `${esatti}/5 al posto giusto`}</h2>
         ${esatti < 5 ? `<p class="nota">Ordine giusto: ${giusto.map((g) => esc(g.nome.split(" ").slice(-1)[0])).join(" → ")}</p>` : "<p>Perfetto!</p>"}
         <div class="esito-azioni">${modo === "giorno" ? `<button type="button" class="pill attiva" id="condividi">Condividi</button>` : ""}<button type="button" class="pill" id="ancora">Gioca ancora</button></div></div>` : ""}`;
     if (finito) {
       document.getElementById("condividi")?.addEventListener("click", (e) => condividi(`Smash Oggi · Ordina ${oggiItalia()}: ${esatti}/5\n${scelta.map((id, i) => (id === giusto[i].id ? "🟩" : "🟥")).join("")}`, e.currentTarget));
-      document.getElementById("ancora").addEventListener("click", () => { modo = "libero"; partita = pesca(tutti, Math.random); scelta = []; disegna(); });
+      document.getElementById("ancora").addEventListener("click", () => { modo = "libero"; partita = pesca(tutti, Math.random); scelta = []; rivelata = false; disegna(); });
     }
     document.getElementById("annulla")?.addEventListener("click", () => { scelta.pop(); salva(); disegna(); });
   };
+  ascoltaAiuti(box, { rivela: () => { rivelata = true; if (modo === "giorno") scrivi(chiave + "-r", true); disegna(); } });
   const salva = () => { if (modo === "giorno") scrivi(chiave, scelta); };
   box.addEventListener("click", (e) => {
     const b = e.target.closest(".ord-carta:not([disabled])");

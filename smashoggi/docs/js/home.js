@@ -1,7 +1,7 @@
 import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, giornoRoma, oggiRoma, dataLunga, aggiornatoIl,
-  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali } from "./common.js?v=202610120732";
+  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali, bandiera } from "./common.js?v=202610120738";
 
-import { partiteLive } from "./live.js?v=202610120732";
+import { partiteLive } from "./live.js?v=202610120738";
 
 montaPagina("index.html");
 
@@ -59,7 +59,7 @@ function schedaEvidenza(p, giocatori, tornei) {
       // tabellone: set vinti evidenziati, chi conduce o ha vinto in grassetto
       const [x, y] = [a, b].map((g) => g.set.map((s) => ({ ...s })));
       x.forEach((s, i) => { const o = y[i]; if (o) { s.v = s.g > o.g; o.v = o.g > s.g; } });
-      const riga = (g, sets) => `<div class="tb-riga${g.vince ? " vince" : ""}"><span class="tb-codice">${esc(g.paese || "")}</span><span class="tb-nome">${esc(g.breve || g.nome)}</span>
+      const riga = (g, sets) => `<div class="tb-riga${g.vince ? " vince" : ""}"><span class="tb-codice">${bandiera(g.paese)}${esc(g.paese || "")}</span><span class="tb-nome">${esc(g.breve || g.nome)}</span>
         <span class="tb-set">${(sets.length ? sets : [{ g: 0 }]).map((s) => `<b class="${s.v ? "v" : ""}">${s.g}${s.tb !== undefined ? `<sup>${s.tb}</sup>` : ""}</b>`).join("")}</span></div>`;
       extra = `<div class="tabellone">${riga(a, x)}${riga(b, y)}${p.speciale ? `<div class="tb-nota">${esc(p.speciale)}</div>` : ""}</div>`;
     }
@@ -101,10 +101,10 @@ function miniTorneo(t) {
 }
 
 function cardGiocatore(g, etichetta) {
-  const sub = [g.paeseNome, g.eta ? `${g.eta} anni` : null].filter(Boolean).join(" · ");
+  const sub = [`${bandiera(g.paese)}${esc(g.paeseNome || "")}`, g.eta ? `${g.eta} anni` : null].filter(Boolean).join(" · ");  // html: contiene la bandierina
   return `<a class="champ-card" href="giocatore.html?id=${encodeURIComponent(g.id)}">
     ${g.foto ? `<img class="champ-foto" src="${esc(g.foto)}" alt="" loading="lazy">` : `<span class="champ-iniziali" aria-hidden="true">${esc(iniziali(g.nome))}</span>`}
-    <div class="champ-overlay"><span class="champ-div">${esc(etichetta)}</span><div class="champ-nome">${esc(g.nome)}</div><div class="champ-sub">${esc(sub)}</div></div></a>`;
+    <div class="champ-overlay"><span class="champ-div">${esc(etichetta)}</span><div class="champ-nome">${esc(g.nome)}</div><div class="champ-sub">${sub}</div></div></a>`;
 }
 
 let ridisegnaLive = () => {};

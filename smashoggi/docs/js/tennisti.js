@@ -1,6 +1,6 @@
 // Tennisti: tutti i giocatori che ricaviamo dai dati, con ricerca e filtri.
-import { esc, montaPagina, caricaGiocatori, avatar, messaggioErrore } from "./common.js?v=202610120732";
-import { normale } from "./giochi-comuni.js?v=202610120732";
+import { esc, montaPagina, caricaGiocatori, avatar, messaggioErrore, bandiera } from "./common.js?v=202610120738";
+import { normale } from "./giochi-comuni.js?v=202610120738";
 
 montaPagina("tennisti.html");
 
@@ -16,7 +16,7 @@ const pillole = (k, voci) => `<div class="gruppo-filtri" role="group">${voci.map
 
 const scheda = (g) => `<a class="tennista" href="giocatore.html?id=${encodeURIComponent(g.id)}">
     ${avatar(g, true)}
-    <span class="tn-chi"><b>${esc(g.nome)}</b><small>${esc(g.paeseNome || g.paese || "")}${g.eta ? ` · ${g.eta} anni` : ""}</small></span>
+    <span class="tn-chi"><b>${esc(g.nome)}</b><small>${bandiera(g.paese)}${esc(g.paeseNome || g.paese || "")}${g.eta ? ` · ${g.eta} anni` : ""}</small></span>
     <span class="tn-pos">${g.pos ? `<b>${g.pos}</b><small>${g.tour.toUpperCase()}</small>` : `<small>${g.tour.toUpperCase()}</small>`}</span></a>`;
 
 function disegna() {

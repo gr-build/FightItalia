@@ -1,11 +1,11 @@
 // Riga di una finale dell'archivio: usata dalla pagina Archivio e dalle schede dei giocatori.
-import { esc, etichettaCategoria, intervalloDate, superficie } from "./common.js?v=202610120732";
+import { esc, etichettaCategoria, intervalloDate, superficie, bandiera } from "./common.js?v=202610120738";
 
 export const punteggioFinale = (a) => a.punteggioTesto ?? a.punteggio.map(([v, f, tb]) => `${v}-${f}${tb !== undefined ? `(${tb})` : ""}`).join(" ")
   + (a.speciale === "Ritiro" ? " rit." : a.speciale === "Walkover" ? " w.o." : "");
 
 const persona = (g, cls, evidenzia) => `<a class="af-persona ${cls}${g.id === evidenzia ? " lui" : ""}${g.paese === "ITA" ? " ita" : ""}" href="giocatore.html?id=${encodeURIComponent(g.id)}">
-    <span class="codice">${esc(g.paese || "–")}</span><span class="af-nome">${esc(g.nome)}</span></a>`;
+    <span class="codice">${bandiera(g.paese)}${esc(g.paese || "–")}</span><span class="af-nome">${esc(g.nome)}</span></a>`;
 
 export function rigaFinale(a, evidenzia) {
   const cat = etichettaCategoria(a);

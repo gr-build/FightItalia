@@ -86,7 +86,7 @@ export function schedaPartita(p, giocatori) {
   const stato = inCorso ? `<span class="stato live">In corso</span>`
     : finita ? `<span class="stato">Finita</span>` : `<span class="stato">${esc(oraRoma(p.data))}</span>`;
   const riga = (g) => `<div class="riga-giocatore${g.paese === "ITA" ? " ita" : ""}${g.vince ? " vince" : ""}">
-      <span class="codice" title="${esc(g.paese || "")}">${esc(g.paese || "–")}</span>
+      <span class="codice" title="${esc(g.paeseNome || g.paese || "")}">${bandiera(g.paese)}${esc(g.paese || "–")}</span>
       ${giocatori[g.id]?.foto ? `<img class="mini-foto" src="${esc(giocatori[g.id].foto)}" alt="" loading="lazy" width="26" height="26">` : `<span class="mini-foto" aria-hidden="true">${esc(iniziali(g.nome))}</span>`}<span class="nome">${linkGiocatore(g, giocatori)}</span>
       <span class="set">${setHtml(g)}</span></div>`;
   return `<article class="partita" data-href="partita.html?tour=${p.tour}&id=${encodeURIComponent(p.id)}">
@@ -212,6 +212,9 @@ function montaSceltaTema(header) {
   applicaTema(temaCorrente().id);
 }
 
+// ---------- Bandiere (copiate nel sito: img/bandiere/xxx.webp, codice ISO3 minuscolo) ----------
+export const bandiera = (cod, c = "flag") => (cod ? `<img class="${c}" src="img/bandiere/${esc(String(cod).toLowerCase())}.webp" alt="" width="18" height="12" loading="lazy" onerror="this.remove()">` : "");
+
 // ---------- Foto e iniziali ----------
 export const iniziali = (nome) => (nome || "?").split(/\s+/).filter(Boolean).map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 export function avatar(g, grande = false) {
@@ -254,11 +257,43 @@ export function montaPagina(paginaCorrente) {
   const footer = document.getElementById("site-footer");
   if (footer) {
     footer.innerHTML = `<div class="container">
-        <div class="footer-social"><span>Segui Smash Oggi</span><a class="social-link" href="seguici.html"><span>Seguici</span></a><a class="social-link" href="chi-siamo.html"><span>Chi siamo</span></a></div>
-        <p>I dati riportati hanno scopo informativo e statistico; non costituiscono consiglio di scommessa. Gioca responsabilmente.</p>
-        <p>Smash Oggi — risultati, calendario e classifiche del tennis. Dati da ESPN e Wikipedia, foto da ESPN e Wikimedia Commons (licenze libere), notizie con link alle testate originali, aggiornati periodicamente.</p>
-        <p style="font-size:11.5px">Smash Oggi è un progetto indipendente, non affiliato né sponsorizzato da ATP, WTA, ITF o dai tornei citati.</p>
+        <details class="feedback" id="feedback">
+          <summary><span class="fb-titolo">Aiutaci a migliorare <b aria-hidden="true">+</b></span><span class="fb-stelle" aria-hidden="true">★★★★★</span></summary>
+          <form class="fb-form" id="fb-form">
+            <div class="fb-stelle-scelta" role="radiogroup" aria-label="Voto">${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="fb-stella" role="radio" aria-checked="false" aria-label="${n} su 5" data-v="${n}">★</button>`).join("")}</div>
+            <label class="sr-only" for="fb-tipo">Che cosa vuoi dirci</label>
+            <select id="fb-tipo"><option>Vorrei una funzione nuova</option><option>Ho trovato un errore</option><option>Un dato è sbagliato</option><option>Un complimento</option></select>
+            <label class="sr-only" for="fb-testo">Il tuo messaggio</label>
+            <textarea id="fb-testo" rows="3" maxlength="600" placeholder="Cosa miglioreresti in questa pagina?"></textarea>
+            <button type="submit" class="fb-invia">Invia</button>
+            <p class="fb-esito" id="fb-esito" role="status"></p>
+          </form>
+        </details>
+        <div class="footer-colonne">
+          <div><h3>Sezioni</h3>${[["index.html", "Home"], ["live.html", "Live"], ["partite.html", "Risultati"], ["calendario.html", "Calendario"], ["classifiche.html", "Classifiche"], ["tennisti.html", "Tennisti"], ["archivio.html", "Archivio"], ["giochi.html", "Giochi"], ["notizie.html", "News"]].map(([h, t]) => `<a href="${h}">${t}</a>`).join("")}</div>
+          <div><h3>Fonte dati</h3><span>ESPN: classifiche, partite, tornei</span><span>Wikipedia: Challenger e categorie</span><span>Wikimedia Commons: foto</span><span>Notizie: Ubitennis, Tennis Italiano, OA Sport, Gazzetta, Corriere dello Sport, Tuttosport</span></div>
+          <div><h3>Seguici</h3><a href="seguici.html">Dove trovarci</a><a href="chi-siamo.html">Chi siamo</a><h3 style="margin-top:14px">Legale</h3><span>Sito non ufficiale</span><span>Nessuna quota né pronostici</span></div>
+        </div>
+        <p class="footer-nota">I dati riportati hanno scopo informativo e statistico; non costituiscono consiglio di scommessa. Gioca responsabilmente.</p>
+        <p class="footer-nota">Smash Oggi è un progetto indipendente, non affiliato né sponsorizzato da ATP, WTA, ITF o dai tornei citati. Dati aggiornati periodicamente.</p>
       </div>`;
+    // Feedback: l'invio vero si attiva con un indirizzo di raccolta (FEEDBACK_URL); finche' manca, il modulo lo dice chiaramente
+    const FEEDBACK_URL = "";
+    let voto = 0;
+    footer.querySelectorAll(".fb-stella").forEach((b) => b.addEventListener("click", () => {
+      voto = Number(b.dataset.v);
+      footer.querySelectorAll(".fb-stella").forEach((x) => { const on = Number(x.dataset.v) <= voto; x.classList.toggle("on", on); x.setAttribute("aria-checked", String(Number(x.dataset.v) === voto)); });
+    }));
+    footer.querySelector("#fb-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const out = footer.querySelector("#fb-esito"), testo = footer.querySelector("#fb-testo").value.trim();
+      if (!testo && !voto) { out.textContent = "Scrivi un messaggio o scegli un voto."; return; }
+      if (!FEEDBACK_URL) { out.textContent = "Grazie! In questa versione di prova i messaggi non vengono ancora inviati: l'invio si attiva con il sito online."; return; }
+      try {
+        await fetch(FEEDBACK_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ voto, tipo: footer.querySelector("#fb-tipo").value, testo, pagina: location.pathname }) });
+        out.textContent = "Grazie, messaggio inviato."; footer.querySelector("#fb-testo").value = "";
+      } catch (err) { out.textContent = "Invio non riuscito. Riprova tra poco."; }
+    });
   }
   const main = document.querySelector("main");
   if (main && !main.id) main.id = "contenuto";

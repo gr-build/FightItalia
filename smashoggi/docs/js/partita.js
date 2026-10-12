@@ -1,8 +1,8 @@
 // Pagina di una partita: tabellone, bilancio dei game (calcolato dal punteggio), confronto, scontri diretti, forma.
 // ESPN non da' statistiche punto per punto per il tennis (ace, break, % prime): qui solo dati veri.
-import { partiteLive } from "./live.js?v=202610120732";
-import { fetchJSON, esc, montaPagina, caricaGiocatori, avatar, frecciaIndietro, messaggioErrore, etichettaCategoria, oraRoma, dataLunga, schedaPartita } from "./common.js?v=202610120732";
-import { punteggioFinale } from "./archivio-comune.js?v=202610120732";
+import { partiteLive } from "./live.js?v=202610120738";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, avatar, frecciaIndietro, messaggioErrore, etichettaCategoria, oraRoma, dataLunga, schedaPartita, bandiera } from "./common.js?v=202610120738";
+import { punteggioFinale } from "./archivio-comune.js?v=202610120738";
 
 montaPagina("live.html");
 frecciaIndietro(document.getElementById("indietro"), "partite.html", "Indietro");
@@ -73,12 +73,12 @@ async function avvia() {
   const cat = t ? etichettaCategoria(t) : null;
 
   const lato = (g, f) => `<a class="pg-lato${g.vince ? " vince" : ""}" href="${giocatori[g.id] ? `giocatore.html?id=${encodeURIComponent(g.id)}` : "#"}">
-      ${avatar(f, true)}<b>${esc(g.nome)}</b><small>${esc(g.paese || "")}${f.pos ? ` · N° ${f.pos}` : ""}${g.seed ? ` · TdS ${g.seed}` : ""}</small></a>`;
+      ${avatar(f, true)}<b>${esc(g.nome)}</b><small>${bandiera(g.paese)}${esc(g.paese || "")}${f.pos ? ` · N° ${f.pos}` : ""}${g.seed ? ` · TdS ${g.seed}` : ""}</small></a>`;
   const zero = live && p.giocatori.every((g) => g.set.length <= 1 && g.set.every((s) => s.g === 0));
   const nSet = Math.max(a.set.length, b.set.length, 1);
   const celle = (g, o) => Array.from({ length: nSet }, (_, i) => { const s = g.set[i], r = o.set[i]; const v = s && r && s.g > r.g;
     return `<span class="pg-set${v ? " v" : ""}">${s ? `${s.g}${s.tb !== undefined ? `<sup>${s.tb}</sup>` : ""}` : "–"}</span>`; }).join("");
-  const riga = (g) => `<div class="pg-riga${g.vince ? " vince" : ""}"><span class="tb-codice">${esc(g.paese || "")}</span><span class="pg-nome">${esc(g.nome)}</span><span class="pg-sets">${celle(g, g === a ? b : a)}</span></div>`;
+  const riga = (g) => `<div class="pg-riga${g.vince ? " vince" : ""}"><span class="tb-codice">${bandiera(g.paese)}${esc(g.paese || "")}</span><span class="pg-nome">${esc(g.nome)}</span><span class="pg-sets">${celle(g, g === a ? b : a)}</span></div>`;
 
   const righe = [
     ["Classifica", A.pos, B.pos, (v) => `N° ${v}`, "basso"], ["Punti", A.punti, B.punti, (v) => v.toLocaleString("it-IT"), "alto"],

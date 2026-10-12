@@ -1,6 +1,6 @@
 // Piu' o meno: due giocatori, una statistica vera. Indovina se il secondo ha un valore piu' alto o piu' basso e allunga la serie.
-import { montaPagina, esc, iniziali } from "./common.js?v=202610120732";
-import { caricaGiocatoriGioco, leggi, scrivi, condividi } from "./giochi-comuni.js?v=202610120732";
+import { montaPagina, esc, iniziali, bandiera } from "./common.js?v=202610120738";
+import { caricaGiocatoriGioco, leggi, scrivi, condividi } from "./giochi-comuni.js?v=202610120738";
 
 montaPagina("giochi.html");
 
@@ -31,7 +31,7 @@ async function avvia() {
   };
 
   const carta = (g, mostra, dd) => `<div class="pom-carta">
-      ${foto(g)}<b>${esc(g.nome)}</b><small>${esc(g.paeseNome || g.paese || "")} · ${g.tour.toUpperCase()} N° ${g.pos}</small>
+      ${foto(g)}<b>${esc(g.nome)}</b><small>${bandiera(g.paese)}${esc(g.paeseNome || g.paese || "")} · ${g.tour.toUpperCase()} N° ${g.pos}</small>
       ${mostra ? `<div class="pom-valore">${esc(dd.fmt(g[dd.k]))}</div><small>${esc(dd.testo)}</small>` : ""}</div>`;
 
   const disegna = (stato) => {

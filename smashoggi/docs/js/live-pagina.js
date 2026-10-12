@@ -1,6 +1,6 @@
 // Pagina Live: solo le partite in corso adesso, aggiornate ogni 30 secondi.
-import { partiteLive } from "./live.js?v=202610120732";
-import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, dataBreve, oraRoma, messaggioErrore, superficie } from "./common.js?v=202610120732";
+import { partiteLive } from "./live.js?v=202610120738";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, dataBreve, oraRoma, messaggioErrore, superficie, bandiera } from "./common.js?v=202610120738";
 
 montaPagina("live.html");
 
@@ -44,7 +44,7 @@ Promise.all([partiteLive((l) => { tutte = l; disegna(); }, { sempre: true }), ca
 }).catch(() => messaggioErrore(document.getElementById("elenco")));
 
 // Challenger in corso: niente diretta (ESPN non li copre), tabellone da Wikipedia aggiornato a fine partita
-const persona = (p) => (p ? `<span class="ch-p${p.paese === "ITA" ? " ita" : ""}"><span class="codice">${esc(p.paese || "–")}</span>${esc(p.nome)}</span>` : `<span class="ch-p attesa">da definire</span>`);
+const persona = (p) => (p ? `<span class="ch-p${p.paese === "ITA" ? " ita" : ""}"><span class="codice">${bandiera(p.paese)}${esc(p.paese || "–")}</span>${esc(p.nome)}</span>` : `<span class="ch-p attesa">da definire</span>`);
 const sfida = (l) => `<div class="ch-sfida">${persona(l?.[0])}<span class="ch-vs">vs</span>${persona(l?.[1])}</div>`;
 fetchJSON("data/challenger.json").then(({ tornei }) => {
   const ora = tornei.filter((t) => t.stato === "in corso");

@@ -1,6 +1,6 @@
 // Confronto: due tennisti fianco a fianco, il valore migliore evidenziato. L'indirizzo (?a=..&b=..) si puo' condividere.
-import { fetchJSON, esc, montaPagina, caricaGiocatori, avatar, messaggioErrore } from "./common.js?v=202610120732";
-import { cercaGiocatore, condividi } from "./giochi-comuni.js?v=202610120732";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, avatar, messaggioErrore, bandiera } from "./common.js?v=202610120738";
+import { cercaGiocatore, condividi } from "./giochi-comuni.js?v=202610120738";
 
 montaPagina("tennisti.html");
 
@@ -28,7 +28,7 @@ function slot(lato) {
   const el = document.getElementById(`slot-${lato}`);
   const g = tutti[scelti[lato]];
   if (g) {
-    el.innerHTML = `<div class="cf-gioc">${avatar(g, true)}<b>${esc(g.nome)}</b><small>${esc(g.paeseNome || g.paese || "")}${g.pos ? ` · ${g.tour.toUpperCase()} N° ${g.pos}` : ""}</small>
+    el.innerHTML = `<div class="cf-gioc">${avatar(g, true)}<b>${esc(g.nome)}</b><small>${bandiera(g.paese)}${esc(g.paeseNome || g.paese || "")}${g.pos ? ` · ${g.tour.toUpperCase()} N° ${g.pos}` : ""}</small>
       <button type="button" class="pill cf-cambia" data-lato="${lato}">Cambia</button></div>`;
     el.querySelector(".cf-cambia").addEventListener("click", () => { scelti[lato] = null; aggiorna(); });
   } else {

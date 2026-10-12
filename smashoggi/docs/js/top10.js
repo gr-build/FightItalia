@@ -1,6 +1,6 @@
 // Top 10: una classifica vera al giorno da completare scrivendo i nomi. Tre errori e la partita finisce.
-import { montaPagina, esc, iniziali } from "./common.js?v=202610120732";
-import { caricaTuttiGioco, casualeConSeme, numeroGiorno, leggi, scrivi, oggiItalia, condividi, cercaGiocatore } from "./giochi-comuni.js?v=202610120732";
+import { montaPagina, esc, iniziali } from "./common.js?v=202610120738";
+import { caricaTuttiGioco, casualeConSeme, numeroGiorno, leggi, scrivi, oggiItalia, condividi, cercaGiocatore, htmlAiuti, ascoltaAiuti } from "./giochi-comuni.js?v=202610120738";
 
 montaPagina("giochi.html");
 const box = document.getElementById("gioco");
@@ -28,16 +28,17 @@ async function avvia() {
   let st = leggi(chiave, { presi: [], errori: 0 });
 
   const disegna = () => {
-    const finito = st.presi.length === 10 || st.errori >= VITE;
+    const vite = VITE + (st.extra || 0);
+    const finito = st.presi.length === 10 || st.errori >= vite || st.rivelata;
     box.innerHTML = `<div class="gioco-testa"><span class="gioco-tag">${modo === "giorno" ? "Top 10 del giorno" : "Partita libera"}</span>
-        <span class="vite">${"❤️".repeat(Math.max(0, VITE - st.errori))}${"🖤".repeat(Math.min(VITE, st.errori))}</span></div>
+        <span class="vite">${"❤️".repeat(Math.max(0, vite - st.errori))}${"🖤".repeat(Math.min(vite, st.errori))}</span></div>
       <p class="pom-domanda"><b>${esc(L.titolo)}</b></p>
-      ${finito ? "" : `<div id="cerca"></div>`}
+      ${finito ? "" : `<div id="cerca"></div>${htmlAiuti({ extra: (st.extra || 0) < 6 ? "Altre 3 vite" : null })}`}
       <ol class="t10">${L.lista.map((g, i) => {
         const preso = st.presi.includes(g.id);
         return `<li class="${preso ? "preso" : finito ? "mancato" : ""}"><span class="t10-n">${i + 1}</span>${preso || finito ? `${g.foto ? `<img src="${esc(g.foto)}" alt="">` : `<span class="t10-ini">${esc(iniziali(g.nome))}</span>`}<b>${esc(g.nome)}</b><small>${esc(L.val(g))}</small>` : `<span class="t10-vuoto">?</span>`}</li>`;
       }).join("")}</ol>
-      ${finito ? `<div class="esito ${st.presi.length === 10 ? "vinto" : ""}"><h2>${st.presi.length}/10</h2>
+      ${finito ? `<div class="esito ${st.presi.length === 10 ? "vinto" : ""}"><h2>${st.rivelata && st.presi.length < 10 ? "Soluzione rivelata" : `${st.presi.length}/10`}</h2>
         <div class="esito-azioni">${modo === "giorno" ? `<button type="button" class="pill attiva" id="condividi">Condividi</button>` : ""}<button type="button" class="pill" id="ancora">Un'altra Top 10</button></div></div>` : ""}`;
     if (!finito) {
       cercaGiocatore(document.getElementById("cerca"), tutti, (g) => {
@@ -49,6 +50,10 @@ async function avvia() {
       document.getElementById("ancora").addEventListener("click", () => { modo = "libero"; L = liste[Math.floor(Math.random() * liste.length)]; st = { presi: [], errori: 0 }; disegna(); });
     }
   };
+  ascoltaAiuti(box, {
+    extra: () => { st.extra = (st.extra || 0) + 3; salva(); disegna(); },
+    rivela: () => { st.rivelata = true; salva(); disegna(); },
+  });
   const salva = () => { if (modo === "giorno") scrivi(chiave, st); };
   disegna();
 }

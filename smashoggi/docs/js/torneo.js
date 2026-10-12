@@ -1,11 +1,11 @@
-import { partiteLive } from "./live.js?v=202610120732";
+import { partiteLive } from "./live.js?v=202610120738";
 import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, schedaPartita, etichettaCategoria, intervalloDate, nomeTour, frecciaIndietro,
-  messaggioErrore, oggiRoma, giornoRoma, dataBreve, punteggioPartita, superficie, avatar } from "./common.js?v=202610120732";
+  messaggioErrore, oggiRoma, giornoRoma, dataBreve, punteggioPartita, superficie, avatar, bandiera } from "./common.js?v=202610120738";
 
 montaPagina("calendario.html");
 frecciaIndietro(document.getElementById("indietro"), "calendario.html", "Calendario");
 
-import { punteggioFinale } from "./archivio-comune.js?v=202610120732";
+import { punteggioFinale } from "./archivio-comune.js?v=202610120738";
 
 const q = new URLSearchParams(location.search);
 const idChallenger = q.get("ch");
@@ -109,7 +109,7 @@ async function avviaChallenger() {
   const perNome = new Map(Object.values(giocatori).filter((g) => g.tour === "atp").map((g) => [norma(g.nome), g.id]));
   const conId = (p) => (p ? { ...p, id: p.id || perNome.get(norma(p.nome)) } : p);
   const stato = { concluso: '<span class="tag neutro">Concluso</span>', "in corso": '<span class="tag corso">In corso</span>', programma: '<span class="tag neutro">In programma</span>' }[t.stato] || "";
-  const persona = (p0) => { const p = conId(p0); return p ? `<span class="ch-p${p.paese === "ITA" ? " ita" : ""}"><span class="codice">${esc(p.paese || "–")}</span>${p.id ? `<a href="giocatore.html?id=${encodeURIComponent(p.id)}">${esc(p.nome)}</a>` : esc(p.nome)}</span>` : `<span class="ch-p attesa">da definire</span>`; };
+  const persona = (p0) => { const p = conId(p0); return p ? `<span class="ch-p${p.paese === "ITA" ? " ita" : ""}"><span class="codice">${bandiera(p.paese)}${esc(p.paese || "–")}</span>${p.id ? `<a href="giocatore.html?id=${encodeURIComponent(p.id)}">${esc(p.nome)}</a>` : esc(p.nome)}</span>` : `<span class="ch-p attesa">da definire</span>`; };
   const sfida = (l) => `<div class="ch-sfida">${persona(l?.[0])}${persona(l?.[1])}</div>`;
   let corpo = "";
   if (t.stato === "concluso") {

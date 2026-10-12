@@ -1,6 +1,6 @@
-import { partiteLive } from "./live.js?v=202610120732";
-import { rigaFinale } from "./archivio-comune.js?v=202610120732";
-import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar } from "./common.js?v=202610120732";
+import { partiteLive } from "./live.js?v=202610120738";
+import { rigaFinale } from "./archivio-comune.js?v=202610120738";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar, bandiera } from "./common.js?v=202610120738";
 
 montaPagina("classifiche.html");
 frecciaIndietro(document.getElementById("indietro"), "tennisti.html", "Indietro");
@@ -30,7 +30,7 @@ async function avvia() {
       <div class="gh-testo">
         <div class="gh-tag">${g.pos ? `<span class="gh-rank">N° ${g.pos} <small>${g.tour.toUpperCase()}</small></span>` : `<span class="gh-rank muto">${g.soloChallenger ? "Challenger" : g.tour.toUpperCase()}</span>`}${delta ? `<span class="var ${delta > 0 ? "su" : "giu"}">${delta > 0 ? `▲${delta}` : `▼${-delta}`}</span>` : ""}</div>
         <h1>${esc(g.nome)}</h1>
-        <div class="gh-sub"><span class="codice">${esc(g.paese || "–")}</span>${esc(g.paeseNome || "")}${g.eta ? ` · ${g.eta} anni` : ""}${g.mano ? ` · ${g.mano === "Sinistra" ? "mancino" : "destrorso"}` : ""}</div>
+        <div class="gh-sub">${bandiera(g.paese, "flag flag-grande")}${esc(g.paeseNome || "")}${g.eta ? ` · ${g.eta} anni` : ""}${g.mano ? ` · ${g.mano === "Sinistra" ? "mancino" : "destrorso"}` : ""}</div>
       </div>
     </div>
     ${g.vinte != null && g.perse != null && g.vinte + g.perse > 0 ? (() => {

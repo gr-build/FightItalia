@@ -1,4 +1,4 @@
-import { fetchJSON, esc, montaPagina, messaggioErrore, avatar } from "./common.js?v=202610120732";
+import { fetchJSON, esc, montaPagina, messaggioErrore, avatar, bandiera } from "./common.js?v=202610120738";
 
 montaPagina("classifiche.html");
 
@@ -27,7 +27,7 @@ function disegna() {
     const v = delta > 0 ? `<span class="var su" aria-label="salito di ${delta}">▲${delta}</span>` : delta < 0 ? `<span class="var giu" aria-label="sceso di ${-delta}">▼${-delta}</span>` : "";
     return `<a class="riga-class${r.paese === "ITA" ? " ita" : ""}" href="giocatore.html?id=${encodeURIComponent(r.id)}">
       <span class="pos">${r.pos}</span>${avatar(r)}
-      <span class="chi"><b>${esc(r.nome)}${v}</b><small>${esc(r.paeseNome || r.paese || "")}${r.eta ? ` · ${r.eta} anni` : ""}</small></span>
+      <span class="chi"><b>${esc(r.nome)}${v}</b><small>${bandiera(r.paese)}${esc(r.paeseNome || r.paese || "")}${r.eta ? ` · ${r.eta} anni` : ""}</small></span>
       <span class="punti">${r.punti ?? "–"}<small>punti</small></span></a>`;
   }).join("")}</div>` : `<div class="vuoto">Nessun giocatore trovato.</div>`);
   document.getElementById("agg").textContent = c.aggiornata

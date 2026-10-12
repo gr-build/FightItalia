@@ -1,5 +1,5 @@
 // Utilita' condivise dai giochi di Smash Oggi: dati dei giocatori, memoria locale, giocatore del giorno, condivisione.
-import { fetchJSON, esc } from "./common.js?v=202610120732";
+import { fetchJSON, esc } from "./common.js?v=202610120738";
 
 // I giochi usano i primi 100 di ATP e WTA (data/giocatori.json, dati ESPN veri); la Griglia accetta tutti i classificati.
 let cache;
@@ -88,4 +88,48 @@ export function cercaGiocatore(contenitore, giocatori, alScelto, escludi = () =>
     alScelto(giocatori.find((g) => String(g.id) === b.dataset.id));
   });
   return input;
+}
+
+// ---------- Aiuti: "Altri tentativi" e "Rivela la soluzione" (con annuncio breve) ----------
+// Annuncio con premio: oggi e' una SIMULAZIONE (nessuna pubblicita' vera, 5 secondi di attesa). Quando ci sara' un
+// fornitore di annunci con premio, basta definire window.SMASH_ADS = { mostra: () => Promise<boolean> } prima dei giochi.
+export function chiediAnnuncio(premio) {
+  if (window.SMASH_ADS?.mostra) return window.SMASH_ADS.mostra(premio);
+  return new Promise((risolvi) => {
+    const m = document.createElement("div");
+    m.className = "annuncio-fondo";
+    m.innerHTML = `<div class="annuncio" role="dialog" aria-modal="true" aria-label="Annuncio">
+        <button type="button" class="annuncio-chiudi" aria-label="Chiudi">×</button>
+        <div class="annuncio-tag">Annuncio</div>
+        <div class="annuncio-video" aria-hidden="true"><span>▶</span><small>Qui comparirà un breve video pubblicitario</small></div>
+        <p>${esc(premio)}</p>
+        <button type="button" class="annuncio-ok" disabled>Attendi <b>5</b>…</button>
+        <p class="annuncio-prova">Versione di prova: nessuna pubblicità vera, solo l'attesa.</p></div>`;
+    document.body.appendChild(m);
+    const ok = m.querySelector(".annuncio-ok"), n = ok.querySelector("b");
+    let t = 5;
+    const chiudi = (esito) => { clearInterval(giro); m.remove(); document.removeEventListener("keydown", tasto); risolvi(esito); };
+    const tasto = (e) => { if (e.key === "Escape") chiudi(false); };
+    document.addEventListener("keydown", tasto);
+    const giro = setInterval(() => { t--; if (t <= 0) { clearInterval(giro); ok.disabled = false; ok.textContent = "Continua"; } else n.textContent = t; }, 1000);
+    ok.addEventListener("click", () => chiudi(true));
+    m.querySelector(".annuncio-chiudi").addEventListener("click", () => chiudi(false));
+    ok.focus();
+  });
+}
+
+// Barra con i due aiuti. opz: { extra: "+3 tentativi" | null, rivela: true }. Il gioco ascolta i click su [data-aiuto].
+export function htmlAiuti({ extra, rivela = true } = {}) {
+  return `<div class="aiuti">${extra ? `<button type="button" class="aiuto" data-aiuto="extra"><span aria-hidden="true">＋</span>${esc(extra)}</button>` : ""}${rivela ? `<button type="button" class="aiuto aiuto-ad" data-aiuto="rivela"><span aria-hidden="true">👁</span>Rivela la soluzione<small>guarda un breve annuncio</small></button>` : ""}</div>`;
+}
+export function ascoltaAiuti(box, { extra, rivela }) {
+  box.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-aiuto]");
+    if (!b || b.disabled) return;
+    if (b.dataset.aiuto === "extra") return extra?.();
+    b.disabled = true;
+    const ok = await chiediAnnuncio("Dopo l'annuncio vedi la soluzione.");
+    b.disabled = false;
+    if (ok) rivela?.();
+  });
 }

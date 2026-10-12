@@ -1,6 +1,6 @@
 // Griglia: in ogni casella un tennista che rispetta riga e colonna. Griglia del giorno uguale per tutti; 3 errori al massimo.
-import { montaPagina, esc, fetchJSON } from "./common.js?v=202610120732";
-import { caricaTuttiGioco, casualeConSeme, numeroGiorno, mescola, leggi, scrivi, oggiItalia, condividi, cercaGiocatore } from "./giochi-comuni.js?v=202610120732";
+import { montaPagina, esc, fetchJSON } from "./common.js?v=202610120738";
+import { caricaTuttiGioco, casualeConSeme, numeroGiorno, mescola, leggi, scrivi, oggiItalia, condividi, cercaGiocatore, htmlAiuti, ascoltaAiuti } from "./giochi-comuni.js?v=202610120738";
 
 montaPagina("giochi.html");
 const box = document.getElementById("gioco");
@@ -53,7 +53,8 @@ async function avvia() {
   const disegna = () => {
     const { righe, colonne, celle } = griglia;
     const piene = Object.keys(st.celle).length;
-    const finito = piene === 9 || st.errori >= ERRORI;
+    const vite = ERRORI + (st.extra || 0);
+    const finito = piene === 9 || st.errori >= vite || st.rivelata;
     const usati = new Set(Object.values(st.celle));
     const cella = (i, j) => {
       const k = `${i}${j}`, id = st.celle[k];
@@ -62,13 +63,13 @@ async function avvia() {
       return `<button type="button" class="gr-cella${attiva === k ? " attiva" : ""}" data-c="${k}" aria-label="${esc(righe[i].testo)} e ${esc(colonne[j].testo)}">+</button>`;
     };
     box.innerHTML = `<div class="gioco-testa"><span class="gioco-tag">${modo === "giorno" ? "Griglia del giorno" : "Partita libera"}</span>
-        <span class="vite" aria-label="Errori rimasti">${"❤️".repeat(Math.max(0, ERRORI - st.errori))}${"🖤".repeat(Math.min(ERRORI, st.errori))}</span></div>
+        <span class="vite" aria-label="Errori rimasti">${"❤️".repeat(Math.max(0, vite - st.errori))}${"🖤".repeat(Math.min(vite, st.errori))}</span></div>
       <div class="griglia-gioco">
         <div></div>${colonne.map((co) => `<div class="gr-testa">${esc(co.testo)}</div>`).join("")}
         ${righe.map((ri, i) => `<div class="gr-testa riga">${esc(ri.testo)}</div>${[0, 1, 2].map((j) => cella(i, j)).join("")}`).join("")}
       </div>
-      <div id="scelta"></div>
-      ${finito ? `<div class="esito ${piene === 9 ? "vinto" : ""}"><h2>${piene}/9</h2><p>${piene === 9 ? "Griglia completata!" : "Le caselle vuote mostrano una risposta possibile."}</p>
+      <div id="scelta"></div>${finito ? "" : htmlAiuti({ extra: (st.extra || 0) < 6 ? "Altre 3 vite" : null })}
+      ${finito ? `<div class="esito ${piene === 9 ? "vinto" : ""}"><h2>${st.rivelata && piene < 9 ? "Soluzioni rivelate" : `${piene}/9`}</h2><p>${piene === 9 ? "Griglia completata!" : "Le caselle vuote mostrano una risposta possibile."}</p>
         <div class="esito-azioni">${modo === "giorno" ? `<button type="button" class="pill attiva" id="condividi">Condividi</button>` : ""}<button type="button" class="pill" id="ancora">Nuova griglia</button></div></div>`
         : `<p class="nota" style="text-align:center">Tocca una casella e scrivi un tennista dei primi 150 che rispetta riga e colonna. Ogni tennista vale una volta sola.</p>`}`;
     if (attiva && !finito) {
@@ -89,6 +90,10 @@ async function avvia() {
       document.getElementById("ancora").addEventListener("click", () => { modo = "libero"; griglia = creaGriglia(tutti, c, Math.random); st = { celle: {}, errori: 0 }; attiva = null; disegna(); });
     }
   };
+  ascoltaAiuti(box, {
+    extra: () => { st.extra = (st.extra || 0) + 3; attiva = null; salva(); disegna(); },
+    rivela: () => { st.rivelata = true; attiva = null; salva(); disegna(); },
+  });
   const salva = () => { if (modo === "giorno") scrivi(chiave, st); };
   box.addEventListener("click", (e) => { const b = e.target.closest("button.gr-cella"); if (b) { attiva = b.dataset.c; disegna(); } });
   if (!griglia) { box.innerHTML = `<div class="vuoto">Dati insufficienti.</div>`; return; }

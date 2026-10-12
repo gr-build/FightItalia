@@ -1,6 +1,6 @@
 // Chi e'? Foto sfocata del giocatore del giorno (primi 100 ATP e WTA): 6 tentativi, a ogni errore la foto si schiarisce.
-import { montaPagina, esc } from "./common.js?v=202610120732";
-import { caricaGiocatoriGioco, delGiorno, leggi, scrivi, oggiItalia, condividi, cercaGiocatore } from "./giochi-comuni.js?v=202610120732";
+import { montaPagina, esc } from "./common.js?v=202610120738";
+import { caricaGiocatoriGioco, delGiorno, leggi, scrivi, oggiItalia, condividi, cercaGiocatore, htmlAiuti, ascoltaAiuti } from "./giochi-comuni.js?v=202610120738";
 
 montaPagina("giochi.html");
 
@@ -41,7 +41,8 @@ async function avvia() {
   const chiave = `smash-chie-${oggiItalia()}`;
   let tentativi = leggi(chiave, []);  // id provati oggi
   let finito = false;
-
+  let extra = leggi(chiave + "-x", 0), rivelata = leggi(chiave + "-r", false);   // tentativi in piu' e soluzione rivelata
+  const massimo = () => MAX + extra;
   const img = new Image();
   const html = () => {
     box.innerHTML = `
@@ -49,6 +50,7 @@ async function avvia() {
       <div class="chie-foto"><canvas id="foto" width="280" height="280" aria-label="Foto sfocata del giocatore da indovinare" role="img"></canvas></div>
       <p class="nota" id="aiuto" style="text-align:center"></p>
       <div id="cerca"></div>
+      <div id="aiuti"></div>
       <div id="esito"></div>
       <ol class="tentativi" id="tentativi" aria-label="I tuoi tentativi"></ol>`;
   };
@@ -57,30 +59,31 @@ async function avvia() {
     const canvas = document.getElementById("foto");
     const sbagli = tentativi.filter((id) => id !== soluzione.id).length;
     const vinto = tentativi.includes(soluzione.id);
-    finito = vinto || tentativi.length >= MAX;
+    finito = vinto || rivelata || tentativi.length >= massimo();
     if (img.complete && img.naturalWidth) disegnaFoto(canvas, img, finito ? 99 : sbagli);
-    document.getElementById("vite").textContent = finito ? "" : `${MAX - tentativi.length} tentativi`;
+    document.getElementById("vite").textContent = finito ? "" : `${massimo() - tentativi.length} tentativi`;
     document.getElementById("aiuto").textContent = finito ? "" : tentativi.length ? "Verde: coincide. Frecce: il numero giusto è più alto ↑ o più basso ↓." : "Uomo o donna, primi 100 del mondo. Scrivi un nome.";
     document.getElementById("tentativi").innerHTML = tentativi.map((id) => {
       const g = tutti.find((x) => x.id === id);
       return g ? `<li class="${id === soluzione.id ? "giusto" : ""}"><b>${esc(g.nome)}</b><div class="indizi">${confronto(g, soluzione)}</div></li>` : "";
     }).reverse().join("");
     document.getElementById("cerca").hidden = finito;
+    document.getElementById("aiuti").innerHTML = finito ? "" : htmlAiuti({ extra: extra < 6 ? "Altri 3 tentativi" : null });
     const esito = document.getElementById("esito");
     if (!finito) { esito.innerHTML = ""; return; }
-    const quadri = tentativi.map((id) => (id === soluzione.id ? "🟩" : "🟥")).join("");
+    const quadri = rivelata && !vinto ? "👁" : tentativi.map((id) => (id === soluzione.id ? "🟩" : "🟥")).join("");
     esito.innerHTML = `<div class="esito ${vinto ? "vinto" : "perso"}">
-        <h2>${vinto ? "Indovinato!" : "Peccato"}</h2>
+        <h2>${vinto ? "Indovinato!" : rivelata ? "Soluzione rivelata" : "Peccato"}</h2>
         <p>Era <a href="giocatore.html?id=${encodeURIComponent(soluzione.id)}"><b>${esc(soluzione.nome)}</b></a>, N° ${soluzione.pos} ${soluzione.tour.toUpperCase()}.</p>
         <div class="esito-azioni">${modo === "giorno" ? `<button type="button" class="pill attiva" id="condividi">Condividi</button>` : ""}
         <button type="button" class="pill" id="ancora">Gioca ancora (giocatore a caso)</button></div>
         ${modo === "giorno" ? `<p class="nota">Domani un giocatore nuovo.</p>` : ""}</div>`;
     document.getElementById("condividi")?.addEventListener("click", (e) =>
-      condividi(`Smash Oggi · Chi è? ${oggiItalia()}\n${quadri} ${vinto ? `${tentativi.length}/${MAX}` : `X/${MAX}`}`, e.currentTarget));
+      condividi(`Smash Oggi · Chi è? ${oggiItalia()}\n${quadri} ${vinto ? `${tentativi.length}/${massimo()}` : `X/${massimo()}`}`, e.currentTarget));
     document.getElementById("ancora").addEventListener("click", () => {
       modo = "libero";
       soluzione = conFoto[Math.floor(Math.random() * conFoto.length)];
-      tentativi = [];
+      tentativi = []; extra = 0; rivelata = false;
       parti();
     });
   };
@@ -97,6 +100,10 @@ async function avvia() {
     }, (g) => tentativi.includes(g.id));
     aggiorna();
   };
+  ascoltaAiuti(box, {
+    extra: () => { extra += 3; if (modo === "giorno") scrivi(chiave + "-x", extra); aggiorna(); },
+    rivela: () => { rivelata = true; if (modo === "giorno") scrivi(chiave + "-r", true); aggiorna(); },
+  });
   parti();
 }
 

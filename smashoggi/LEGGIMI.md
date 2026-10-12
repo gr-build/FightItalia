@@ -56,6 +56,12 @@ Temi: sono le superfici dei campi (Indoor scuro di base, Erba, Terra battuta, Ce
 destra e la scelta resta sul telefono. I colori stanno in `docs/css/style.css` (blocchi `:root[data-theme=...]`); lo sfondo
 ha una racchetta in filigrana (`img/racchetta.svg`) che prende il colore dal tema.
 
+Bandiere: `docs/img/bandiere/xxx.webp` (codice ISO3 minuscolo, 75 paesi, da ESPN). Per un paese nuovo scaricale con lo stesso
+metodo di `build_foto.py` (non ancora automatico). Aiuti nei giochi: "Altri tentativi" e "Rivela la soluzione" passano da
+`chiediAnnuncio()` in `docs/js/giochi-comuni.js`. Oggi e' una SIMULAZIONE (5 secondi, nessuna pubblicita' vera): con un
+fornitore di annunci con premio basta definire `window.SMASH_ADS.mostra(premio)` che restituisce una Promise<boolean>.
+Il modulo "Aiutaci a migliorare" nel piè di pagina non invia ancora nulla: serve un indirizzo di raccolta (`FEEDBACK_URL`).
+
 Altri script:
 - `python3 bump_versione.py` — cambia il numero `?v=` di JS e CSS (da lanciare prima di ogni pubblicazione).
 - `python3 build_sitemap.py` — scrive `sitemap.xml` e `robots.txt` (usa `docs/CNAME` se esiste).
