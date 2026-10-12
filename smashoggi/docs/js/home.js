@@ -1,7 +1,7 @@
 import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, giornoRoma, oggiRoma, dataLunga, aggiornatoIl,
-  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali, bandiera } from "./common.js?v=202610121158";
+  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali, bandiera } from "./common.js?v=202610121200";
 
-import { partiteLive } from "./live.js?v=202610121158";
+import { partiteLive } from "./live.js?v=202610121200";
 
 montaPagina("index.html");
 

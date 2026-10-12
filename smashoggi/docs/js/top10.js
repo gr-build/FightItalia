@@ -1,6 +1,6 @@
 // Top 10: una classifica vera al giorno da completare scrivendo i nomi. Tre errori e la partita finisce.
-import { montaPagina, esc, iniziali } from "./common.js?v=202610121158";
-import { caricaTuttiGioco, casualeConSeme, numeroGiorno, leggi, scrivi, oggiItalia, condividi, cercaGiocatore, htmlAiuti, ascoltaAiuti } from "./giochi-comuni.js?v=202610121158";
+import { montaPagina, esc, iniziali } from "./common.js?v=202610121200";
+import { caricaTuttiGioco, casualeConSeme, numeroGiorno, leggi, scrivi, oggiItalia, condividi, cercaGiocatore, htmlAiuti, ascoltaAiuti } from "./giochi-comuni.js?v=202610121200";
 
 montaPagina("giochi.html");
 const box = document.getElementById("gioco");

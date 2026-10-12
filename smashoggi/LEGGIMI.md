@@ -66,6 +66,8 @@ Logo: `make_logo.py` (stile GP Oggi / MMA Oggi): riquadro scuro SMASH + riquadro
 
 Telefono (fino a 700px): barra in basso con Home, Live, Giochi (pulsante rialzato), Risultati e Altro (foglio con Calendario, Classifiche, Tennisti, Archivio, News, Confronto) al posto del menu in alto, in `montaBarra()` di `docs/js/common.js`. Home per telefono: un blocco a parte (`#home-mobile` in `index.html`, disegnato da `disegnaMobile()` in `docs/js/home.js`) con partite in campo, italiani oggi, 6 scorciatoie, Giochi, altre partite e 4 notizie. Da computer resta la home di sempre.
 
+App: `manifest.json` + `sw.js` (copia salvata per l'uso senza rete) + meta Apple: dal telefono si aggiunge alla schermata Home e si apre a schermo intero.
+
 Altri script:
 - `python3 bump_versione.py` — cambia il numero `?v=` di JS e CSS (da lanciare prima di ogni pubblicazione).
 - `python3 build_sitemap.py` — scrive `sitemap.xml` e `robots.txt` (usa `docs/CNAME` se esiste).

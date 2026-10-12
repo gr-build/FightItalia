@@ -5,10 +5,39 @@
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0a0a0d",
-  "theme_color": "#0a0a0d",
+  "background_color": "#cfe0f5",
+  "theme_color": "#cfe0f5",
   "icons": [
-    {"src": "img/icon-512.png", "sizes": "512x512", "type": "image/png"},
-    {"src": "img/apple-touch-icon.png", "sizes": "180x180", "type": "image/png"}
+    {
+      "src": "img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "lang": "it",
+  "orientation": "portrait",
+  "categories": [
+    "sports",
+    "news"
+  ],
+  "shortcuts": [
+    {
+      "name": "Live",
+      "url": "live.html"
+    },
+    {
+      "name": "Risultati",
+      "url": "partite.html"
+    },
+    {
+      "name": "Giochi",
+      "url": "giochi.html"
+    }
   ]
 }

@@ -273,6 +273,8 @@ function impostaVista() {
 
 export function montaPagina(paginaCorrente) {
   impostaVista();
+  // installabile come app e utilizzabile anche senza rete (solo con indirizzo https)
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js").catch(() => {});
   const header = document.getElementById("site-header");
   if (header) {
     header.innerHTML = `<div class="container nav">
