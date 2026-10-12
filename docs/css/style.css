@@ -2835,3 +2835,15 @@ a.fr:active { border-color: var(--accent); background: var(--bg-elevated-2); }
 .fr-nome { font-size: 15.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fr-sub { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fr-record { flex: none; font-family: var(--font-display); font-size: 17px; color: var(--text); letter-spacing: 0.02em; }
+
+/* home: un solo invito verso la pagina Lottatori (la lista completa non sta piu' qui) */
+.home-tutti-lottatori {
+  display: block; margin: 6px 0 56px; padding: 14px 18px; text-align: center; text-decoration: none;
+  font-family: var(--font-display); font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text); background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: 12px;
+}
+.home-tutti-lottatori:hover, .home-tutti-lottatori:active { border-color: var(--accent); color: var(--accent); }
+@media (min-width: 901px) {
+  .evidenza-riga { grid-template-columns: repeat(4, 1fr); }
+  .mini-tutti { display: none; }  /* sul computer c'e' gia' il pulsante "Guarda altri fight passati" */
+}

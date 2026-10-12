@@ -1,8 +1,9 @@
-import { fetchJSON, renderChrome, icon, debounce, fotoDi, classeFoto } from "./common.js?v=202610121228";
+import { fetchJSON, renderChrome, icon, debounce, fotoDi, classeFoto } from "./common.js?v=202610121232";
 
 // Gira sia in home sia in tutti-i-lottatori.html, che non ha statistiche ne' campioni in evidenza.
 renderChrome(document.body.dataset.pagina || "database");
-document.getElementById("search-icon").innerHTML = icon("search");
+const haLista = !!document.getElementById("fighter-grid");  // la home non ha piu' la lista: i lottatori hanno la loro pagina
+if (haLista) document.getElementById("search-icon").innerHTML = icon("search");
 
 const ORDINE_CATEGORIE = [
   "Leggende (ex campioni)",
@@ -169,12 +170,14 @@ async function init() {
   roster = await fetchJSON("data/roster.json");
 
   renderStatStrip();
-  renderPills();
-  renderGrid();
-  document.getElementById("search").addEventListener("input", debounce(() => renderGrid(true), 120));
+  if (haLista) {
+    renderPills();
+    renderGrid();
+  }
+  if (haLista) document.getElementById("search").addEventListener("input", debounce(() => renderGrid(true), 120));
   const altri = document.getElementById("mostra-altri");
-  if (altri) altri.addEventListener("click", () => { mostrati += PASSO(); renderGrid(false); });
-  telefono.addEventListener("change", () => renderGrid(true));
+  if (haLista && altri) altri.addEventListener("click", () => { mostrati += PASSO(); renderGrid(false); });
+  if (haLista) telefono.addEventListener("change", () => renderGrid(true));
 
   if (!document.getElementById("in-evidenza")) return;
   const inEvidenza = ORDINE_CATEGORIE.map((cat) => roster.find((r) => r.categoria === cat && r.campione_attuale)).filter(Boolean).slice(0, 4);
