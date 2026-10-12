@@ -1,6 +1,6 @@
 // Memory: trova le coppie foto + cognome dei tennisti. Meno mosse, meglio e'.
-import { montaPagina, esc } from "./common.js?v=202610120726";
-import { caricaGiocatoriGioco, casualeConSeme, numeroGiorno, mescola, leggi, scrivi, condividi, oggiItalia } from "./giochi-comuni.js?v=202610120726";
+import { montaPagina, esc } from "./common.js?v=202610120732";
+import { caricaGiocatoriGioco, casualeConSeme, numeroGiorno, mescola, leggi, scrivi, condividi, oggiItalia } from "./giochi-comuni.js?v=202610120732";
 
 montaPagina("giochi.html");
 const box = document.getElementById("gioco");

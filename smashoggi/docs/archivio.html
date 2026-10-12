@@ -21,8 +21,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=202610120726">
-<script>try{var t=localStorage.getItem("tema");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="css/style.css?v=202610120732">
+<script>try{var t=localStorage.getItem("tema");t={light:"erba",dark:"indoor"}[t]||t;var m={indoor:"scuro",erba:"chiaro",terra:"chiaro",cemento:"chiaro"};if(m[t]){document.documentElement.dataset.theme=t;document.documentElement.dataset.tono=m[t]}}catch(e){}</script>
 </head>
 <body>
 <a class="skip" href="#contenuto">Vai al contenuto</a>
@@ -40,6 +40,6 @@
 </div>
 </main>
 <footer id="site-footer" class="site-footer"></footer>
-<script type="module" src="js/archivio.js?v=202610120726"></script>
+<script type="module" src="js/archivio.js?v=202610120732"></script>
 </body>
 </html>

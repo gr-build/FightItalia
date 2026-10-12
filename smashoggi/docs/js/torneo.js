@@ -1,11 +1,11 @@
-import { partiteLive } from "./live.js?v=202610120726";
+import { partiteLive } from "./live.js?v=202610120732";
 import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, schedaPartita, etichettaCategoria, intervalloDate, nomeTour, frecciaIndietro,
-  messaggioErrore, oggiRoma, giornoRoma, dataBreve, punteggioPartita, superficie, avatar } from "./common.js?v=202610120726";
+  messaggioErrore, oggiRoma, giornoRoma, dataBreve, punteggioPartita, superficie, avatar } from "./common.js?v=202610120732";
 
 montaPagina("calendario.html");
 frecciaIndietro(document.getElementById("indietro"), "calendario.html", "Calendario");
 
-import { punteggioFinale } from "./archivio-comune.js?v=202610120726";
+import { punteggioFinale } from "./archivio-comune.js?v=202610120732";
 
 const q = new URLSearchParams(location.search);
 const idChallenger = q.get("ch");

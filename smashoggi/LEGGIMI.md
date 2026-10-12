@@ -52,6 +52,10 @@ Pagina partita (`partita.html?tour=&id=`): tocca una partita per aprirla. Mostra
 (calcolati dal punteggio), confronto dei giocatori, forma e scontri diretti presenti nei dati. ESPN non dà le statistiche
 punto per punto del tennis (ace, break, % prime): per averle serve un fornitore a pagamento.
 
+Temi: sono le superfici dei campi (Indoor scuro di base, Erba, Terra battuta, Cemento). Si scelgono dal pallino in alto a
+destra e la scelta resta sul telefono. I colori stanno in `docs/css/style.css` (blocchi `:root[data-theme=...]`); lo sfondo
+ha una racchetta in filigrana (`img/racchetta.svg`) che prende il colore dal tema.
+
 Altri script:
 - `python3 bump_versione.py` — cambia il numero `?v=` di JS e CSS (da lanciare prima di ogni pubblicazione).
 - `python3 build_sitemap.py` — scrive `sitemap.xml` e `robots.txt` (usa `docs/CNAME` se esiste).

@@ -183,17 +183,33 @@ function selettoreLingua() {
       <select id="lingua" aria-label="Lingua / Language">${opzioni}</select></label>`;
 }
 
-// ---------- Tema chiaro/scuro (di base scuro, come MMA Oggi; la scelta resta sul telefono) ----------
-const SOLE = '<svg class="ico-sole" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
-const LUNA = '<svg class="ico-luna" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
-
-const temaCorrente = () => (document.documentElement.dataset.theme === "light" ? "light" : "dark");
-function applicaTema(tema) {
-  document.documentElement.dataset.theme = tema;
-  try { localStorage.setItem("tema", tema); } catch (e) { /* senza memoria locale il tema vale solo per questa visita */ }
-  const b = document.getElementById("tema-btn");
-  if (b) b.setAttribute("aria-checked", tema === "light" ? "true" : "false");
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", tema === "light" ? "#f4f4f6" : "#0a0a0d");
+// ---------- Temi: le superfici dei campi (Indoor scuro, Erba, Terra battuta, Cemento); la scelta resta sul telefono ----------
+const TEMI = [
+  { id: "indoor", nome: "Indoor", nota: "scuro", colore: "#4b3fb8", tono: "scuro", meta: "#0f0c24" },
+  { id: "erba", nome: "Erba", nota: "chiaro", colore: "#8fc23a", tono: "chiaro", meta: "#eaeee1" },
+  { id: "terra", nome: "Terra battuta", nota: "arancio", colore: "#d9622b", tono: "chiaro", meta: "#f0d3ba" },
+  { id: "cemento", nome: "Cemento", nota: "blu", colore: "#2f7bff", tono: "chiaro", meta: "#cfe0f5" },
+];
+const temaCorrente = () => TEMI.find((t) => t.id === document.documentElement.dataset.theme) || TEMI[0];
+function applicaTema(id) {
+  const t = TEMI.find((x) => x.id === id) || TEMI[0];
+  document.documentElement.dataset.theme = t.id;
+  document.documentElement.dataset.tono = t.tono;
+  try { localStorage.setItem("tema", t.id); } catch (e) { /* senza memoria locale il tema vale solo per questa visita */ }
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", t.meta);
+  const sw = document.getElementById("tema-pallina");
+  if (sw) sw.style.setProperty("--sw", t.colore);
+  document.querySelectorAll(".tema-voce").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.tema === t.id)));
+}
+function montaSceltaTema(header) {
+  const btn = header.querySelector("#tema-btn"), menu = header.querySelector("#tema-menu");
+  menu.innerHTML = `<div class="titolo">Superficie del campo</div>` + TEMI.map((t) => `<button type="button" role="menuitemradio" class="tema-voce" data-tema="${t.id}" aria-checked="false"><span class="pall" style="background:${t.colore}"></span>${t.nome}<small>${t.nota}</small></button>`).join("");
+  const chiudi = () => { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); };
+  btn.addEventListener("click", (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; btn.setAttribute("aria-expanded", String(!menu.hidden)); });
+  menu.addEventListener("click", (e) => { const v = e.target.closest(".tema-voce"); if (v) { applicaTema(v.dataset.tema); chiudi(); btn.focus(); } });
+  document.addEventListener("click", (e) => { if (!menu.hidden && !e.target.closest(".nav-strumenti")) chiudi(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !menu.hidden) { chiudi(); btn.focus(); } });
+  applicaTema(temaCorrente().id);
 }
 
 // ---------- Foto e iniziali ----------
@@ -224,7 +240,7 @@ export function montaPagina(paginaCorrente) {
         <div class="nav-riga2"><a class="btn-giochi${paginaCorrente === "giochi.html" ? " attivo" : ""}" href="giochi.html"${paginaCorrente === "giochi.html" ? ' aria-current="page"' : ""}><span aria-hidden="true">🎮</span>Giochi</a>
         <div class="nav-menu" id="nav-menu"><ul class="nav-links" id="nav-links">${VOCI.map(([h, t]) => `<li><a href="${h}" class="${h === paginaCorrente ? "active" : ""}${h === "giochi.html" ? " voce-giochi" : ""}${h === "live.html" ? " voce-live" : ""}"${h === paginaCorrente ? ' aria-current="page"' : ""}>${t}</a></li>`).join("")}</ul></div></div>
         <div class="nav-strumenti">${selettoreLingua()}
-          <button type="button" class="tema-btn" id="tema-btn" role="switch" aria-label="Tema chiaro" title="Chiaro / scuro">${SOLE}${LUNA}<span class="tema-pallino" aria-hidden="true"></span></button></div>
+          <button type="button" class="tema-btn" id="tema-btn" aria-haspopup="menu" aria-expanded="false" aria-label="Scegli il tema: superficie del campo" title="Tema: superficie del campo"><span class="tema-pallina" id="tema-pallina" aria-hidden="true"></span></button><div class="tema-menu" id="tema-menu" role="menu" hidden></div></div>
       </div>`;
     // la barra scorre: porta la voce attiva al centro e toglie la sfumatura quando si e' arrivati in fondo
     const lista = header.querySelector("#nav-links"), menu = header.querySelector("#nav-menu"), attiva = lista.querySelector(".active");
@@ -233,8 +249,7 @@ export function montaPagina(paginaCorrente) {
     lista.addEventListener("scroll", fondo, { passive: true });
     requestAnimationFrame(fondo);
     header.querySelector("#lingua").addEventListener("change", (e) => cambiaLingua(e.target.value));
-    applicaTema(temaCorrente());
-    header.querySelector("#tema-btn").addEventListener("click", () => applicaTema(temaCorrente() === "dark" ? "light" : "dark"));
+    montaSceltaTema(header);
   }
   const footer = document.getElementById("site-footer");
   if (footer) {
