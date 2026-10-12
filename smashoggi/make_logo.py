@@ -31,15 +31,17 @@ def testo_path(testo, size, spaziatura=0.0):
 
 
 def emblema(x=0, y=0, s=1.0):
-    d, w = testo_path("SMASH", 22, 2)
+    # stile MMA Oggi / GP Oggi: stemma tondo con la parola OGGI grande in alto e la pallina sotto (niente "SMASH")
+    d, w = testo_path("OGGI", 41, 3)
     return f'''<g transform="translate({x} {y}) scale({s})">
   <circle cx="60" cy="60" r="57" fill="{SCURO}" stroke="{ACCENT}" stroke-width="5"/>
-  <clipPath id="pallina"><circle cx="60" cy="47" r="30"/></clipPath>
-  <circle cx="60" cy="47" r="30" fill="{ACCENT}"/>
-  <g clip-path="url(#pallina)" fill="none" stroke="{SCURO}" stroke-width="3.6" stroke-linecap="round">
-    <circle cx="19" cy="47" r="29"/><circle cx="101" cy="47" r="29"/>
+  <path d="{d}" fill="#ffffff" transform="translate({60 - w / 2:.2f} 51)"/>
+  <rect x="31" y="57" width="58" height="3.2" rx="1.6" fill="{ACCENT}"/>
+  <clipPath id="pallina"><circle cx="60" cy="83" r="22"/></clipPath>
+  <circle cx="60" cy="83" r="22" fill="{ACCENT}"/>
+  <g clip-path="url(#pallina)" fill="none" stroke="{SCURO}" stroke-width="3" stroke-linecap="round">
+    <circle cx="27" cy="83" r="21"/><circle cx="93" cy="83" r="21"/>
   </g>
-  <path d="{d}" fill="#ffffff" transform="translate({60 - w / 2:.2f} 99)"/>
 </g>'''
 
 

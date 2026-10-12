@@ -1,6 +1,6 @@
 // Griglia: in ogni casella un tennista che rispetta riga e colonna. Griglia del giorno uguale per tutti; 3 errori al massimo.
-import { montaPagina, esc, fetchJSON } from "./common.js?v=202610120823";
-import { caricaTuttiGioco, casualeConSeme, numeroGiorno, mescola, leggi, scrivi, oggiItalia, condividi, cercaGiocatore, htmlAiuti, ascoltaAiuti } from "./giochi-comuni.js?v=202610120823";
+import { montaPagina, esc, fetchJSON } from "./common.js?v=202610121032";
+import { caricaTuttiGioco, casualeConSeme, numeroGiorno, mescola, leggi, scrivi, oggiItalia, condividi, cercaGiocatore, htmlAiuti, ascoltaAiuti } from "./giochi-comuni.js?v=202610121032";
 
 montaPagina("giochi.html");
 const box = document.getElementById("gioco");

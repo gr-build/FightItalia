@@ -1,2 +1,2 @@
-import { montaPagina } from "./common.js?v=202610120823";
+import { montaPagina } from "./common.js?v=202610121032";
 montaPagina(location.pathname.split("/").pop() || "index.html");
