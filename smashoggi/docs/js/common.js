@@ -236,10 +236,16 @@ const ICONE = {
   live: '<circle cx="12" cy="12" r="3"/><path d="M6.3 6.3a8 8 0 0 0 0 11.4M17.7 6.3a8 8 0 0 1 0 11.4M3.5 3.5a12 12 0 0 0 0 17M20.5 3.5a12 12 0 0 1 0 17"/>',
   risultati: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
   giochi: '<path d="M7 8h10a4 4 0 0 1 4 4v1a3 3 0 0 1-5.2 2L14.5 13h-5L8.2 15A3 3 0 0 1 3 13v-1a4 4 0 0 1 4-4z"/><path d="M8 10.5v3M6.5 12h3"/><circle cx="16" cy="11.5" r=".6"/><circle cx="18" cy="13" r=".6"/>',
-  altro: '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+  altro: '<rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/>',
+  calendario: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  classifiche: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/>',
+  tennisti: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/>',
+  archivio: '<rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/>',
+  news: '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2zM18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2M8.5 8h6M8.5 12h6M8.5 16h4"/>',
+  confronto: '<path d="M12 3v18M5 7h14M5 7l-2.5 7a3 3 0 0 0 5 0zM19 7l-2.5 7a3 3 0 0 0 5 0z"/>',
 };
 const SCHEDE = [["home", "index.html", "Home"], ["live", "live.html", "Live"], ["giochi", "giochi.html", "Giochi"], ["risultati", "partite.html", "Risultati"]];
-const ALTRE = [["calendario.html", "Calendario"], ["classifiche.html", "Classifiche"], ["tennisti.html", "Tennisti"], ["archivio.html", "Archivio"], ["notizie.html", "News"], ["confronto.html", "Confronto"]];
+const ALTRE = [["calendario.html", "Calendario", "calendario"], ["classifiche.html", "Classifiche", "classifiche"], ["tennisti.html", "Tennisti", "tennisti"], ["archivio.html", "Archivio", "archivio"], ["notizie.html", "News", "news"], ["confronto.html", "Confronto", "confronto"]];
 function montaBarra(paginaCorrente) {
   if (document.getElementById("tabbar")) return;
   const icona = (k) => `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONE[k]}</svg>`;
@@ -250,7 +256,7 @@ function montaBarra(paginaCorrente) {
   document.body.appendChild(nav);
   const foglio = document.createElement("div");
   foglio.className = "foglio"; foglio.hidden = true;
-  foglio.innerHTML = `<div class="foglio-corpo" role="dialog" aria-label="Altre sezioni"><div class="foglio-maniglia"></div>${ALTRE.map(([h, t]) => `<a href="${h}"${h === paginaCorrente ? ' aria-current="page"' : ""}>${t}<span aria-hidden="true">›</span></a>`).join("")}</div>`;
+  foglio.innerHTML = `<div class="foglio-corpo" role="dialog" aria-label="Altre sezioni"><div class="foglio-maniglia"></div><div class="foglio-griglia">${ALTRE.map(([h, t, k]) => `<a href="${h}"${h === paginaCorrente ? ' aria-current="page"' : ""}>${icona(k)}<span>${t}</span></a>`).join("")}</div></div>`;
   document.body.appendChild(foglio);
   const apri = (si) => { foglio.hidden = !si; nav.querySelector("#tab-altro").setAttribute("aria-expanded", String(si)); };
   nav.querySelector("#tab-altro").addEventListener("click", () => apri(foglio.hidden));

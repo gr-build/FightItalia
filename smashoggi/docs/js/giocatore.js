@@ -1,6 +1,6 @@
-import { partiteLive } from "./live.js?v=202610121151";
-import { rigaFinale } from "./archivio-comune.js?v=202610121151";
-import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar, bandiera } from "./common.js?v=202610121151";
+import { partiteLive } from "./live.js?v=202610121154";
+import { rigaFinale } from "./archivio-comune.js?v=202610121154";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, schedaPartita, frecciaIndietro, messaggioErrore, nomeTour, avatar, bandiera } from "./common.js?v=202610121154";
 
 montaPagina("classifiche.html");
 frecciaIndietro(document.getElementById("indietro"), "tennisti.html", "Indietro");

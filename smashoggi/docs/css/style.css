@@ -1000,3 +1000,25 @@ body::after { content: ""; position: fixed; inset: 0; z-index: -3; pointer-event
   .foglio-corpo a span { color: var(--text-muted); }
   .site-footer { margin-top: 28px; }
 }
+
+/* ---------- Telefono, versione moderna: barra fluttuante in vetro, foglio a griglia ---------- */
+@media (max-width: 700px) {
+  body { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .tabbar { left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); padding: 6px; border: 1px solid var(--border); border-radius: 26px;
+    background: color-mix(in srgb, var(--bg-elevated) 82%, transparent); -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4); box-shadow: 0 10px 30px rgba(0, 0, 0, .28); }
+  .tab { gap: 2px; min-height: 50px; font: 600 10.5px var(--font-body); letter-spacing: .01em; border-radius: 18px; transition: background .15s, color .15s; }
+  .tab svg { width: 22px; height: 22px; }
+  .tab.attiva { background: var(--accent-soft); }
+  .tab.attiva svg { stroke-width: 2.2; }
+  .tab-giochi.attiva { background: none; }
+  .tab-giochi svg { width: 24px; height: 24px; padding: 11px; margin-top: -30px; box-shadow: 0 8px 18px var(--giochi-glow), 0 0 0 5px var(--bg); }
+  .foglio-corpo { padding: 8px 16px calc(100px + env(safe-area-inset-bottom, 0px)); border-radius: 26px 26px 0 0; }
+  .foglio-griglia { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .foglio-corpo .foglio-griglia a { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 10px; min-height: 92px; padding: 14px; border: 1px solid var(--border-soft); border-radius: 18px; background: var(--bg-elevated-2); font: 600 15px var(--font-body); text-transform: none; letter-spacing: 0; }
+  .foglio-griglia a svg { width: 26px; height: 26px; color: var(--accent-text); }
+  .foglio-corpo .foglio-griglia a[aria-current] { border-color: var(--accent-text); }
+  .foglio-griglia a span { color: inherit; }
+  .hm-scorri { scroll-padding-inline: 16px; }
+  .hm-evidenza .evidenza { margin-top: 0; }
+  .hm-evidenza { margin-bottom: 4px; }
+}

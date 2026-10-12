@@ -1,7 +1,7 @@
 import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, giornoRoma, oggiRoma, dataLunga, aggiornatoIl,
-  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali, bandiera } from "./common.js?v=202610121151";
+  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali, bandiera } from "./common.js?v=202610121154";
 
-import { partiteLive } from "./live.js?v=202610121151";
+import { partiteLive } from "./live.js?v=202610121154";
 
 montaPagina("index.html");
 
@@ -76,10 +76,10 @@ function schedaEvidenza(p, giocatori, tornei) {
     </div></a>`;
 }
 
-let timerConto;
-function avviaConto() {
-  clearInterval(timerConto);
-  const el = document.getElementById("conto");
+const timerConto = {};
+function avviaConto(id = "conto") {
+  clearInterval(timerConto[id]);
+  const el = document.getElementById(id);
   if (!el) return;
   const fine = new Date(el.dataset.quando).getTime();
   const tic = () => {
@@ -91,7 +91,7 @@ function avviaConto() {
     el.textContent = (g ? `${g}g ` : "") + `${h}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
   };
   tic();
-  timerConto = setInterval(tic, 1000);
+  timerConto[id] = setInterval(tic, 1000);
 }
 
 function miniTorneo(t) {
@@ -122,18 +122,21 @@ function cardCompatta(p, giocatori) {
 function disegnaMobile(principali, giocatori, tornei, atp, wta, oggi) {
   const box = document.getElementById("home-mobile");
   if (!box) return;
+  setTimeout(() => avviaConto("conto-m"), 0);
   const inCampo = principali.filter((p) => p.stato === "in");
   const deOggi = principali.filter((p) => p.stato === "in" || giornoRoma(p.data) === oggi);
   const ita = principali.filter((p) => p.giocatori.some((g) => g.paese === "ITA") && (p.stato === "in" || giornoRoma(p.data) === oggi))
     .sort((x, y) => (y.stato === "in") - (x.stato === "in") || (x.data < y.data ? -1 : 1));
   const torneoCorso = tornei.filter((t) => t.categoria && !t.concluso && t.inizio <= oggi && t.fine >= oggi).sort((x, y) => (y.categoria === "1000") - (x.categoria === "1000"))[0];
-  const mostrate = new Set([...ordina(inCampo, giocatori).slice(0, 3), ...ita.slice(0, 8)].map((p) => p.id));   // gia' sopra: non si ripetono
+  const ev = sceltaEvidenza(principali, giocatori);
+  const mostrate = new Set([ev, ...ordina(inCampo.filter((p) => p !== ev), giocatori).slice(0, 3), ...ita.slice(0, 8)].filter(Boolean).map((p) => p.id));   // gia' sopra: non si ripetono
   const tile = (h, t, sub, c) => `<a class="hm-tile" href="${h}" style="--tc:${c}"><b>${t}</b><small>${sub}</small></a>`;
   box.innerHTML = `
     <div class="hm-titolo"><h1>Oggi nel <span>tennis</span></h1><small>${esc(dataLunga(new Date().toISOString()))}</small></div>
-    ${inCampo.length ? `<section class="hm-sez"><div class="hm-testa"><h2><i class="live-punto" aria-hidden="true"></i>In campo adesso</h2><a href="live.html">Tutte ${inCampo.length} ›</a></div>
-      <div class="hm-lista">${ordina(inCampo, giocatori).slice(0, 3).map((p) => cardCompatta(p, giocatori)).join("")}</div></section>` : ""}
-    ${ita.length ? `<section class="hm-sez"><div class="hm-testa"><h2>🇮🇹 Gli italiani oggi</h2></div>
+    ${ev ? `<div class="hm-evidenza">${schedaEvidenza(ev, giocatori, tornei).replace('id="conto"', 'id="conto-m"')}</div>` : ""}
+    ${inCampo.filter((p) => p !== ev).length ? `<section class="hm-sez"><div class="hm-testa"><h2><i class="live-punto" aria-hidden="true"></i>In campo adesso</h2><a href="live.html">Tutte ${inCampo.length} ›</a></div>
+      <div class="hm-lista">${ordina(inCampo.filter((p) => p !== ev), giocatori).slice(0, 3).map((p) => cardCompatta(p, giocatori)).join("")}</div></section>` : ""}
+    ${ita.length ? `<section class="hm-sez"><div class="hm-testa"><h2>${bandiera("ITA", "flag flag-grande")}Gli italiani oggi</h2></div>
       <div class="hm-scorri">${ita.slice(0, 8).map((p) => cardCompatta(p, giocatori)).join("")}</div></section>` : ""}
     <a class="hm-giochi" href="giochi.html"><span><b>Giochi del giorno</b><small>Griglia, Top 10, Quiz, Chi è?</small></span><strong>Gioca ›</strong></a>
     <section class="hm-sez"><div class="hm-testa"><h2>Altre partite di oggi</h2><a href="partite.html">Tutte ›</a></div>

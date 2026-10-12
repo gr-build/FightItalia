@@ -1,4 +1,4 @@
-import { fetchJSON, esc, montaPagina, oggiRoma, etichettaCategoria, intervalloDate, nomeTour, mesiIt, messaggioErrore, dataSolo, superficie } from "./common.js?v=202610121151";
+import { fetchJSON, esc, montaPagina, oggiRoma, etichettaCategoria, intervalloDate, nomeTour, mesiIt, messaggioErrore, dataSolo, superficie } from "./common.js?v=202610121154";
 
 montaPagina("calendario.html");
 
