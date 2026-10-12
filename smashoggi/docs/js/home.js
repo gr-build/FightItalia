@@ -1,7 +1,7 @@
 import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, giornoRoma, oggiRoma, dataLunga, aggiornatoIl,
-  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali, bandiera } from "./common.js?v=202610121145";
+  messaggioErrore, etichettaCategoria, intervalloDate, nomeTour, dataBreve, oraRoma, avatar, iniziali, bandiera } from "./common.js?v=202610121151";
 
-import { partiteLive } from "./live.js?v=202610121145";
+import { partiteLive } from "./live.js?v=202610121151";
 
 montaPagina("index.html");
 
@@ -135,19 +135,11 @@ function disegnaMobile(principali, giocatori, tornei, atp, wta, oggi) {
       <div class="hm-lista">${ordina(inCampo, giocatori).slice(0, 3).map((p) => cardCompatta(p, giocatori)).join("")}</div></section>` : ""}
     ${ita.length ? `<section class="hm-sez"><div class="hm-testa"><h2>🇮🇹 Gli italiani oggi</h2></div>
       <div class="hm-scorri">${ita.slice(0, 8).map((p) => cardCompatta(p, giocatori)).join("")}</div></section>` : ""}
-    <div class="hm-tiles">
-      ${tile("live.html", "Live", inCampo.length ? `${inCampo.length} in corso` : "partite in corso", "#ff5a4f")}
-      ${tile("partite.html", "Risultati", `${deOggi.length} oggi`, "var(--accent)")}
-      ${tile("calendario.html", "Calendario", torneoCorso ? esc(torneoCorso.nome.replace(/ presented by.*$/i, "")) : "tornei", "#e8c34a")}
-      ${tile("classifiche.html", "Classifiche", "ATP · WTA", "#a66bff")}
-      ${tile("tennisti.html", "Tennisti", "schede e foto", "#22b8cf")}
-      ${tile("archivio.html", "Archivio", "finali 2026", "#d9622b")}
-    </div>
     <a class="hm-giochi" href="giochi.html"><span><b>Giochi del giorno</b><small>Griglia, Top 10, Quiz, Chi è?</small></span><strong>Gioca ›</strong></a>
     <section class="hm-sez"><div class="hm-testa"><h2>Altre partite di oggi</h2><a href="partite.html">Tutte ›</a></div>
-      <div class="hm-lista">${(deOggi.length ? ordina(deOggi, giocatori) : ordina(principali.filter((p) => p.stato === "pre"), giocatori)).filter((p) => !mostrate.has(p.id)).slice(0, 5).map((p) => cardCompatta(p, giocatori)).join("") || `<div class="vuoto">Oggi non ci sono partite nei dati disponibili.</div>`}</div></section>
+      <div class="hm-lista">${(deOggi.length ? ordina(deOggi, giocatori) : ordina(principali.filter((p) => p.stato === "pre"), giocatori)).filter((p) => !mostrate.has(p.id)).slice(0, 3).map((p) => cardCompatta(p, giocatori)).join("") || `<div class="vuoto">Oggi non ci sono partite nei dati disponibili.</div>`}</div></section>
     ${NOTIZIE.length ? `<section class="hm-sez"><div class="hm-testa"><h2>Notizie</h2><a href="notizie.html">Tutte ›</a></div>
-      <div class="hm-notizie">${NOTIZIE.slice(0, 4).map((n) => `<a href="${esc(n.link)}" target="_blank" rel="noopener noreferrer"><b>${esc(n.titolo)}</b><small>${esc(n.fonte)}</small></a>`).join("")}</div></section>` : ""}`;
+      <div class="hm-notizie">${NOTIZIE.slice(0, 3).map((n) => `<a href="${esc(n.link)}" target="_blank" rel="noopener noreferrer"><b>${esc(n.titolo)}</b><small>${esc(n.fonte)}</small></a>`).join("")}</div></section>` : ""}`;
 }
 
 let ridisegnaLive = () => {};

@@ -230,6 +230,34 @@ document.addEventListener("click", (e) => {
   location.href = a.dataset.href;
 });
 
+// ---------- Telefono: barra in basso (Home, Live, Giochi, Risultati, Altro) al posto del menu in alto ----------
+const ICONE = {
+  home: '<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  live: '<circle cx="12" cy="12" r="3"/><path d="M6.3 6.3a8 8 0 0 0 0 11.4M17.7 6.3a8 8 0 0 1 0 11.4M3.5 3.5a12 12 0 0 0 0 17M20.5 3.5a12 12 0 0 1 0 17"/>',
+  risultati: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+  giochi: '<path d="M7 8h10a4 4 0 0 1 4 4v1a3 3 0 0 1-5.2 2L14.5 13h-5L8.2 15A3 3 0 0 1 3 13v-1a4 4 0 0 1 4-4z"/><path d="M8 10.5v3M6.5 12h3"/><circle cx="16" cy="11.5" r=".6"/><circle cx="18" cy="13" r=".6"/>',
+  altro: '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+};
+const SCHEDE = [["home", "index.html", "Home"], ["live", "live.html", "Live"], ["giochi", "giochi.html", "Giochi"], ["risultati", "partite.html", "Risultati"]];
+const ALTRE = [["calendario.html", "Calendario"], ["classifiche.html", "Classifiche"], ["tennisti.html", "Tennisti"], ["archivio.html", "Archivio"], ["notizie.html", "News"], ["confronto.html", "Confronto"]];
+function montaBarra(paginaCorrente) {
+  if (document.getElementById("tabbar")) return;
+  const icona = (k) => `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONE[k]}</svg>`;
+  const nav = document.createElement("nav");
+  nav.id = "tabbar"; nav.className = "tabbar"; nav.setAttribute("aria-label", "Menu principale");
+  nav.innerHTML = SCHEDE.map(([k, h, t]) => `<a href="${h}" class="tab${k === "giochi" ? " tab-giochi" : ""}${h === paginaCorrente ? " attiva" : ""}"${h === paginaCorrente ? ' aria-current="page"' : ""}>${icona(k)}<span>${t}</span></a>`).join("")
+    + `<button type="button" class="tab${ALTRE.some(([h]) => h === paginaCorrente) ? " attiva" : ""}" id="tab-altro" aria-haspopup="dialog" aria-expanded="false">${icona("altro")}<span>Altro</span></button>`;
+  document.body.appendChild(nav);
+  const foglio = document.createElement("div");
+  foglio.className = "foglio"; foglio.hidden = true;
+  foglio.innerHTML = `<div class="foglio-corpo" role="dialog" aria-label="Altre sezioni"><div class="foglio-maniglia"></div>${ALTRE.map(([h, t]) => `<a href="${h}"${h === paginaCorrente ? ' aria-current="page"' : ""}>${t}<span aria-hidden="true">›</span></a>`).join("")}</div>`;
+  document.body.appendChild(foglio);
+  const apri = (si) => { foglio.hidden = !si; nav.querySelector("#tab-altro").setAttribute("aria-expanded", String(si)); };
+  nav.querySelector("#tab-altro").addEventListener("click", () => apri(foglio.hidden));
+  foglio.addEventListener("click", (e) => { if (e.target === foglio) apri(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") apri(false); });
+}
+
 export function montaPagina(paginaCorrente) {
   const header = document.getElementById("site-header");
   if (header) {
@@ -290,6 +318,7 @@ export function montaPagina(paginaCorrente) {
       } catch (err) { out.textContent = "Invio non riuscito. Riprova tra poco."; }
     });
   }
+  montaBarra(paginaCorrente);
   const main = document.querySelector("main");
   if (main && !main.id) main.id = "contenuto";
   avviaTraduzione();
