@@ -1,22 +1,41 @@
-import { fetchJSON, slugDaLink } from "./common.js?v=202610110113";
+import { fetchJSON, slugDaLink } from "./common.js?v=202610121228";
 
-// Riquadro "Prossimi eventi" a destra della home: i prossimi 4 eventi
+// Riquadro "Prossimi eventi" della home (a destra sul computer, a carte da scorrere sul telefono): i prossimi 4 eventi
 // programmati, con link alla scheda o a "Vedi tutti gli eventi" (eventi.html).
 // In cima anche l'ultimo fight gia' disputato: senza, chi vuole i risultati
 // di ieri sera non lo trova da qui (su richiesta di Giovanni).
 const MESI = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
 
-function rigaMini(ev) {
-  const d = new Date(ev.data);
-  const data = isNaN(d) ? "" : `${d.getDate()} ${MESI[d.getMonth()]}`;
-  const href = ev.link ? `evento.html?slug=${slugDaLink(ev.link)}` : "eventi.html";
-  return `<a class="mini-evento" href="${href}"><div class="mini-data">${data}</div><div class="mini-nome">${ev.evento}</div></a>`;
+function dividi(ev) {
+  const nome = ev.evento || "";
+  const k = nome.indexOf(":");
+  return k > 0 ? [nome.slice(0, k).trim(), nome.slice(k + 1).trim()] : [ev.tipo === "Numerato" ? "UFC" : "UFC Fight Night", nome];
 }
 
-function rigaMiniRisultato(ev) {
-  const href = ev.link ? `evento.html?slug=${slugDaLink(ev.link)}` : "eventi.html";
-  return `<a class="mini-evento mini-evento-risultato" href="${href}"><div class="mini-data risultato">Risultato</div><div class="mini-nome">${ev.evento}</div></a>`;
+function luogoBreve(ev) {
+  const parti = String(ev.luogo || "").split(",").map((x) => x.trim()).filter(Boolean);
+  if (!parti.length) return "";
+  return parti.length > 1 ? `${parti[0]}, ${parti[parti.length - 1]}` : parti[0];
 }
+
+function carta(ev, risultato) {
+  const d = new Date(ev.data);
+  const href = ev.link ? `evento.html?slug=${slugDaLink(ev.link)}` : "eventi.html";
+  const [kick, nome] = dividi(ev);
+  const box = risultato
+    ? `<span class="mini-data-box risultato"><b>✓</b><i>fatto</i></span>`
+    : `<span class="mini-data-box"><b>${isNaN(d) ? "·" : d.getDate()}</b><i>${isNaN(d) ? "" : MESI[d.getMonth()]}</i></span>`;
+  return `<a class="mini-evento${risultato ? " mini-evento-risultato" : ""}" href="${href}">
+    ${box}
+    <span class="mini-corpo">
+      <span class="mini-kick">${risultato ? "Ultimo evento · risultati" : kick}</span>
+      <span class="mini-nome">${nome || kick}</span>
+      <span class="mini-luogo">${luogoBreve(ev)}</span>
+    </span>
+  </a>`;
+}
+
+const cartaTutti = `<a class="mini-evento mini-tutti" href="eventi.html"><span class="mini-nome">Tutti gli eventi</span><span class="mini-luogo">anche i passati →</span></a>`;
 
 fetchJSON("data/eventi.json")
   .then((eventi) => {
@@ -29,7 +48,7 @@ fetchJSON("data/eventi.json")
       .sort((a, b) => new Date(b.data) - new Date(a.data));
     const box = document.getElementById("prossimi-mini");
     box.innerHTML =
-      (ultimoPassato ? rigaMiniRisultato(ultimoPassato) : "") +
-      (prossimi.length ? prossimi.map(rigaMini).join("") : `<p style="font-size:12px; color:var(--text-muted);">Nessun evento programmato trovato.</p>`);
+      (ultimoPassato ? carta(ultimoPassato, true) : "") +
+      (prossimi.length ? prossimi.map((e) => carta(e, false)).join("") + cartaTutti : `<p style="font-size:12px; color:var(--text-muted);">Nessun evento programmato trovato.</p>`);
   })
   .catch(() => {});

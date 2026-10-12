@@ -1,4 +1,4 @@
-import { fetchJSON, renderChrome, icon, debounce, fotoDi, classeFoto } from "./common.js?v=202610110113";
+import { fetchJSON, renderChrome, icon, debounce, fotoDi, classeFoto } from "./common.js?v=202610121228";
 
 // Gira sia in home sia in tutti-i-lottatori.html, che non ha statistiche ne' campioni in evidenza.
 renderChrome(document.body.dataset.pagina || "database");
@@ -21,6 +21,12 @@ const ORDINE_CATEGORIE = [
 
 let roster = [];
 let categoriaAttiva = null;
+// Sul telefono la lista e' fatta di righe compatte (tutta la riga e' un tocco unico)
+// e si allunga a piccoli passi con "Mostra altri": 665 schede alte tutte insieme
+// rendevano la pagina lunghissima e pesante.
+const telefono = window.matchMedia("(max-width: 900px)");
+const PASSO = () => (telefono.matches ? 30 : 60);
+let mostrati = PASSO();
 
 function nomeBreveCategoria(cat) {
   if (!cat) return "—";
@@ -104,7 +110,29 @@ function cardLottatore(r) {
     </div>`;
 }
 
-function renderGrid() {
+function rigaLottatore(r) {
+  const href = r.slug ? `lottatore.html?slug=${r.slug}` : null;
+  const urlFoto = fotoDi(r);
+  const iniziale = (r.nome || "?").charAt(0);
+  const foto = urlFoto
+    ? `<img src="${urlFoto}" alt="" loading="lazy" onerror="this.remove()" class="fr-img${classeFoto(urlFoto)}">`
+    : "";
+  const medaglia = r.campione_attuale ? "🏆" : r.ex_campione ? "🥊" : "";
+  const sotto = [nomeBreveCategoria(r.categoria), r.eta ? `${r.eta} anni` : ""].filter(Boolean).join(" · ");
+  const tag = href ? "a" : "div";
+  return `
+    <${tag} class="fr"${href ? ` href="${href}"` : ""}>
+      <span class="fr-foto"><span class="fr-iniziale">${iniziale}</span>${foto}</span>
+      <span class="fr-testo">
+        <span class="fr-nome">${medaglia ? medaglia + " " : ""}${r.nome}</span>
+        <span class="fr-sub">${sotto}</span>
+      </span>
+      <span class="fr-record">${r.record_mma || "—"}</span>
+    </${tag}>`;
+}
+
+function renderGrid(reset = true) {
+  if (reset === true) mostrati = PASSO();
   const q = document.getElementById("search").value.trim().toLowerCase();
   // Le pillole delle categorie occupano spazio utile e su telefono spingono
   // i risultati sotto la piega: mentre si cerca per nome non servono (la
@@ -126,7 +154,15 @@ function renderGrid() {
     grid.innerHTML = `<div class="empty-state">Nessun lottatore trovato.</div>`;
     return;
   }
-  grid.innerHTML = filtrati.slice(0, 300).map(cardLottatore).join("");
+  const disegna = telefono.matches ? rigaLottatore : cardLottatore;
+  grid.classList.toggle("lista-righe", telefono.matches);
+  grid.innerHTML = filtrati.slice(0, mostrati).map(disegna).join("");
+  const altri = document.getElementById("mostra-altri");
+  if (altri) {
+    const resto = filtrati.length - mostrati;
+    altri.hidden = resto <= 0;
+    if (resto > 0) altri.textContent = `Mostra altri ${Math.min(PASSO(), resto)} · ne restano ${resto}`;
+  }
 }
 
 async function init() {
@@ -135,7 +171,10 @@ async function init() {
   renderStatStrip();
   renderPills();
   renderGrid();
-  document.getElementById("search").addEventListener("input", debounce(renderGrid, 120));
+  document.getElementById("search").addEventListener("input", debounce(() => renderGrid(true), 120));
+  const altri = document.getElementById("mostra-altri");
+  if (altri) altri.addEventListener("click", () => { mostrati += PASSO(); renderGrid(false); });
+  telefono.addEventListener("change", () => renderGrid(true));
 
   if (!document.getElementById("in-evidenza")) return;
   const inEvidenza = ORDINE_CATEGORIE.map((cat) => roster.find((r) => r.categoria === cat && r.campione_attuale)).filter(Boolean).slice(0, 4);
