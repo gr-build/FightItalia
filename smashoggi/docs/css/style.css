@@ -377,7 +377,7 @@ img.avatar { background: linear-gradient(180deg, #ffffff, #e4e4ea); }
 @media (prefers-reduced-motion: reduce) { .live-punto { animation: none; } }
 
 /* ---------- Giochi ---------- */
-.nav-links a.voce-giochi { color: var(--accent-text); }
+
 .giochi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-bottom: 40px; }
 .gioco-card { display: flex; flex-direction: column; gap: 8px; padding: 20px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius); transition: border-color .15s, transform .15s; }
 .gioco-card:hover { border-color: var(--accent-text); transform: translateY(-2px); }
@@ -455,7 +455,14 @@ img.avatar { background: linear-gradient(180deg, #ffffff, #e4e4ea); }
 /* Su telefono e tablet le 9 voci vanno su due righe, tutte visibili senza scorrere */
 /* 9 voci: marchio e strumenti sopra, menu sotto in UNA sola barra. Su telefono scorre di lato (la voce attiva si centra da sola) */
 .nav { flex-wrap: wrap; height: auto; padding-top: 8px; row-gap: 0; }
-.nav-menu { order: 3; width: 100%; position: relative; }
+.nav-riga2 { order: 3; width: 100%; display: flex; align-items: center; min-width: 0; }
+.btn-giochi { flex: none; display: inline-flex; align-items: center; gap: 7px; height: 34px; margin: 2px 4px 4px 0; padding: 0 16px 0 12px; border-radius: 999px; background: linear-gradient(135deg, #d9ff4a, var(--accent)); color: var(--accent-ink); font: 700 15px var(--font-display); letter-spacing: .08em; text-transform: uppercase;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .15), 0 4px 14px rgba(198, 244, 50, .35); transition: transform .15s, box-shadow .15s; }
+.btn-giochi:hover { transform: translateY(-1px); box-shadow: 0 0 0 1px rgba(0, 0, 0, .15), 0 6px 18px rgba(198, 244, 50, .5); }
+.btn-giochi.attivo { box-shadow: 0 0 0 2px var(--text), 0 4px 14px rgba(198, 244, 50, .35); }
+.btn-giochi span { font-size: 17px; line-height: 1; }
+:root[data-theme="light"] .btn-giochi { background: linear-gradient(135deg, #5a7d00, #3d5700); color: #fff; box-shadow: 0 4px 14px rgba(77, 107, 0, .35); }
+.nav-menu { flex: 1; min-width: 0; position: relative; }
 .nav-links { width: 100%; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; padding-bottom: 4px; gap: 2px; }
 .nav-links::-webkit-scrollbar { display: none; }
 .nav-links li { flex: none; }

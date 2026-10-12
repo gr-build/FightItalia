@@ -206,7 +206,7 @@ export function avatar(g, grande = false) {
 // ---------- Intestazione e pie' di pagina ----------
 const VOCI = [
   ["index.html", "Home"], ["live.html", "Live"], ["partite.html", "Risultati"], ["calendario.html", "Calendario"], ["classifiche.html", "Classifiche"],
-  ["tennisti.html", "Tennisti"], ["archivio.html", "Archivio"], ["notizie.html", "News"], ["giochi.html", "Giochi"],
+  ["tennisti.html", "Tennisti"], ["archivio.html", "Archivio"], ["notizie.html", "News"]
 ];
 
 // tocco su una scheda partita (fuori dai nomi dei giocatori) = apre la pagina con i dati della partita
@@ -221,7 +221,8 @@ export function montaPagina(paginaCorrente) {
   if (header) {
     header.innerHTML = `<div class="container nav">
         <a href="index.html" class="brand notranslate" translate="no" aria-label="Smash Oggi, home"><img src="img/logo.svg" alt="" class="brand-logo" width="56" height="56"><span>SMASH<span class="dot">•</span><span class="oggi">Oggi</span></span></a>
-        <div class="nav-menu" id="nav-menu"><ul class="nav-links" id="nav-links">${VOCI.map(([h, t]) => `<li><a href="${h}" class="${h === paginaCorrente ? "active" : ""}${h === "giochi.html" ? " voce-giochi" : ""}${h === "live.html" ? " voce-live" : ""}"${h === paginaCorrente ? ' aria-current="page"' : ""}>${t}</a></li>`).join("")}</ul></div>
+        <div class="nav-riga2"><a class="btn-giochi${paginaCorrente === "giochi.html" ? " attivo" : ""}" href="giochi.html"${paginaCorrente === "giochi.html" ? ' aria-current="page"' : ""}><span aria-hidden="true">🎮</span>Giochi</a>
+        <div class="nav-menu" id="nav-menu"><ul class="nav-links" id="nav-links">${VOCI.map(([h, t]) => `<li><a href="${h}" class="${h === paginaCorrente ? "active" : ""}${h === "giochi.html" ? " voce-giochi" : ""}${h === "live.html" ? " voce-live" : ""}"${h === paginaCorrente ? ' aria-current="page"' : ""}>${t}</a></li>`).join("")}</ul></div></div>
         <div class="nav-strumenti">${selettoreLingua()}
           <button type="button" class="tema-btn" id="tema-btn" role="switch" aria-label="Tema chiaro" title="Chiaro / scuro">${SOLE}${LUNA}<span class="tema-pallino" aria-hidden="true"></span></button></div>
       </div>`;
