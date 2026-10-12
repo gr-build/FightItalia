@@ -910,3 +910,12 @@ body::after { content: ""; position: fixed; inset: 0; z-index: -3; pointer-event
   .tema-q[aria-checked="true"] { box-shadow: inset 0 0 0 2.5px var(--sw), inset 0 0 0 4px rgba(255, 255, 255, .85), 0 0 0 1.5px var(--bg-elevated), 0 0 0 3px var(--text); }
 }
 @media (max-width: 380px) { .brand { font-size: 16.5px; gap: 6px; } .brand-logo { width: 30px; height: 30px; } .lingua select { max-width: 70px; } .nav { column-gap: 6px; } }
+
+/* ---------- Logo completo (scritta + campo, racchetta e pallina) al posto di stemma e testo ---------- */
+.brand-logo { width: auto; height: 60px; aspect-ratio: 520 / 300; filter: none; }
+.brand:hover .brand-logo { transform: none; }
+@media (max-width: 980px) { .brand-logo { height: 48px; } }
+@media (max-width: 380px) { .brand-logo { height: 42px; } }
+.brand-logo { height: 84px; }
+@media (max-width: 980px) { .brand-logo { height: 66px; } }
+@media (max-width: 380px) { .brand-logo { height: 58px; } }

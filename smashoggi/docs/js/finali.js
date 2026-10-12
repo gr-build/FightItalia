@@ -1,7 +1,7 @@
 // Chi ha vinto la finale? Le finali vere della stagione (ATP, WTA e Challenger): scegli il vincitore e allunga la serie.
-import { montaPagina, esc, fetchJSON, caricaGiocatori, etichettaCategoria, iniziali } from "./common.js?v=202610121032";
-import { leggi, scrivi, condividi, mescola } from "./giochi-comuni.js?v=202610121032";
-import { punteggioFinale } from "./archivio-comune.js?v=202610121032";
+import { montaPagina, esc, fetchJSON, caricaGiocatori, etichettaCategoria, iniziali } from "./common.js?v=202610121044";
+import { leggi, scrivi, condividi, mescola } from "./giochi-comuni.js?v=202610121044";
+import { punteggioFinale } from "./archivio-comune.js?v=202610121044";
 
 montaPagina("giochi.html");
 const box = document.getElementById("gioco");

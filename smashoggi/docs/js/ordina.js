@@ -1,6 +1,6 @@
 // Ordina: cinque tennisti veri da mettere in ordine (classifica, titoli, eta' o altezza). Uno al giorno, uguale per tutti.
-import { montaPagina, esc, iniziali, bandiera } from "./common.js?v=202610121032";
-import { caricaGiocatoriGioco, casualeConSeme, numeroGiorno, mescola, leggi, scrivi, oggiItalia, condividi, htmlAiuti, ascoltaAiuti } from "./giochi-comuni.js?v=202610121032";
+import { montaPagina, esc, iniziali, bandiera } from "./common.js?v=202610121044";
+import { caricaGiocatoriGioco, casualeConSeme, numeroGiorno, mescola, leggi, scrivi, oggiItalia, condividi, htmlAiuti, ascoltaAiuti } from "./giochi-comuni.js?v=202610121044";
 
 montaPagina("giochi.html");
 

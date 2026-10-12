@@ -62,6 +62,8 @@ metodo di `build_foto.py` (non ancora automatico). Aiuti nei giochi: "Altri tent
 fornitore di annunci con premio basta definire `window.SMASH_ADS.mostra(premio)` che restituisce una Promise<boolean>.
 Il modulo "Aiutaci a migliorare" nel piè di pagina non invia ancora nulla: serve un indirizzo di raccolta (`FEEDBACK_URL`).
 
+Logo: `make_logo.py` (stile GP Oggi / MMA Oggi): riquadro scuro SMASH + riquadro lime OGGI, sotto campo in prospettiva, racchetta e pallina. Genera `logo.svg` (usato nell'intestazione), `logo-orizzontale.svg`, `icona*.svg` e i PNG.
+
 Altri script:
 - `python3 bump_versione.py` — cambia il numero `?v=` di JS e CSS (da lanciare prima di ogni pubblicazione).
 - `python3 build_sitemap.py` — scrive `sitemap.xml` e `robots.txt` (usa `docs/CNAME` se esiste).

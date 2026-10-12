@@ -1,5 +1,7 @@
 """Genera il logo di Smash Oggi: SVG pulito (testo trasformato in tracciati) + PNG (favicon, apple-touch-icon, og-image).
 
+Stile della famiglia (GP Oggi, MMA Oggi): parola dello sport in un riquadro scuro + OGGI su riquadro colorato,
+sotto un disegno dello sport (qui: campo da tennis in prospettiva, racchetta e pallina).
 Serve:  pip install fonttools playwright   e il file Oswald-Bold.ttf (Google Fonts, licenza OFL).
 Uso:    python3 make_logo.py /percorso/Oswald-Bold.ttf
 Tutto e' disegnato qui: nessuna immagine di terzi.
@@ -11,15 +13,15 @@ from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
 from fontTools.ttLib import TTFont
 
-ACCENT = "#c6f432"
-SCURO = "#0a0a0d"
+LIME = "#c6f432"
+SCURO = "#14171c"
 IMG = Path(__file__).parent / "docs" / "img"
 font = TTFont(sys.argv[1])
 gs, cmap, upm = font.getGlyphSet(), font.getBestCmap(), font["head"].unitsPerEm
+CAP = font["OS/2"].sCapHeight / upm
 
 
 def testo_path(testo, size, spaziatura=0.0):
-    """Restituisce (d, larghezza) del testo come tracciato SVG, con origine in (0,0) sulla linea di base."""
     scala, x, d = size / upm, 0.0, []
     for ch in testo:
         g = gs[cmap[ord(ch)]]
@@ -30,17 +32,66 @@ def testo_path(testo, size, spaziatura=0.0):
     return " ".join(d), x - spaziatura
 
 
-def emblema(x=0, y=0, s=1.0):
-    # stile MMA Oggi / GP Oggi: stemma tondo con la parola OGGI grande in alto e la pallina sotto (niente "SMASH")
-    d, w = testo_path("OGGI", 41, 3)
-    return f'''<g transform="translate({x} {y}) scale({s})">
-  <circle cx="60" cy="60" r="57" fill="{SCURO}" stroke="{ACCENT}" stroke-width="5"/>
-  <path d="{d}" fill="#ffffff" transform="translate({60 - w / 2:.2f} 51)"/>
-  <rect x="31" y="57" width="58" height="3.2" rx="1.6" fill="{ACCENT}"/>
-  <clipPath id="pallina"><circle cx="60" cy="83" r="22"/></clipPath>
-  <circle cx="60" cy="83" r="22" fill="{ACCENT}"/>
-  <g clip-path="url(#pallina)" fill="none" stroke="{SCURO}" stroke-width="3" stroke-linecap="round">
-    <circle cx="27" cy="83" r="21"/><circle cx="93" cy="83" r="21"/>
+def scritta(cx_box_x, y0, h, size=60):
+    """Riquadro scuro SMASH + riquadro lime OGGI, centrati a partire da cx_box_x (centro)."""
+    d1, w1 = testo_path("SMASH", size, 2)
+    d2, w2 = testo_path("OGGI", size, 2)
+    pad = 20
+    W = w1 + w2 + 4 * pad
+    x = cx_box_x - W / 2
+    base = y0 + (h + size * CAP) / 2
+    return (f'<rect x="{x:.1f}" y="{y0}" width="{w1 + 2 * pad:.1f}" height="{h}" fill="{SCURO}" stroke="#ffffff" stroke-opacity=".28" stroke-width="2"/>'
+            f'<rect x="{x + w1 + 2 * pad:.1f}" y="{y0}" width="{w2 + 2 * pad:.1f}" height="{h}" fill="{LIME}"/>'
+            f'<path d="{d1}" fill="#ffffff" transform="translate({x + pad:.1f} {base:.1f})"/>'
+            f'<path d="{d2}" fill="{SCURO}" transform="translate({x + w1 + 3 * pad:.1f} {base:.1f})"/>'), W
+
+
+def campo():
+    """Campo visto in prospettiva: trapezio con righe, rete e linee di servizio (colore neutro: va bene su fondo chiaro e scuro)."""
+    BL, BR, TL, TR = (40, 272), (480, 272), (130, 122), (390, 122)
+
+    def p(t, u):  # t = 0 linea di fondo vicina, 1 lontana; u = 0 sinistra, 1 destra
+        y = BL[1] + (TL[1] - BL[1]) * t
+        sx = BL[0] + (TL[0] - BL[0]) * t
+        ex = BR[0] + (TR[0] - BR[0]) * t
+        return sx + (ex - sx) * u, y
+
+    def linea(a, b, extra=""):
+        return f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" {extra}/>'
+    s1, s2 = 0.125, 0.875
+    righe = [linea(p(0, s1), p(1, s1)), linea(p(0, s2), p(1, s2)),
+             linea(p(0.231, s1), p(0.231, s2)), linea(p(0.769, s1), p(0.769, s2)), linea(p(0.231, .5), p(0.769, .5))]
+    rete = linea(p(0.5, -0.04), p(0.5, 1.04), 'stroke-width="5" stroke-dasharray="9 6"')
+    poly = f'M{BL[0]} {BL[1]} L{BR[0]} {BR[1]} L{TR[0]} {TR[1]} L{TL[0]} {TL[1]} Z'
+    return (f'<g stroke="#8d9680" stroke-opacity=".7" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none">'
+            f'<path d="{poly}" fill="#8d9680" fill-opacity=".10"/>{"".join(righe)}{rete}</g>')
+
+
+def racchetta(x, y, s, ang):
+    cx, cy, rx, ry = 50, 78, 36, 48
+    fili = "".join(f'<line x1="{cx - rx + 2 * rx * i / 7:.1f}" y1="{cy - ry}" x2="{cx - rx + 2 * rx * i / 7:.1f}" y2="{cy + ry}"/>' for i in range(1, 7))
+    fili += "".join(f'<line x1="{cx - rx}" y1="{cy - ry + 2 * ry * j / 9:.1f}" x2="{cx + rx}" y2="{cy - ry + 2 * ry * j / 9:.1f}"/>' for j in range(1, 9))
+    forma = (f'<ellipse cx="{cx}" cy="{cy}" rx="{rx + 3}" ry="{ry + 3}"/>'
+             f'<path d="M{cx - 17} {cy + ry - 4} L{cx - 4} 168 M{cx + 17} {cy + ry - 4} L{cx + 4} 168"/>')
+    return f'''<g transform="translate({x} {y}) rotate({ang}) scale({s}) translate(-50 -150)">
+  <clipPath id="rc"><ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}"/></clipPath>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke="#ffffff" stroke-width="19">{forma}</g><rect x="{cx - 8}" y="164" width="16" height="108" rx="8" fill="#ffffff" stroke="#ffffff" stroke-width="5"/>
+    <g clip-path="url(#rc)" stroke="{LIME}" stroke-width="3.6">{fili}</g>
+    <g stroke="{SCURO}" stroke-width="12">{forma}</g>
+  </g>
+  <rect x="{cx - 8}" y="164" width="16" height="108" rx="8" fill="{SCURO}"/>
+  <rect x="{cx - 8}" y="196" width="16" height="9" fill="{LIME}"/><rect x="{cx - 8}" y="214" width="16" height="9" fill="{LIME}"/><rect x="{cx - 8}" y="232" width="16" height="9" fill="{LIME}"/>
+</g>'''
+
+
+def pallina(x, y, r):
+    return f'''<g>
+  <ellipse cx="{x}" cy="{y + r + 9}" rx="{r * 1.05}" ry="{r * 0.22}" fill="#000" fill-opacity=".18"/>
+  <clipPath id="pal"><circle cx="{x}" cy="{y}" r="{r}"/></clipPath>
+  <circle cx="{x}" cy="{y}" r="{r}" fill="{LIME}" stroke="{SCURO}" stroke-width="3"/>
+  <g clip-path="url(#pal)" fill="none" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round">
+    <path d="M{x - r * 0.98} {y - r * 0.55} Q{x - r * 0.15} {y} {x - r * 0.98} {y + r * 0.55}"/><path d="M{x + r * 0.98} {y - r * 0.55} Q{x + r * 0.15} {y} {x + r * 0.98} {y + r * 0.55}"/>
   </g>
 </g>'''
 
@@ -51,30 +102,33 @@ def svg(w, h, corpo, titolo):
 
 
 IMG.mkdir(parents=True, exist_ok=True)
-(IMG / "logo.svg").write_text(svg(120, 120, emblema(), "Smash Oggi"), encoding="utf-8")
+scr, Wscr = scritta(260, 14, 76)
+completo = scr + campo() + racchetta(178, 214, 0.64, -22) + pallina(388, 222, 28)
+(IMG / "logo.svg").write_text(svg(520, 300, completo, "Smash Oggi"), encoding="utf-8")
+scr2, W2 = scritta(Wscr / 2 + 6, 6, 76)
+(IMG / "logo-orizzontale.svg").write_text(svg(int(Wscr + 12), 88, scr2, "Smash Oggi"), encoding="utf-8")
 
-# versione orizzontale: emblema + marchio "SMASH•Oggi" (testo bianco, per fondi scuri)
-dt, wt = testo_path("SMASH", 54, 2)
-dd, wd = testo_path("•", 54)
-do, wo = testo_path("Oggi", 54, 1)
-x0 = 140
-corpo = emblema() + f'''
-<path d="{dt}" fill="#ffffff" transform="translate({x0} 78)"/>
-<path d="{dd}" fill="{ACCENT}" transform="translate({x0 + wt + 4:.1f} 78)"/>
-<path d="{do}" fill="{ACCENT}" transform="translate({x0 + wt + wd + 12:.1f} 78)"/>'''
-larg = int(x0 + wt + wd + 12 + wo + 10)
-(IMG / "logo-orizzontale.svg").write_text(svg(larg, 120, corpo, "Smash Oggi"), encoding="utf-8")
 
-# PNG con Chromium (gia' installato): favicon, apple-touch-icon, icona 512, og-image
+def icona(rx):
+    d, w = testo_path("OGGI", 80, 2)
+    return svg(256, 256, f'<rect width="256" height="256" rx="{rx}" fill="{SCURO}"/>'
+               f'<rect x="38" y="30" width="180" height="82" rx="6" fill="{LIME}"/>'
+               f'<path d="{d}" fill="{SCURO}" transform="translate({128 - w / 2:.1f} {30 + (82 + 80 * CAP) / 2:.1f})"/>'
+               + pallina(128, 176, 46).replace('stroke-width="3"', 'stroke-width="5"').replace('stroke-width="3.4"', 'stroke-width="6"'),
+               "Smash Oggi")
+
+
+(IMG / "icona.svg").write_text(icona(44), encoding="utf-8")
+(IMG / "icona-piena.svg").write_text(icona(0), encoding="utf-8")
+
+# PNG con Chromium (gia' installato)
 from playwright.sync_api import sync_playwright
 
-emb = (IMG / "logo.svg").read_text(encoding="utf-8")
-orizz = (IMG / "logo-orizzontale.svg").read_text(encoding="utf-8")
+comp = (IMG / "logo.svg").read_text(encoding="utf-8")
 
 
-def fluido(svg_testo):
-    """Fa riempire all'SVG la larghezza del contenitore."""
-    return svg_testo.replace("<svg ", '<svg style="width:100%;height:auto;display:block" ', 1)
+def fluido(testo):
+    return testo.replace("<svg ", '<svg style="width:100%;height:auto;display:block" ', 1)
 
 
 with sync_playwright() as p:
@@ -86,17 +140,13 @@ with sync_playwright() as p:
         pg.screenshot(path=str(IMG / nome), omit_background=trasparente)
         pg.close()
 
-    for nome, lato in (("favicon-64.png", 64), ("apple-touch-icon.png", 180), ("icon-512.png", 512)):
-        apple = "apple" in nome
-        larghezza = lato * 0.86 if apple else lato
-        fondo = SCURO if apple else "transparent"
-        png(nome, lato, lato, f'<div style="width:{lato}px;height:{lato}px;background:{fondo};display:grid;place-items:center">'
-            f'<div style="width:{larghezza}px">{fluido(emb)}</div></div>')
+    for nome, lato, file in (("favicon-64.png", 64, "icona.svg"), ("apple-touch-icon.png", 180, "icona-piena.svg"), ("icon-512.png", 512, "icona.svg")):
+        png(nome, lato, lato, f'<div style="width:{lato}px;height:{lato}px">{fluido((IMG / file).read_text(encoding="utf-8"))}</div>')
     pg = b.new_page(viewport={"width": 1200, "height": 630})
-    pg.set_content(f'''<body style="margin:0;width:1200px;height:630px;background:radial-gradient(circle at 20% 20%,#1c2208,{SCURO} 60%);
-      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;font-family:Inter,Arial,sans-serif">
-      <div style="width:900px">{fluido(orizz)}</div>
-      <div style="color:#c9c9d4;font-size:34px;letter-spacing:.02em">Risultati, calendario e classifiche del tennis, in italiano</div></body>''')
+    pg.set_content(f'''<body style="margin:0;width:1200px;height:630px;background:linear-gradient(160deg,#f2f5ea,#dfe6cf);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;font-family:Inter,Arial,sans-serif">
+      <div style="width:820px">{fluido(comp)}</div>
+      <div style="color:#2d3322;font-size:34px;letter-spacing:.01em">Risultati, calendario e classifiche del tennis, in italiano</div></body>''')
     pg.screenshot(path=str(IMG / "og-image.png"))
     b.close()
 print("Logo creato in", IMG)

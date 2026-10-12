@@ -234,7 +234,7 @@ export function montaPagina(paginaCorrente) {
   const header = document.getElementById("site-header");
   if (header) {
     header.innerHTML = `<div class="container nav">
-        <a href="index.html" class="brand notranslate" translate="no" aria-label="Smash Oggi, home"><img src="img/logo.svg" alt="" class="brand-logo" width="56" height="56"><span>SMASH<span class="dot">•</span><span class="oggi">Oggi</span></span></a>
+        <a href="index.html" class="brand notranslate" translate="no" aria-label="Smash Oggi, home"><img src="img/logo.svg" alt="Smash Oggi" class="brand-logo" width="97" height="56"></a>
         <div class="nav-riga2"><a class="btn-giochi${paginaCorrente === "giochi.html" ? " attivo" : ""}" href="giochi.html"${paginaCorrente === "giochi.html" ? ' aria-current="page"' : ""}><span aria-hidden="true">🎮</span>Giochi</a>
         <div class="nav-menu" id="nav-menu"><ul class="nav-links" id="nav-links">${VOCI.map(([h, t]) => `<li><a href="${h}" class="${h === paginaCorrente ? "active" : ""}${h === "giochi.html" ? " voce-giochi" : ""}${h === "live.html" ? " voce-live" : ""}"${h === paginaCorrente ? ' aria-current="page"' : ""}>${t}</a></li>`).join("")}</ul></div></div>
         <div class="nav-strumenti">${selettoreLingua()}
