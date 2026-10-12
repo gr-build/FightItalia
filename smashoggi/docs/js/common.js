@@ -185,30 +185,25 @@ function selettoreLingua() {
 
 // ---------- Temi: le superfici dei campi (Indoor scuro, Erba, Terra battuta, Cemento); la scelta resta sul telefono ----------
 const TEMI = [
-  { id: "indoor", nome: "Indoor", nota: "scuro", colore: "#4b3fb8", tono: "scuro", meta: "#0f0c24" },
-  { id: "erba", nome: "Erba", nota: "chiaro", colore: "#8fc23a", tono: "chiaro", meta: "#eaeee1" },
-  { id: "terra", nome: "Terra battuta", nota: "arancio", colore: "#d9622b", tono: "chiaro", meta: "#f0d3ba" },
-  { id: "cemento", nome: "Cemento", nota: "blu", colore: "#2f7bff", tono: "chiaro", meta: "#cfe0f5" },
+  { id: "indoor", nome: "Indoor", citta: "Torino", nota: "scuro", colore: "#4b3fb8", ink: "#ffffff", tono: "scuro", meta: "#0f0c24" },
+  { id: "erba", nome: "Erba", citta: "Londra", nota: "chiaro", colore: "#8fc23a", ink: "#14200a", tono: "chiaro", meta: "#eaeee1" },
+  { id: "terra", nome: "Terra battuta", citta: "Parigi", nota: "arancio", colore: "#d9622b", ink: "#ffffff", tono: "chiaro", meta: "#f0d3ba" },
+  { id: "cemento", nome: "Cemento", citta: "New York", nota: "blu", colore: "#2f7bff", ink: "#ffffff", tono: "chiaro", meta: "#cfe0f5" },
 ];
-const temaCorrente = () => TEMI.find((t) => t.id === document.documentElement.dataset.theme) || TEMI[0];
+const TEMA_BASE = "cemento";   // si apre sul cemento: il blu dice subito "campo da tennis"
+const temaCorrente = () => TEMI.find((t) => t.id === document.documentElement.dataset.theme) || TEMI.find((t) => t.id === TEMA_BASE);
 function applicaTema(id) {
-  const t = TEMI.find((x) => x.id === id) || TEMI[0];
+  const t = TEMI.find((x) => x.id === id) || TEMI.find((x) => x.id === TEMA_BASE);
   document.documentElement.dataset.theme = t.id;
   document.documentElement.dataset.tono = t.tono;
   try { localStorage.setItem("tema", t.id); } catch (e) { /* senza memoria locale il tema vale solo per questa visita */ }
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", t.meta);
-  const sw = document.getElementById("tema-pallina");
-  if (sw) sw.style.setProperty("--sw", t.colore);
-  document.querySelectorAll(".tema-voce").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.tema === t.id)));
+  document.querySelectorAll(".tema-q").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.tema === t.id)));
 }
 function montaSceltaTema(header) {
-  const btn = header.querySelector("#tema-btn"), menu = header.querySelector("#tema-menu");
-  menu.innerHTML = `<div class="titolo">Superficie del campo</div>` + TEMI.map((t) => `<button type="button" role="menuitemradio" class="tema-voce" data-tema="${t.id}" aria-checked="false"><span class="pall" style="background:${t.colore}"></span>${t.nome}<small>${t.nota}</small></button>`).join("");
-  const chiudi = () => { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); };
-  btn.addEventListener("click", (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; btn.setAttribute("aria-expanded", String(!menu.hidden)); });
-  menu.addEventListener("click", (e) => { const v = e.target.closest(".tema-voce"); if (v) { applicaTema(v.dataset.tema); chiudi(); btn.focus(); } });
-  document.addEventListener("click", (e) => { if (!menu.hidden && !e.target.closest(".nav-strumenti")) chiudi(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !menu.hidden) { chiudi(); btn.focus(); } });
+  const gruppo = header.querySelector("#temi");
+  gruppo.innerHTML = TEMI.map((t) => `<button type="button" class="tema-q" role="radio" data-tema="${t.id}" aria-checked="false" aria-label="${t.nome} (${t.citta})" title="${t.nome} · ${t.citta}" style="--sw:${t.colore};--ink:${t.ink}">${t.citta[0]}</button>`).join("");
+  gruppo.addEventListener("click", (e) => { const q = e.target.closest(".tema-q"); if (q) applicaTema(q.dataset.tema); });
   applicaTema(temaCorrente().id);
 }
 
@@ -243,7 +238,7 @@ export function montaPagina(paginaCorrente) {
         <div class="nav-riga2"><a class="btn-giochi${paginaCorrente === "giochi.html" ? " attivo" : ""}" href="giochi.html"${paginaCorrente === "giochi.html" ? ' aria-current="page"' : ""}><span aria-hidden="true">🎮</span>Giochi</a>
         <div class="nav-menu" id="nav-menu"><ul class="nav-links" id="nav-links">${VOCI.map(([h, t]) => `<li><a href="${h}" class="${h === paginaCorrente ? "active" : ""}${h === "giochi.html" ? " voce-giochi" : ""}${h === "live.html" ? " voce-live" : ""}"${h === paginaCorrente ? ' aria-current="page"' : ""}>${t}</a></li>`).join("")}</ul></div></div>
         <div class="nav-strumenti">${selettoreLingua()}
-          <button type="button" class="tema-btn" id="tema-btn" aria-haspopup="menu" aria-expanded="false" aria-label="Scegli il tema: superficie del campo" title="Tema: superficie del campo"><span class="tema-pallina" id="tema-pallina" aria-hidden="true"></span></button><div class="tema-menu" id="tema-menu" role="menu" hidden></div></div>
+          <div class="temi" id="temi" role="radiogroup" aria-label="Colore del campo"></div></div>
       </div>`;
     // la barra scorre: porta la voce attiva al centro e toglie la sfumatura quando si e' arrivati in fondo
     const lista = header.querySelector("#nav-links"), menu = header.querySelector("#nav-menu"), attiva = lista.querySelector(".active");

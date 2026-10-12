@@ -1,6 +1,6 @@
 // Da dove viene? Foto e nome di un tennista, quattro paesi: indovina e allunga la serie.
-import { montaPagina, esc } from "./common.js?v=202610120738";
-import { caricaGiocatoriGioco, leggi, scrivi, condividi, mescola } from "./giochi-comuni.js?v=202610120738";
+import { montaPagina, esc } from "./common.js?v=202610120746";
+import { caricaGiocatoriGioco, leggi, scrivi, condividi, mescola } from "./giochi-comuni.js?v=202610120746";
 
 montaPagina("giochi.html");
 const box = document.getElementById("gioco");

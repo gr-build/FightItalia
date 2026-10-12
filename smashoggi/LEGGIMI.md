@@ -52,9 +52,9 @@ Pagina partita (`partita.html?tour=&id=`): tocca una partita per aprirla. Mostra
 (calcolati dal punteggio), confronto dei giocatori, forma e scontri diretti presenti nei dati. ESPN non dà le statistiche
 punto per punto del tennis (ace, break, % prime): per averle serve un fornitore a pagamento.
 
-Temi: sono le superfici dei campi (Indoor scuro di base, Erba, Terra battuta, Cemento). Si scelgono dal pallino in alto a
-destra e la scelta resta sul telefono. I colori stanno in `docs/css/style.css` (blocchi `:root[data-theme=...]`); lo sfondo
-ha una racchetta in filigrana (`img/racchetta.svg`) che prende il colore dal tema.
+Temi: sono le superfici dei campi (Indoor scuro di base, Erba, Terra battuta, Cemento). Di base si apre sul Cemento. Si scelgono con i 4
+quadratini in alto a destra (T = Torino/Indoor, L = Londra/Erba, P = Parigi/Terra, N = New York/Cemento) e la scelta resta sul telefono. I colori stanno in `docs/css/style.css` (blocchi `:root[data-theme=...]`); lo sfondo
+ha solo un alone di colore (la racchetta in filigrana confondeva con le scritte; `img/racchetta.svg` resta nel repo ma non e' usata).
 
 Bandiere: `docs/img/bandiere/xxx.webp` (codice ISO3 minuscolo, 75 paesi, da ESPN). Per un paese nuovo scaricale con lo stesso
 metodo di `build_foto.py` (non ancora automatico). Aiuti nei giochi: "Altri tentativi" e "Rivela la soluzione" passano da
