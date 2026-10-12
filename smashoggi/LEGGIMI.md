@@ -54,7 +54,7 @@ punto per punto del tennis (ace, break, % prime): per averle serve un fornitore 
 
 Temi: sono le superfici dei campi (Indoor scuro di base, Erba, Terra battuta, Cemento). Di base si apre sul Cemento. Si scelgono con i 4
 quadratini in alto a destra (T = Torino/Indoor, L = Londra/Erba, P = Parigi/Terra, N = New York/Cemento) e la scelta resta sul telefono. I colori stanno in `docs/css/style.css` (blocchi `:root[data-theme=...]`); lo sfondo
-ha solo un alone di colore (la racchetta in filigrana confondeva con le scritte; `img/racchetta.svg` resta nel repo ma non e' usata).
+ha un campo da tennis visto dall'alto (`img/campo-fondo.svg` e `img/campo-linee.svg`, colori dal tema; in verticale su telefono). La racchetta in filigrana era stata tolta perche' confondeva con le scritte.
 
 Bandiere: `docs/img/bandiere/xxx.webp` (codice ISO3 minuscolo, 75 paesi, da ESPN). Per un paese nuovo scaricale con lo stesso
 metodo di `build_foto.py` (non ancora automatico). Aiuti nei giochi: "Altri tentativi" e "Rivela la soluzione" passano da

@@ -1,6 +1,6 @@
 // Pagina Live: solo le partite in corso adesso, aggiornate ogni 30 secondi.
-import { partiteLive } from "./live.js?v=202610120746";
-import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, dataBreve, oraRoma, messaggioErrore, superficie, bandiera } from "./common.js?v=202610120746";
+import { partiteLive } from "./live.js?v=202610120823";
+import { fetchJSON, esc, montaPagina, caricaGiocatori, listaPartite, punteggioPartita, dataBreve, oraRoma, messaggioErrore, superficie, bandiera } from "./common.js?v=202610120823";
 
 montaPagina("live.html");
 

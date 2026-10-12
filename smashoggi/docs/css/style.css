@@ -18,7 +18,8 @@
   --accent-hover: #d8ff58;
   --accent-ink: #0f0c24;
   --accent-soft: rgba(198, 244, 50, 0.12);
-  --racchetta: rgba(198, 244, 50, 0.08);
+  --campo-fondo: rgba(130, 110, 255, 0.09);
+  --campo-linee: rgba(255, 255, 255, 0.07);
   --alone: rgba(198, 244, 50, 0.07);
   --header-bg: rgba(15, 12, 36, 0.88);
   --live: #ff5a4f;
@@ -50,7 +51,8 @@
   --accent-hover: #3d5600;
   --accent-ink: #0a0a0d;
   --accent-soft: rgba(120, 160, 0, 0.14);
-  --racchetta: rgba(77, 107, 0, 0.12);
+  --campo-fondo: rgba(60, 130, 40, 0.14);
+  --campo-linee: rgba(255, 255, 255, 0.42);
   --alone: rgba(120, 160, 0, 0.16);
   --header-bg: rgba(234, 238, 225, 0.92);
   --live: #c9302a;
@@ -75,7 +77,8 @@
   --accent-hover: #7d2e08;
   --accent-ink: #2a1608;
   --accent-soft: rgba(226, 105, 44, 0.16);
-  --racchetta: rgba(154, 58, 12, 0.13);
+  --campo-fondo: rgba(190, 85, 30, 0.17);
+  --campo-linee: rgba(255, 255, 255, 0.42);
   --alone: rgba(226, 105, 44, 0.20);
   --header-bg: rgba(240, 211, 186, 0.92);
   --live: #b3261e;
@@ -100,7 +103,8 @@
   --accent-hover: #123a7d;
   --accent-ink: #0e1a2e;
   --accent-soft: rgba(47, 123, 255, 0.14);
-  --racchetta: rgba(26, 79, 163, 0.12);
+  --campo-fondo: rgba(30, 90, 200, 0.16);
+  --campo-linee: rgba(255, 255, 255, 0.42);
   --alone: rgba(47, 123, 255, 0.18);
   --header-bg: rgba(207, 224, 245, 0.92);
   --live: #c9302a;
@@ -823,9 +827,15 @@ button.gr-cella:hover, .gr-cella.attiva { border-color: var(--accent-text); colo
 .pg-forma .gh-forma span { width: 24px; height: 24px; flex: none; }
 .pg-forma b { overflow: hidden; text-overflow: ellipsis; }
 
-/* ---------- Sfondo: solo un alone di colore in alto a sinistra (la racchetta confondeva con le scritte) ---------- */
-body::after { content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+/* ---------- Sfondo: un campo da tennis visto dall'alto (fondo + linee), sempre dietro i contenuti ---------- */
+html::before, body::before { content: ""; position: fixed; left: 50%; top: 50%; width: min(96vw, 1700px); aspect-ratio: 2617 / 1377; pointer-events: none;
+  transform: translate(-50%, -50%); -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+html::before { z-index: -2; background-color: var(--campo-fondo); -webkit-mask-image: url("../img/campo-fondo.svg"); mask-image: url("../img/campo-fondo.svg"); }
+body::before { z-index: -1; background-color: var(--campo-linee); -webkit-mask-image: url("../img/campo-linee.svg"); mask-image: url("../img/campo-linee.svg"); }
+body::after { content: ""; position: fixed; inset: 0; z-index: -3; pointer-events: none;
   background: radial-gradient(ellipse 60% 45% at 8% 0%, var(--alone), transparent 70%); }
+/* su telefono il campo si gira in verticale */
+@media (max-width: 700px) { html::before, body::before { width: min(92vh, 200vw); transform: translate(-50%, -50%) rotate(90deg); } }
 
 /* ---------- Scelta del tema: 4 quadratini, uno per superficie, in alto a destra ---------- */
 .nav-strumenti { position: relative; }
