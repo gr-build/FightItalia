@@ -264,7 +264,15 @@ function montaBarra(paginaCorrente) {
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") apri(false); });
 }
 
+// Vista scelta a mano: "pc" forza la larghezza del computer anche sul telefono (si cambia dal piè di pagina)
+function vistaPc() { try { return localStorage.getItem("vista") === "pc"; } catch (e) { return false; } }
+function impostaVista() {
+  if (!vistaPc()) return;
+  document.querySelector('meta[name="viewport"]')?.setAttribute("content", "width=1100");
+}
+
 export function montaPagina(paginaCorrente) {
+  impostaVista();
   const header = document.getElementById("site-header");
   if (header) {
     header.innerHTML = `<div class="container nav">
@@ -303,9 +311,11 @@ export function montaPagina(paginaCorrente) {
           <div><h3>Fonte dati</h3><span>ESPN: classifiche, partite, tornei</span><span>Wikipedia: Challenger e categorie</span><span>Wikimedia Commons: foto</span><span>Notizie: Ubitennis, Tennis Italiano, OA Sport, Gazzetta, Corriere dello Sport, Tuttosport</span></div>
           <div><h3>Seguici</h3><a href="seguici.html">Dove trovarci</a><a href="chi-siamo.html">Chi siamo</a><h3 style="margin-top:14px">Legale</h3><span>Sito non ufficiale</span><span>Nessuna quota né pronostici</span></div>
         </div>
+        <p class="footer-nota"><button type="button" class="vista-btn" id="vista-btn">${vistaPc() ? "Passa alla versione per telefono" : "Vedi la versione per computer"}</button></p>
         <p class="footer-nota">I dati riportati hanno scopo informativo e statistico; non costituiscono consiglio di scommessa. Gioca responsabilmente.</p>
         <p class="footer-nota">Smash Oggi è un progetto indipendente, non affiliato né sponsorizzato da ATP, WTA, ITF o dai tornei citati. Dati aggiornati periodicamente.</p>
       </div>`;
+    footer.querySelector("#vista-btn").addEventListener("click", () => { try { localStorage.setItem("vista", vistaPc() ? "telefono" : "pc"); } catch (e) { /* senza memoria locale non si cambia */ } location.reload(); });
     // Feedback: l'invio vero si attiva con un indirizzo di raccolta (FEEDBACK_URL); finche' manca, il modulo lo dice chiaramente
     const FEEDBACK_URL = "";
     let voto = 0;

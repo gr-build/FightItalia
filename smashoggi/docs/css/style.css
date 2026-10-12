@@ -1022,3 +1022,6 @@ body::after { content: ""; position: fixed; inset: 0; z-index: -3; pointer-event
   .hm-evidenza .evidenza { margin-top: 0; }
   .hm-evidenza { margin-bottom: 4px; }
 }
+
+.vista-btn { padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-elevated); color: var(--text-secondary); font: 600 13px var(--font-body); cursor: pointer; }
+.vista-btn:hover { border-color: var(--accent-text); color: var(--accent-text); }
