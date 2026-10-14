@@ -40,11 +40,11 @@ def evidenzia(t):
 
 def scena_sottotitolo(pid, testo, sup, tag="Ultim'ora"):
     pw, ph, y = dims(ALT)
-    fw = int(pw * 1.3)
+    img, cred = mc.ritratto(pid, pw, ph, 1.3)
     sott = (f'<div style="position:absolute;left:{M}px;right:{M}px;top:{y}px;height:{ALT-M-U*5-U*3-y}px;display:flex;align-items:center;'
             f'font-size:{U*9}px;line-height:1.12;text-transform:uppercase"><div>{evidenzia(testo)}</div></div>')
-    cont = f'<div class=pannello style="height:{ph}px">{linee(pw, ph)}<img class=f src="{foto(pid)}" style="width:{fw}px"></div>{sott}'
-    return telaio(ALT, SUPERFICI[sup], cont, tag)
+    cont = f'<div class=pannello style="height:{ph}px">{linee(pw, ph)}{img}</div>{sott}'
+    return telaio(ALT, SUPERFICI[sup], cont, tag, cred)
 
 
 def scena_finale(testo1, testo2):
@@ -52,7 +52,7 @@ def scena_finale(testo1, testo2):
     cont = (f'<div style="position:absolute;left:{M}px;right:{M}px;top:{M+72+36}px;height:{ALT-2*M-72-36-U*8}px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:{U*4}px;text-align:center">'
             f'<img src="{logo}" style="width:{W-2*M-U*10}px"><div style="font-size:{U*8}px;text-transform:uppercase;line-height:1.1">{evidenzia(testo1)}</div>'
             f'<div class="b l" style="font-size:{U*5}px;height:{U*8}px">{e(testo2)}</div></div>')
-    return telaio(ALT, SUPERFICI["indoor"], cont, "Smash Oggi", credito=False)
+    return telaio(ALT, SUPERFICI["indoor"], cont, "Smash Oggi", "")
 
 
 def durata(f):

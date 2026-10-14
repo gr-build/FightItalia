@@ -22,19 +22,88 @@ def b64(path, mime):
     return f"data:{mime};base64," + base64.b64encode(Path(path).read_bytes()).decode()
 
 
+UA = {"User-Agent": "SmashOggiBot/1.0 (prototipo; contatto: sito Smash Oggi)"}
+_NOMI = {}
+
+
+def _scarica(url, tentativi=5, pausa=25):
+    """Scarica con pause: Wikimedia risponde 429 se si chiede troppo in fretta."""
+    import time, urllib.error
+    for t in range(tentativi):
+        try:
+            return urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=40).read()
+        except urllib.error.HTTPError as err:
+            if err.code not in (429, 503) or t == tentativi - 1:
+                raise
+            time.sleep(pausa * (t + 1))
+
+
+def _nome(pid):
+    if not _NOMI:
+        import json
+        g = json.load(open(QUI / "docs/data/giocatori.json"))
+        for x in (g if isinstance(g, list) else g.values()):
+            _NOMI[str(x["id"])] = x["nome"]
+    return _NOMI.get(str(pid))
+
+
+def foto_wiki(pid):
+    """Foto da Wikimedia Commons (licenza libera): (data URI, credito) oppure None se non c'è o non è usabile."""
+    import json, re, urllib.parse
+    CACHE.mkdir(parents=True, exist_ok=True)
+    meta = CACHE / f"wiki-{pid}.json"
+    img = CACHE / f"wiki-{pid}.jpg"
+    if meta.exists() and img.exists():
+        return b64(img, "image/jpeg"), json.loads(meta.read_text())["credito"]
+    nome = _nome(pid)
+    memo = json.load(open(QUI / "docs/data/foto-wiki.json"))
+    url = memo.get(nome) if nome else None
+    m = url and re.search(r"/thumb/./../([^/]+)/\d+px-", url)
+    if not m:
+        return None
+    titolo = urllib.parse.unquote(m.group(1))
+    api = ("https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=1400&format=json&titles="
+           + urllib.parse.quote("File:" + titolo))
+    pagine = json.loads(_scarica(api))["query"]["pages"]
+    info = next(iter(pagine.values())).get("imageinfo", [{}])[0]
+    ext = info.get("extmetadata", {})
+    pulito = lambda k: re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", (ext.get(k) or {}).get("value", ""))).strip()
+    licenza = pulito("LicenseShortName")
+    if not info.get("thumburl") or not licenza or "fair" in licenza.lower() or "non" in licenza.lower():
+        return None
+    autore = pulito("Artist") or "autore su Commons"
+    autore = re.sub(r"^Original:\s*", "", autore).split(", Derivative")[0].split(" Derivative")[0]
+    credito = f"Foto: {autore[:48]} / Wikimedia Commons · {licenza}"
+    img.write_bytes(_scarica(info["thumburl"]))
+    meta.write_text(json.dumps({"credito": credito, "file": titolo}))
+    return b64(img, "image/jpeg"), credito
+
+
 def foto(pid):
+    """Foto ESPN con fondo trasparente (ripiego: non licenziata per uso commerciale)."""
     CACHE.mkdir(parents=True, exist_ok=True)
     f = CACHE / f"{pid}.png"
     if not f.exists():
-        u = f"https://a.espncdn.com/i/headshots/tennis/players/full/{pid}.png"   # originale: w/h fissi del combiner stirano la faccia
-        f.write_bytes(urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"}), timeout=30).read())
+        f.write_bytes(_scarica(f"https://a.espncdn.com/i/headshots/tennis/players/full/{pid}.png"))   # originale: w/h fissi del combiner stirano la faccia
     return b64(f, "image/png")
+
+
+def ritratto(pid, pw, ph, scala):
+    """HTML della foto dentro il pannello pw x ph. Prima licenza libera (riempie il riquadro), poi ESPN (cutout). Ritorna (html, credito)."""
+    try:
+        w = foto_wiki(pid)
+    except Exception as err:   # rete, 429, file strano: si ripiega su ESPN
+        print("  wiki non disponibile per", pid, "->", str(err)[:60])
+        w = None
+    if w:
+        return f'<img src="{w[0]}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%">', w[1]
+    return f'<img class=f src="{foto(pid)}" style="width:{int(pw*scala)}px">', "Foto: ESPN (solo prova)"
 
 
 def e(t): return html.escape(t)
 
 
-def telaio(alt, colore, contenuto, tag, credito=True):
+def telaio(alt, colore, contenuto, tag, credito="smashoggi"):
     """Struttura comune: riga alta (logo + tag), area centrale, riga bassa con filetto."""
     logo = b64(QUI / "docs/img/logo-orizzontale.svg", "image/svg+xml")
     css = f"""@font-face{{font-family:Osw;src:url({b64(OSWALD, 'font/ttf')}) format('truetype');font-weight:700}}
@@ -51,9 +120,9 @@ body{{width:{W}px;height:{alt}px;overflow:hidden;background:{SCURO};font-family:
 .l{{background:{LIME};color:{SCURO}}}.w{{background:{BIANCO};color:{SCURO}}}.s{{background:{SCURO};color:{BIANCO};border:6px solid {BIANCO}}}
 .sotto{{height:{U*4}px;display:flex;align-items:center;font-size:{U*3+6}px;letter-spacing:2px;text-transform:uppercase}}
 .piede{{position:absolute;left:{M}px;right:{M}px;bottom:{M}px;height:{U*5}px;border-top:3px solid rgba(255,255,255,.3);display:flex;justify-content:space-between;align-items:flex-end;font-size:{U*2+10}px;letter-spacing:3px}}
-.piede span:last-child{{font:500 24px Arial,sans-serif;letter-spacing:0;opacity:.7}}
+.piede span:last-child{{font:500 24px Arial,sans-serif;letter-spacing:0;opacity:.75;max-width:640px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 """
-    piede = f'<div class=piede><span>SMASH OGGI</span><span>{"Foto: ESPN" if credito else "smashoggi"}</span></div>'
+    piede = f'<div class=piede><span>SMASH OGGI</span><span>{e(credito) if credito else "smashoggi"}</span></div>'
     return (f'<html><head><meta charset=utf-8><style>{css}</style></head><body>'
             f'<div class=alto><img src="{logo}"><div class=tag>{e(tag)}</div></div>{contenuto}{piede}</body></html>')
 
@@ -75,21 +144,21 @@ def dims(alt):
 def pagina_foto(pid, righe, sotto, tag, sup="cemento", alt=1920, giga=None):
     pw, ph, y = dims(alt)
     scala = 1.3 if alt == 1920 else 1.15
-    fw = int(pw * scala)
+    img, cred = ritratto(pid, pw, ph, scala)
     blocchi = "".join(f'<div class="b {c}">{e(x)}</div>' for x, c in righe)
     extra = f'<div class="sotto">{e(sotto)}</div>' if sotto else ""
-    cont = (f'<div class=pannello style="height:{ph}px">{linee(pw, ph)}<img class=f src="{foto(pid)}" style="width:{fw}px"></div>'
+    cont = (f'<div class=pannello style="height:{ph}px">{linee(pw, ph)}{img}</div>'
             f'<div class=blocchi style="top:{y}px">{blocchi}{extra}</div>')
-    return telaio(alt, SUPERFICI[sup], cont, tag)
+    return telaio(alt, SUPERFICI[sup], cont, tag, cred)
 
 
 def numero(pid, grande, riga1, riga2, sup="cemento", alt=1920):
     pw, ph, y = dims(alt)
-    fw = int(pw * (1.3 if alt == 1920 else 1.15))
-    cont = (f'<div class=pannello style="height:{ph}px">{linee(pw, ph)}<img class=f src="{foto(pid)}" style="width:{fw}px"></div>'
+    img, cred = ritratto(pid, pw, ph, 1.3 if alt == 1920 else 1.15)
+    cont = (f'<div class=pannello style="height:{ph}px">{linee(pw, ph)}{img}</div>'
             f'<div class=blocchi style="top:{y}px"><div class="b" style="height:{U*24}px;padding:0;font-size:{U*22}px;color:{LIME};background:none">{e(grande)}</div>'
             f'<div class="b w" style="font-size:{U*8}px">{e(riga1)}</div><div class="sotto">{e(riga2)}</div></div>')
-    return telaio(alt, SUPERFICI[sup], cont, "Il numero")
+    return telaio(alt, SUPERFICI[sup], cont, "Il numero", cred)
 
 
 def incampo(titolo, partite, sup="terra", alt=1920):
@@ -102,7 +171,7 @@ def incampo(titolo, partite, sup="terra", alt=1920):
     lista = f'<div style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);border-bottom:3px solid rgba(255,255,255,.4)">{righe}</div>'
     cont = (f'<div class=pannello style="height:{ph}px">{linee(pw, ph)}{lista}</div>'
             f'<div class=blocchi style="top:{y}px"><div class="b l">{e(titolo[0])}</div><div class="b w">{e(titolo[1])}</div></div>')
-    return telaio(alt, SUPERFICI[sup], cont, "Oggi", credito=False)
+    return telaio(alt, SUPERFICI[sup], cont, "Oggi", "")
 
 
 def disegna(lavori, uscita):
