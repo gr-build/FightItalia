@@ -27,7 +27,7 @@ const SITO = "https://gr-build.github.io/smashoggi/";   // da cambiare quando c'
 const BOT_BASE = "SmashOggiBot";
 const FUSO = "Europe/Rome";
 const RAMO = "main";
-const VERSIONE = "bot-1 2026-10-14";
+const VERSIONE = "bot-2 2026-10-14";
 const ETA_MASSIMA_SECONDI = 600;   // un comando più vecchio di 10 minuti non si esegue
 
 // comando -> [file del workflow GitHub, input o null, descrizione]. Vuoto finché non esistono workflow.
@@ -35,6 +35,7 @@ const COMANDI = {};
 
 const AIUTO = [
   "/oggi · Le partite di oggi, con gli italiani in cima",
+  "/id · Mostra il tuo CHAT_ID",
   "/live · Le partite in corso adesso",
   "/italiani · Cosa fanno oggi e domani gli italiani",
   "/risultati · Gli ultimi risultati (italiani prima)",
@@ -253,7 +254,12 @@ export default {
     const update = await req.json().catch(() => ({}));
     const msg = update.message;
     if (!msg || !msg.text) return testo("ok");
-    if (!env.CHAT_ID || String(msg.chat?.id) !== String(env.CHAT_ID)) return testo("ok");   // chiunque altro: ignorato in silenzio
+    // /id risponde a chiunque (l'id non è un segreto): serve a scoprire il proprio CHAT_ID. Vale anche se CHAT_ID non è ancora impostato.
+    if (/^\/id(@\w+)?(\s|$)/i.test(msg.text.trim()) || !env.CHAT_ID) {
+      ctx.waitUntil(rispondi(env, msg.chat.id, `Il tuo CHAT_ID è: <code>${msg.chat.id}</code>\nCopialo e mettilo nella variabile CHAT_ID del Worker.`));
+      return testo("ok");
+    }
+    if (String(msg.chat?.id) !== String(env.CHAT_ID)) return testo("ok");   // chiunque altro: ignorato in silenzio
 
     const lavoro = (async () => {
       if (Date.now() / 1000 - (msg.date || 0) > ETA_MASSIMA_SECONDI) return;
