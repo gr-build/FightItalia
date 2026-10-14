@@ -2847,3 +2847,24 @@ a.fr:active { border-color: var(--accent); background: var(--bg-elevated-2); }
   .evidenza-riga { grid-template-columns: repeat(4, 1fr); }
   .mini-tutti { display: none; }  /* sul computer c'e' gia' il pulsante "Guarda altri fight passati" */
 }
+
+/* ======================================================================
+   Home (14/10): ring piu' grande e piu' visibile, countdown semitrasparente
+   Geometria: il ring e' centrato, pali simmetrici ai bordi, corde a un terzo dell'altezza.
+   ====================================================================== */
+.ring-bg { opacity: 0.85; -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent 100%), linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%); mask-image: linear-gradient(180deg, #000 62%, transparent 100%), linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%); }
+@media (min-width: 901px) { .ring-bg { opacity: 0.7; height: 520px; } }
+@media (max-width: 900px) {
+  /* proporzione 4:3 della grafica: tutto il ring (pali compresi) entra nella larghezza dello schermo, senza ritagli */
+  .ring-bg { left: -16px; right: -16px; height: auto; aspect-ratio: 4 / 3; background-size: 100% 100%; top: 0; }
+}
+:root[data-theme="light"] .ring-bg { opacity: 0.55; }
+
+/* il countdown lascia vedere il ring dietro */
+.home-hero .countdown-evento { background: rgba(20, 20, 26, 0.55); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.home-hero .cd-palco { background: radial-gradient(ellipse at 50% 105%, rgba(232, 53, 47, 0.38), transparent 62%); }
+.home-hero .cd-palco::after { background: linear-gradient(180deg, transparent, rgba(20, 20, 26, 0.55)); }
+:root[data-theme="light"] .home-hero .countdown-evento { background: rgba(255, 255, 255, 0.6); }
+:root[data-theme="light"] .home-hero .cd-palco::after { background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.6)); }
+.home-hero .hero-sub-desktop { color: #d4d4dc; text-shadow: 0 0 10px rgba(10, 10, 13, 0.95), 0 0 22px rgba(10, 10, 13, 0.9), 0 2px 14px rgba(10, 10, 13, 0.9); }
+:root[data-theme="light"] .home-hero .hero-sub-desktop { color: inherit; text-shadow: none; }
