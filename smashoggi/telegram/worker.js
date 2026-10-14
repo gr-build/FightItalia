@@ -27,7 +27,7 @@ const SITO = "https://gr-build.github.io/smashoggi/";   // da cambiare quando c'
 const BOT_BASE = "SmashOggiBot";
 const FUSO = "Europe/Rome";
 const RAMO = "main";
-const VERSIONE = "bot-2 2026-10-14";
+const VERSIONE = "bot-3 2026-10-14";
 const ETA_MASSIMA_SECONDI = 600;   // un comando più vecchio di 10 minuti non si esegue
 
 // comando -> [file del workflow GitHub, input o null, descrizione]. Vuoto finché non esistono workflow.
@@ -35,6 +35,8 @@ const COMANDI = {};
 
 const AIUTO = [
   "/oggi · Le partite di oggi, con gli italiani in cima",
+  "/post · Testo pronto per un post Instagram/TikTok sui risultati degli italiani",
+  "/storia · Testo breve per una storia: gli italiani in campo oggi",
   "/id · Mostra il tuo CHAT_ID",
   "/live · Le partite in corso adesso",
   "/italiani · Cosa fanno oggi e domani gli italiani",
@@ -43,7 +45,7 @@ const AIUTO = [
   ...Object.entries(COMANDI).map(([c, [, , d]]) => `${c} · ${d}`),
 ].join("\n");
 
-const TURNI = { "Round 1": "Primo turno", "Round 2": "Secondo turno", "Round 3": "Terzo turno", "Round of 16": "Ottavi", "Quarterfinals": "Quarti", "Semifinals": "Semifinale", "Final": "Finale", "Round of 32": "Trentaduesimi", "Round of 64": "Sessantaquattresimi", "Round of 128": "Primo turno" };
+const TURNI = { "Round 1": "Primo turno", "Round 2": "Secondo turno", "Round 3": "Terzo turno", "Round 4": "Ottavi", "Round of 16": "Ottavi", "Quarterfinals": "Quarti", "Semifinals": "Semifinale", "Final": "Finale", "Round of 32": "Trentaduesimi", "Round of 64": "Sessantaquattresimi", "Round of 128": "Primo turno" };
 
 const esc = (t) => String(t ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
 const ore = (iso) => new Date(iso).toLocaleTimeString("it-IT", { timeZone: FUSO, hour: "2-digit", minute: "2-digit" });
@@ -91,7 +93,7 @@ async function partite(date) {
           if (comp.length !== 2) continue;
           const rd = c.round?.displayName || "";
           out.push({
-            id: c.id, torneo: ev.name, turno: TURNI[rd] || rd, data: c.startDate || c.date,
+            id: c.id, tour, torneo: ev.name, turno: TURNI[rd] || rd, data: c.startDate || c.date,
             stato: c.status?.type?.state, dettaglio: c.status?.type?.detail,
             g: comp.map((p) => ({
               nome: p.athlete?.displayName || p.athlete?.fullName || "?",
@@ -174,6 +176,36 @@ async function cmdRadar(env, chat) {
   const l = (Array.isArray(d) ? d : d.notizie || d.articoli || []).slice(0, 15);
   if (!l.length) { await rispondi(env, chat, "Non trovo notizie al momento. Riprova tra poco."); return; }
   await invia(env, chat, `📰 <b>Ultime notizie di tennis</b>\n\n${l.map((n, i) => `${i + 1}. ${esc(n.titolo)} (${esc(n.fonte || "")})\n${esc(n.url || n.link || "")}`).join("\n\n")}`);
+}
+
+// ---------- contenuti pronti da copiare (solo fatti: mai quote né pronostici)
+const cod = (t) => `<code>${t}</code>`;   // in Telegram un tocco sul blocco copia il testo
+const hashtag = (p) => `#tennis #tennisitaliano #${p.tour === "wta" ? "WTA" : "ATP"} #smashoggi`;
+
+function legenda(p) {
+  const [a, b] = p.g;
+  const v = a.vince ? a : b, s = a.vince ? b : a;
+  const ps = v.set.map((x, i) => `${x}-${s.set[i]}`).join(" ");
+  const ita = v.ita ? "🇮🇹 " : "";
+  return `${ita}${esc(v.nome)} batte ${esc(s.nome)} ${ps}\n${esc(p.torneo)}${p.turno ? " · " + esc(p.turno) : ""}\n\nTutte le partite di oggi su Smash Oggi (link in bio).\n${hashtag(p)}`;
+}
+
+async function cmdPost(env, chat) {
+  const ieri = new Date(Date.now() - 86400000);
+  const tutte = [...(await partite()), ...(await partite(ISO(ieri)))];
+  const visti = new Set();
+  const finite = tutte.filter((p) => p.stato === "post" && !visti.has(p.id) && visti.add(p.id)).sort((a, b) => perOra(b, a));
+  const scelte = finite.filter((p) => p.g.some((x) => x.ita && x.vince)).slice(0, 4);
+  if (!scelte.length) { await rispondi(env, chat, "Nessuna vittoria di italiani nelle ultime 24 ore. Scrivi /risultati per vedere gli altri."); return; }
+  await rispondi(env, chat, `✍️ <b>Testi pronti</b> (tocca un blocco per copiarlo)\n\n${scelte.map((p) => cod(legenda(p))).join("\n\n")}`);
+}
+
+async function cmdStoria(env, chat) {
+  const oggi = giorno(new Date());
+  const ita = (await partite()).filter((p) => conItaliano(p) && p.stato !== "post" && giorno(p.data) === oggi).sort(perOra);
+  if (!ita.length) { await rispondi(env, chat, "Oggi nessun italiano in programma nei tabelloni principali: niente storia da fare."); return; }
+  const righe = ita.map((p) => `${ore(p.data)} ${esc(p.g[0].nome)} vs ${esc(p.g[1].nome)}`);
+  await rispondi(env, chat, `📱 <b>Testo per la storia</b>\n\n${cod(`🇮🇹 Oggi in campo\n${righe.join("\n")}\n\nSmash Oggi · #tennis`)}`);
 }
 
 // ---------- messaggi automatici
@@ -270,6 +302,8 @@ export default {
       if (c === "/live") return cmdLive(env, chat);
       if (c === "/italiani") return cmdItaliani(env, chat);
       if (c === "/risultati") return cmdRisultati(env, chat);
+      if (c === "/post") return cmdPost(env, chat);
+      if (c === "/storia") return cmdStoria(env, chat);
       if (c === "/radar" || c === "/notizie") return cmdRadar(env, chat);
       if (COMANDI[c]) { const [file, inputs, d] = COMANDI[c]; return eseguiLancio(env, chat, file, inputs, d); }
       await rispondi(env, chat, `Sono sveglio. Scrivi uno di questi comandi:\n${AIUTO}`);
