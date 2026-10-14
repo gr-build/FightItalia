@@ -14,7 +14,7 @@ Stesso schema del bot di GP Oggi: un Worker Cloudflare sempre sveglio che rispon
 1. Workers & Pages → Create → Worker, nome `smashoggi-bot` → Deploy → **Edit code** → incolla `worker.js` → Deploy.
 2. Settings → Variables and Secrets:
    - *Secret*: `TELEGRAM_TOKEN` (il token), `WEBHOOK_SECRET` (una parola lunga a caso inventata da te).
-   - *Testo*: `CHAT_ID` (il tuo id), `BOT_USERNAME` (es. `SmashOggiBot`), `CANALE` (facoltativo, es. `@smashoggi`).
+   - *Testo*: `CHAT_ID` (il tuo id; per più persone separa gli id con la virgola, es. `111,222`), `BOT_USERNAME` (es. `SmashOggiBot`), `CANALE` (facoltativo, es. `@smashoggi`).
 3. Settings → Triggers → Cron: `0 6 * * *` e `*/15 7-21 * * *`.
 4. KV (consigliato): Storage → KV → Create `smashoggi-stato` → nel Worker, Settings → Bindings → KV namespace, nome variabile `STATO`.
 

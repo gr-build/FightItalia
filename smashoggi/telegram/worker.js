@@ -9,7 +9,7 @@
  *   WEBHOOK_SECRET   una parola lunga a caso inventata da te (Telegram la rimanda a ogni messaggio)
  *   GITHUB_TOKEN     solo se un giorno colleghi dei workflow (vedi COMANDI): per ora non serve
  * Variabili di testo:
- *   CHAT_ID          la tua chat: chiunque altro viene ignorato in silenzio
+ *   CHAT_ID          la tua chat (o più numeri separati da virgola, es. 111,222): chiunque altro viene ignorato in silenzio
  *   CANALE           facoltativo, es. @smashoggi: ci va anche il messaggio del mattino
  *   BOT_USERNAME     nome atteso del bot (protegge dal token sbagliato), es. SmashOggiBot
  *   REPO             facoltativo, repository dei workflow (solo con GITHUB_TOKEN)
@@ -27,7 +27,7 @@ const SITO = "https://gr-build.github.io/smashoggi/";   // da cambiare quando c'
 const BOT_BASE = "SmashOggiBot";
 const FUSO = "Europe/Rome";
 const RAMO = "main";
-const VERSIONE = "bot-3 2026-10-14";
+const VERSIONE = "bot-4 2026-10-14";
 const ETA_MASSIMA_SECONDI = 600;   // un comando più vecchio di 10 minuti non si esegue
 
 // comando -> [file del workflow GitHub, input o null, descrizione]. Vuoto finché non esistono workflow.
@@ -219,7 +219,9 @@ function mattino(lista) {
   return t + `\n👉 ${SITO}partite.html`;
 }
 
-const destinatari = (env) => [env.CHAT_ID, env.CANALE].filter(Boolean);
+// CHAT_ID può contenere più numeri separati da virgola (es. "111,222"): tutti possono usare il bot
+const autorizzati = (env) => String(env.CHAT_ID || "").split(",").map((x) => x.trim()).filter(Boolean);
+const destinatari = (env) => [...autorizzati(env), env.CANALE].filter(Boolean);
 
 async function automatico(env, cron) {
   const lista = await partite();
@@ -291,7 +293,7 @@ export default {
       ctx.waitUntil(rispondi(env, msg.chat.id, `Il tuo CHAT_ID è: <code>${msg.chat.id}</code>\nCopialo e mettilo nella variabile CHAT_ID del Worker.`));
       return testo("ok");
     }
-    if (String(msg.chat?.id) !== String(env.CHAT_ID)) return testo("ok");   // chiunque altro: ignorato in silenzio
+    if (!autorizzati(env).includes(String(msg.chat?.id))) return testo("ok");   // chiunque altro: ignorato in silenzio
 
     const lavoro = (async () => {
       if (Date.now() / 1000 - (msg.date || 0) > ETA_MASSIMA_SECONDI) return;
