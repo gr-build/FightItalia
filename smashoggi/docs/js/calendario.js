@@ -1,4 +1,4 @@
-import { fetchJSON, esc, montaPagina, oggiRoma, etichettaCategoria, intervalloDate, nomeTour, mesiIt, messaggioErrore, dataSolo, superficie } from "./common.js?v=202610121200";
+import { fetchJSON, esc, montaPagina, oggiRoma, etichettaCategoria, intervalloDate, nomeTour, mesiIt, messaggioErrore, dataSolo, superficie } from "./common.js?v=202610140902";
 
 montaPagina("calendario.html");
 
@@ -52,7 +52,7 @@ function disegna() {
   document.querySelectorAll(".pill[data-k]").forEach((b) => b.setAttribute("aria-pressed", String(stato[b.dataset.k] === b.dataset.v)));
 }
 
-// ---------- Agenda del mese (stesso schema del calendario di GP Oggi) ----------
+// ---------- Agenda del mese ----------
 const agenda = { mese: null, giorno: null, tour: { atp: true, wta: true }, limiti: null };
 const GIORNI_SETT = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
 const iso = (d) => d.toISOString().slice(0, 10);

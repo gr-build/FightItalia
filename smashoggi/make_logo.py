@@ -1,6 +1,6 @@
 """Genera il logo di Smash Oggi: SVG pulito (testo trasformato in tracciati) + PNG (favicon, apple-touch-icon, og-image).
 
-Stile della famiglia (GP Oggi, MMA Oggi): parola dello sport in un riquadro scuro + OGGI su riquadro colorato,
+Stile della famiglia "Oggi": parola dello sport in un riquadro scuro + OGGI su riquadro colorato,
 sotto un disegno dello sport (qui: campo da tennis in prospettiva, racchetta e pallina).
 Serve:  pip install fonttools playwright   e il file Oswald-Bold.ttf (Google Fonts, licenza OFL).
 Uso:    python3 make_logo.py /percorso/Oswald-Bold.ttf

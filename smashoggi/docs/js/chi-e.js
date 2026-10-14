@@ -1,6 +1,6 @@
 // Chi e'? Foto sfocata del giocatore del giorno (primi 100 ATP e WTA): 6 tentativi, a ogni errore la foto si schiarisce.
-import { montaPagina, esc } from "./common.js?v=202610121200";
-import { caricaGiocatoriGioco, delGiorno, leggi, scrivi, oggiItalia, condividi, cercaGiocatore, htmlAiuti, ascoltaAiuti } from "./giochi-comuni.js?v=202610121200";
+import { montaPagina, esc } from "./common.js?v=202610140902";
+import { caricaGiocatoriGioco, delGiorno, leggi, scrivi, oggiItalia, condividi, cercaGiocatore, htmlAiuti, ascoltaAiuti } from "./giochi-comuni.js?v=202610140902";
 
 montaPagina("giochi.html");
 

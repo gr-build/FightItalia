@@ -1,6 +1,6 @@
 # Bot Telegram di Smash Oggi
 
-Stesso schema del bot di GP Oggi: un Worker Cloudflare sempre sveglio che risponde ai comandi (webhook) e manda messaggi automatici. Mai quote né pronostici.
+Un Worker Cloudflare sempre sveglio che risponde ai comandi (webhook) e manda messaggi automatici. Mai quote né pronostici.
 
 **Comandi** (rispondono solo alla tua chat): `/oggi`, `/live`, `/italiani`, `/risultati`, `/radar` (serve il sito online).
 **Automatico:** ogni mattina "Oggi in campo" e, di giorno, il risultato di ogni italiano appena finito (serve il KV). Vanno alla tua chat e, se lo imposti, al canale.
@@ -29,5 +29,5 @@ Poi scrivi `/start` al bot.
 - Messaggio del mattino: 06:00 UTC = 08:00 estate, 07:00 inverno in Italia.
 - `/radar` legge `notizie.json` dal sito: imposta `DATI_URL` (es. `https://tuodominio.it/data`) quando è online.
 - I link nei messaggi puntano a `SITO` in `worker.js`: cambialo col dominio definitivo.
-- Collegare workflow GitHub (come i video di GP Oggi): riempi `COMANDI` e aggiungi `GITHUB_TOKEN` e `REPO`. Ora è vuoto perché non esistono workflow.
+- Collegare workflow GitHub: riempi `COMANDI` e aggiungi `GITHUB_TOKEN` e `REPO`. Ora è vuoto perché non esistono workflow.
 - Non testato su Telegram reale (serve il tuo token): provato in locale con dati ESPN veri.

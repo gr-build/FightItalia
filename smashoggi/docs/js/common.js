@@ -123,7 +123,7 @@ export function listaPartite(partite, giocatori, { raggruppa = true } = {}) {
 }
 
 // ---------- Lingue ----------
-// Il sito nasce in italiano. Le altre lingue usano il traduttore di Google DENTRO la pagina (come MMA Oggi):
+// Il sito nasce in italiano. Le altre lingue usano il traduttore di Google DENTRO la pagina:
 // la scelta vive nel cookie googtrans (/it/<lingua>) che il traduttore legge da solo.
 const LINGUE = [
   ["it", "Italiano"], ["en", "English"], ["es", "Español"], ["fr", "Français"], ["de", "Deutsch"], ["pt", "Português"],

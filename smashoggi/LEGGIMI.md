@@ -2,7 +2,7 @@
 
 Sito statico (HTML, CSS e JavaScript semplici, nessun framework) per seguire il tennis in italiano:
 partite di oggi, risultati, calendario tornei, classifiche ATP/WTA con scheda giocatore, notizie.
-Stesso schema di MMA Oggi e GP Oggi (menu in Oswald maiuscolo, selettore lingua, scheda grande della partita in evidenza con conto alla rovescia, numeri grandi, box laterale dei prossimi tornei, schede giocatore con foto, tema scuro/chiaro), accento giallo-verde "pallina".
+Schema del sito (menu in Oswald maiuscolo, selettore lingua, scheda grande della partita in evidenza con conto alla rovescia, numeri grandi, box laterale dei prossimi tornei, schede giocatore con foto, tema scuro/chiaro), accento giallo-verde "pallina".
 
 ## Come aprirlo in locale
 ```
@@ -62,7 +62,7 @@ metodo di `build_foto.py` (non ancora automatico). Aiuti nei giochi: "Altri tent
 fornitore di annunci con premio basta definire `window.SMASH_ADS.mostra(premio)` che restituisce una Promise<boolean>.
 Il modulo "Aiutaci a migliorare" nel piè di pagina non invia ancora nulla: serve un indirizzo di raccolta (`FEEDBACK_URL`).
 
-Logo: `make_logo.py` (stile GP Oggi / MMA Oggi): riquadro scuro SMASH + riquadro lime OGGI, sotto campo in prospettiva, racchetta e pallina. Genera `logo.svg` (usato nell'intestazione), `logo-orizzontale.svg`, `icona*.svg` e i PNG.
+Logo: `make_logo.py`: riquadro scuro SMASH + riquadro lime OGGI, sotto campo in prospettiva, racchetta e pallina. Genera `logo.svg` (usato nell'intestazione), `logo-orizzontale.svg`, `icona*.svg` e i PNG.
 
 Telefono (fino a 700px): barra in basso con Home, Live, Giochi (pulsante rialzato), Risultati e Altro (foglio con Calendario, Classifiche, Tennisti, Archivio, News, Confronto) al posto del menu in alto, in `montaBarra()` di `docs/js/common.js`. Home per telefono: un blocco a parte (`#home-mobile` in `index.html`, disegnato da `disegnaMobile()` in `docs/js/home.js`) con partite in campo, italiani oggi, 6 scorciatoie, Giochi, altre partite e 4 notizie. Da computer resta la home di sempre.
 
@@ -80,7 +80,7 @@ Altri script:
    `docs/`, `build_data.py`, `bump_versione.py`, `build_sitemap.py`, `controlla_pagine.py`, `make_logo.py`, `LEGGIMI.md`, `.gitignore`.
 3. `git add . && git commit -m "Prima versione" && git push`.
 4. Su GitHub: Settings → Pages → Branch `main`, cartella `/docs`.
-I percorsi sono tutti relativi e il codice non cita MMA Oggi, quindi non serve cambiare altro. Se il repo ha un nome diverso da `smashoggi`,
+I percorsi sono tutti relativi, quindi non serve cambiare altro. Se il repo ha un nome diverso da `smashoggi`,
 sostituisci l'indirizzo provvisorio come spiegato qui sotto.
 
 ## Come collegare un dominio

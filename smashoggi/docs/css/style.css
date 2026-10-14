@@ -132,7 +132,7 @@ img { max-width: 100%; }
 .skip { position: absolute; left: -999px; top: 8px; background: var(--accent); color: var(--accent-ink); padding: 8px 14px; border-radius: 6px; z-index: 100; font-weight: 700; }
 .skip:focus { left: 8px; }
 
-/* ---------- Intestazione (stesso schema di MMA Oggi e GP Oggi) ---------- */
+/* ---------- Intestazione ---------- */
 .site-header { position: sticky; top: 0; z-index: 50; background: var(--header-bg); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-soft); }
 .nav { display: flex; align-items: center; justify-content: space-between; height: 66px; gap: 12px; }
 .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 23px; letter-spacing: 0.04em; font-weight: 700; white-space: nowrap; text-transform: uppercase; }
@@ -285,7 +285,7 @@ a.riga-class:hover { background: var(--bg-elevated-2); }
 .social-link { display: inline-flex; gap: 6px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-elevated); color: var(--text); font-weight: 600; font-size: 13px; }
 .social-link:hover { border-color: var(--accent-text); color: var(--accent-text); }
 
-/* ---------- Home: griglia come MMA Oggi ---------- */
+/* ---------- Home: griglia ---------- */
 .home-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; grid-template-areas: "hero aside" "main aside"; gap: 0 32px; align-items: start; }
 .home-hero { grid-area: hero; min-width: 0; }
 .home-aside { grid-area: aside; min-width: 0; margin-top: 40px; }
@@ -530,7 +530,7 @@ img.avatar { background: linear-gradient(180deg, #ffffff, #e4e4ea); }
 .turni-barra { position: relative; }
 
 /* ---------- Ritocchi grafici ---------- */
-/* titoli di sezione con la barretta come GP Oggi */
+/* titoli di sezione con la barretta */
 h2.section-title, .section-title { position: relative; padding-left: 14px; }
 h2.section-title::before, .section-title::before { content: ""; position: absolute; left: 0; top: .18em; bottom: .18em; width: 4px; border-radius: 2px; background: var(--accent); }
 .widget .riga-class.ita { background: transparent; box-shadow: none; }
@@ -856,7 +856,7 @@ body::after { content: ""; position: fixed; inset: 0; z-index: -3; pointer-event
 .ch-p .codice { width: auto; min-width: 54px; }
 .gh-sub .codice { display: none; }
 
-/* ---------- Footer completo (come GP Oggi: feedback, colonne, note) ---------- */
+/* ---------- Footer completo (feedback, colonne, note) ---------- */
 .feedback { margin-bottom: 22px; }
 .feedback summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .feedback summary::-webkit-details-marker { display: none; }
