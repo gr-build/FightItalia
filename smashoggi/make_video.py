@@ -13,7 +13,23 @@ ALT = 1920
 
 
 def parla(testo, dest):
-    """Genera la voce. Sostituibile: qui gTTS (voce di Google Traduttore, gratuita, di qualità discreta)."""
+    """Genera la voce. Con AZURE_SPEECH_KEY e AZURE_SPEECH_REGION usa Azure Speech (voci neurali italiane);
+    altrimenti ripiega su gTTS (voce di Google Traduttore, gratuita, di qualità discreta).
+    AZURE_VOICE sceglie la voce (di base it-IT-IsabellaNeural; altre: it-IT-ElsaNeural, it-IT-DiegoNeural).
+    La chiave va solo nelle variabili d'ambiente (o nei segreti di GitHub), mai nei file."""
+    import os
+    chiave, regione = os.environ.get("AZURE_SPEECH_KEY"), os.environ.get("AZURE_SPEECH_REGION")
+    if chiave and regione:
+        import urllib.request
+        voce = os.environ.get("AZURE_VOICE", "it-IT-IsabellaNeural")
+        ssml = (f"<speak version='1.0' xml:lang='it-IT'><voice name='{voce}'>"
+                f"<prosody rate='+5%'>{e(testo)}</prosody></voice></speak>").encode("utf-8")
+        rich = urllib.request.Request(
+            f"https://{regione}.tts.speech.microsoft.com/cognitiveservices/v1", data=ssml, method="POST",
+            headers={"Ocp-Apim-Subscription-Key": chiave, "Content-Type": "application/ssml+xml",
+                     "X-Microsoft-OutputFormat": "audio-24khz-96kbitrate-mono-mp3", "User-Agent": "smashoggi"})
+        Path(dest).write_bytes(urllib.request.urlopen(rich, timeout=60).read())
+        return
     from gtts import gTTS
     gTTS(testo, lang="it").save(str(dest))
 
