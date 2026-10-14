@@ -1,0 +1,12 @@
+name = "smashoggi-telegram"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+[triggers]
+# 06:00 UTC = messaggio del mattino; ogni 15 minuti di giorno = risultati degli italiani
+crons = ["0 6 * * *", "*/15 7-21 * * *"]
+
+# Facoltativo ma consigliato (evita doppioni). Crea il KV e incolla qui l'id:
+# [[kv_namespaces]]
+# binding = "STATO"
+# id = "INCOLLA_ID_KV"
