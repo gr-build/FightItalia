@@ -151,6 +151,27 @@ def record_desc(r, dett):
     return r.get("record_mma") or ""
 
 
+ESITO_IT = {"win": "vittoria", "loss": "sconfitta", "draw": "pareggio", "nc": "no contest"}
+
+
+def ultimo_incontro_desc(dett):
+    """'ultimo incontro: sconfitta contro X (UFC 323, dic 2025)' dai dati dello storico, o '' se manca qualcosa."""
+    st = (dett or {}).get("storico") or []
+    if not st:
+        return ""
+    x = st[0]
+    esito = ESITO_IT.get(str(x.get("res.", "")).strip().lower())
+    avv = (x.get("opponent") or "").strip()
+    ev = (x.get("event") or "").split(":")[0].strip()   # "UFC Fight Night: A vs. B" -> "UFC Fight Night" (descrizione piu' corta)
+    if not (esito and avv and ev):
+        return ""
+    m = re.search(r"([A-Za-z]+) \d{1,2}, (\d{4})", str(x.get("date") or ""))
+    mese = MESI[datetime.strptime(m.group(1)[:3], "%b").month - 1][:3] if m else ""
+    quando = f", {mese} {m.group(2)}" if m else ""
+    prep = "contro" if esito in ("vittoria", "sconfitta", "pareggio") else "con"
+    return f"Ultimo incontro: {esito} {prep} {avv} ({ev}{quando})."
+
+
 def genera_lottatori(base):
     roster = json.loads((DOCS / "data" / "roster.json").read_text(encoding="utf-8"))
     out = DOCS / "lottatore"
@@ -165,7 +186,8 @@ def genera_lottatori(base):
         cat = categoria_it(r.get("categoria"))
         descr = (f"{r['nome']}" + (f", {cat}" if cat else "")
                  + (f", record {record_desc(r, dett)}" if record_desc(r, dett) else "")
-                 + ". Statistiche, storico degli incontri e confronto con altri lottatori UFC su MMA Oggi.")
+                 + ". " + (ultimo_incontro_desc(dett) + " " if ultimo_incontro_desc(dett) else "")
+                 + "Statistiche, storico e confronti su MMA Oggi.")
         canonical = f"{BASE_URL}/lottatore/{slug}.html"
         ld = {"@context": "https://schema.org", "@type": "Person", "name": r["nome"], "url": canonical,
               "knowsAbout": "Mixed Martial Arts",
@@ -222,6 +244,14 @@ def contenuto_evento(ev, card, roster_slugs):
             '<noscript><p>Per la scheda interattiva completa serve JavaScript.</p></noscript>')
 
 
+def orari_italiani_desc(ev):
+    """'Orari in Italia: main card dom 02:00.' dai dati del sito; '' se l'evento non ha orari."""
+    mc = ((ev.get("orari") or {}).get("main_card") or {})
+    if not (mc.get("italia") and mc.get("giorno_it")):
+        return ""
+    return f"Orari in Italia: main card {str(mc['giorno_it']).lower()} {mc['italia']}" + (" (indicativi)." if (ev.get("orari") or {}).get("indicativo") else ".")
+
+
 def genera_eventi(base, roster_slugs):
     eventi = json.loads((DOCS / "data" / "eventi.json").read_text(encoding="utf-8"))
     out = DOCS / "evento"
@@ -235,8 +265,9 @@ def genera_eventi(base, roster_slugs):
         card = json.loads(card_file.read_text(encoding="utf-8")) if card_file.exists() else []
         quando = data_it(ev.get("data"))
         luogo = pulisci_luogo(ev.get("luogo"))
+        orari_it = orari_italiani_desc(ev)
         descr = (f"{ev['evento']}: " + (f"{quando}" if quando else "") + (f", {luogo}" if luogo else "")
-                 + ". Card completa, incontri e risultati su MMA Oggi.")
+                 + ". " + (orari_it + " " if orari_it else "") + "Card completa e risultati su MMA Oggi.").replace("..", ".")
         canonical = f"{BASE_URL}/evento/{slug}.html"
         ld = {"@context": "https://schema.org", "@type": "SportsEvent", "name": ev["evento"], "url": canonical,
               "sport": "Mixed Martial Arts",
@@ -245,7 +276,7 @@ def genera_eventi(base, roster_slugs):
             ld["startDate"] = datetime.strptime(str(ev.get("data")).strip(), "%b %d, %Y").date().isoformat()
         except ValueError:
             pass
-        html = testa(base, titolo=f"{ev['evento']}: card, orari e risultati | MMA Oggi", descrizione=descr,
+        html = testa(base, titolo=f"{ev['evento']}: card, orari italiani e risultati | MMA Oggi" if orari_it else f"{ev['evento']}: card, orari e risultati | MMA Oggi", descrizione=descr,
                      canonical=canonical, jsonld=ld, slug=slug)
         html = html.replace('<div id="scheda-evento"><div class="empty-state">Carico...</div></div>',
                             f'<div id="scheda-evento">{contenuto_evento(ev, card, roster_slugs)}</div>', 1)
