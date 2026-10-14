@@ -154,7 +154,53 @@ def record_desc(r, dett):
 ESITO_IT = {"win": "vittoria", "loss": "sconfitta", "draw": "pareggio", "nc": "no contest"}
 
 
-def ultimo_incontro_desc(dett):
+_ULTIMO_EVENTO_LOTTATORE = None
+
+
+def _ultimi_eventi_per_lottatore():
+    """{nome lottatore: data (date) dell'evento piu' recente passato in cui compare}, dalle card in data/eventi."""
+    global _ULTIMO_EVENTO_LOTTATORE
+    if _ULTIMO_EVENTO_LOTTATORE is not None:
+        return _ULTIMO_EVENTO_LOTTATORE
+    out = {}
+    eventi = json.loads((DOCS / "data" / "eventi.json").read_text(encoding="utf-8"))
+    for ev in eventi:
+        if ev.get("stato") != "passato":
+            continue
+        slug = slug_da_link(ev.get("link"))
+        f = DOCS / "data" / "eventi" / f"{slug}.json"
+        try:
+            quando = None
+            for fmt in ("%b %d, %Y", "%B %d, %Y", "%d %B %Y", "%d %b %Y"):
+                try:
+                    quando = datetime.strptime(str(ev.get("data")).strip(), fmt).date()
+                    break
+                except ValueError:
+                    continue
+            card = json.loads(f.read_text(encoding="utf-8")) if (slug and f.exists()) else []
+        except (OSError, ValueError):
+            continue
+        if not quando:
+            continue
+        for inc in card:
+            for k in ("fighter1", "fighter2"):
+                n = (inc.get(k) or "").strip()
+                if n and (n not in out or quando > out[n]):
+                    out[n] = quando
+    _ULTIMO_EVENTO_LOTTATORE = out
+    return out
+
+
+def _data_incontro(testo):
+    for fmt in ("%B %d, %Y", "%b %d, %Y", "%d %B %Y", "%d %b %Y"):
+        try:
+            return datetime.strptime(str(testo).strip(), fmt).date()
+        except ValueError:
+            continue
+    return None
+
+
+def ultimo_incontro_desc(dett, nome=""):
     """'ultimo incontro: sconfitta contro X (UFC 323, dic 2025)' dai dati dello storico, o '' se manca qualcosa."""
     st = (dett or {}).get("storico") or []
     if not st:
@@ -164,6 +210,12 @@ def ultimo_incontro_desc(dett):
     avv = (x.get("opponent") or "").strip()
     ev = (x.get("event") or "").split(":")[0].strip()   # "UFC Fight Night: A vs. B" -> "UFC Fight Night" (descrizione piu' corta)
     if not (esito and avv and ev):
+        return ""
+    # lo storico del lottatore puo' essere in ritardo sugli eventi: se la sua card piu' recente e' dopo
+    # l'ultimo incontro dello storico (o la data non si legge), non diciamo "ultimo incontro" (sarebbe falso)
+    d_storico = _data_incontro(x.get("date"))
+    d_evento = _ultimi_eventi_per_lottatore().get(nome)
+    if not d_storico or (d_evento and d_evento > d_storico):
         return ""
     m = re.search(r"([A-Za-z]+) \d{1,2}, (\d{4})", str(x.get("date") or ""))
     mese = MESI[datetime.strptime(m.group(1)[:3], "%b").month - 1][:3] if m else ""
@@ -186,7 +238,7 @@ def genera_lottatori(base):
         cat = categoria_it(r.get("categoria"))
         descr = (f"{r['nome']}" + (f", {cat}" if cat else "")
                  + (f", record {record_desc(r, dett)}" if record_desc(r, dett) else "")
-                 + ". " + (ultimo_incontro_desc(dett) + " " if ultimo_incontro_desc(dett) else "")
+                 + ". " + (ultimo_incontro_desc(dett, r["nome"]) + " " if ultimo_incontro_desc(dett, r["nome"]) else "")
                  + "Statistiche, storico e confronti su MMA Oggi.")
         canonical = f"{BASE_URL}/lottatore/{slug}.html"
         ld = {"@context": "https://schema.org", "@type": "Person", "name": r["nome"], "url": canonical,

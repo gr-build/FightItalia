@@ -358,21 +358,75 @@ def _scheda_da_aggiornare(path, campione):
     return (date.today() - ultimo).days >= giorni
 
 
+GIORNI_RIFRESCO_DOPO_EVENTO = 3
+
+
+def _eventi_recenti_per_link(giorni=14):
+    """{link Wikipedia del lottatore: data dell'ultimo evento passato negli ultimi `giorni`}, dalle card gia' scaricate.
+    Serve a ricaricare subito le schede di chi ha appena combattuto (altrimenti restano ferme fino a 30 giorni)."""
+    out = {}
+    try:
+        eventi = json.loads((WEB_DATA / "eventi.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return out
+    oggi = date.today()
+    for ev in eventi:
+        if ev.get("stato") != "passato":
+            continue
+        quando = None
+        for fmt in ("%b %d, %Y", "%B %d, %Y", "%d %B %Y", "%d %b %Y"):
+            try:
+                quando = datetime.strptime(str(ev.get("data")).strip(), fmt).date()
+                break
+            except ValueError:
+                continue
+        if not quando or (oggi - quando).days > giorni:
+            continue
+        try:
+            card = json.loads((WEB_DATA_EVENTI / f"{_slug_da_link(ev['link'])}.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError, KeyError):
+            continue
+        for inc in card:
+            for k in ("fighter1_link", "fighter2_link"):
+                l = inc.get(k)
+                if l and (l not in out or quando > out[l]):
+                    out[l] = quando
+    return out
+
+
+def _scheda_dopo_evento(path, link, eventi):
+    """True se il lottatore ha combattuto e la scheda non e' stata ricaricata almeno GIORNI_RIFRESCO_DOPO_EVENTO giorni dopo l'evento
+    (Wikipedia aggiorna lo storico con 1-2 giorni di ritardo, quindi si riprova fino a quel momento)."""
+    quando = eventi.get(link)
+    if not quando:
+        return False
+    try:
+        ultimo = date.fromisoformat(json.loads(path.read_text(encoding="utf-8")).get("ultimo_aggiornamento", ""))
+    except (ValueError, OSError, json.JSONDecodeError):
+        return True
+    return ultimo < quando + timedelta(days=GIORNI_RIFRESCO_DOPO_EVENTO)
+
+
 def genera_dettagli_lottatori(roster, limite=None, pausa=0.3):
     con_link = roster.dropna(subset=["link"]).reset_index(drop=True)
     if limite:
         con_link = con_link.head(limite)
 
-    # Campioni per primi, cosi' rientrano sempre nel tetto di aggiornamenti.
+    # Prima chi ha appena combattuto, poi i campioni: cosi' rientrano sempre nel tetto di aggiornamenti.
+    recenti = _eventi_recenti_per_link()
+    con_link["_appena_combattuto"] = con_link["link"].map(lambda l: l in recenti)
     if "campione_attuale" in con_link:
-        con_link = con_link.sort_values("campione_attuale", ascending=False, kind="stable").reset_index(drop=True)
+        con_link = con_link.sort_values(["_appena_combattuto", "campione_attuale"], ascending=False, kind="stable").reset_index(drop=True)
+    else:
+        con_link = con_link.sort_values("_appena_combattuto", ascending=False, kind="stable").reset_index(drop=True)
 
     fatti, saltati, aggiornati = 0, 0, 0
     for i, riga in con_link.iterrows():
         slug = riga["slug"]
         out_file = WEB_DATA_LOTTATORI / f"{slug}.json"
         if out_file.exists():
-            if aggiornati >= MAX_AGGIORNAMENTI_PER_RUN or not _scheda_da_aggiornare(out_file, bool(riga.get("campione_attuale"))):
+            dopo_evento = _scheda_dopo_evento(out_file, riga["link"], recenti)
+            if aggiornati >= MAX_AGGIORNAMENTI_PER_RUN or not (dopo_evento or _scheda_da_aggiornare(out_file, bool(riga.get("campione_attuale")))):
                 saltati += 1
                 continue
             aggiornati += 1
