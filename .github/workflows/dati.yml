@@ -2,6 +2,8 @@ name: Aggiorna Dati
 
 on:
   schedule:
+    - cron: "0 4 * * *"  # 6:00 italiane con l'ora legale (GitHub ritarda i cron anche di ore, quindi due tentativi)
+    - cron: "0 5 * * *"  # 6:00 italiane con l'ora solare
     - cron: "15 6 * * *" # ogni giorno alle 6:15 UTC (sfasato rispetto a news.yml, che gira ogni 6 ore in punto)
   workflow_dispatch: {} # permette anche il lancio manuale da GitHub
 
