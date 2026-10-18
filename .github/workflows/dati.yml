@@ -85,5 +85,11 @@ jobs:
             echo "Nessuna novita' da committare."
           else
             git commit -m "Aggiorna dati UFC/Europa [automatico]"
-            git push
+            # news.yml e live.yml spingono su main negli stessi minuti: si riallinea e si riprova
+            for i in 1 2 3 4; do
+              git pull --rebase -X theirs origin main && git push && break
+              echo "push rifiutato, riprovo ($i)"; sleep $((i * 5))
+            done
+            git status -sb | head -1
+            git diff --quiet origin/main HEAD -- docs || { git fetch -q origin main; git diff --quiet origin/main HEAD -- docs || { echo "push non riuscito"; exit 1; }; }
           fi
