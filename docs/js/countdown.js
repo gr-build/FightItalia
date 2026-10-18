@@ -1,4 +1,4 @@
-import { fetchJSON, slugDaLink, fotoDi } from "./common.js?v=202610181701";
+import { fetchJSON, slugDaLink, fotoDi } from "./common.js?v=202610181710";
 
 // Riquadro "Prossimo evento UFC" in cima alla home, con il conto alla rovescia
 // (come il timer del prossimo GP su gpoggi.it). Parte dalla prima fascia della

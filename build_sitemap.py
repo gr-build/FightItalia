@@ -10,6 +10,7 @@ contenuti realmente pubblicati — non e' agganciato a nessuna GitHub
 Action, e' manuale come gli altri script di build (vedi README).
 """
 
+import hashlib
 import json
 import re
 from datetime import date
@@ -19,6 +20,8 @@ ROOT = Path(__file__).parent
 DOCS = ROOT / "docs"
 BASE_URL = "https://mmaoggi.it"
 OGGI = date.today().isoformat()
+STATO = DOCS / "data" / "sitemap-lastmod.json"   # {indirizzo: {"hash": ..., "lastmod": ...}}: la data cambia solo se cambia la pagina
+_stato = {}
 
 # Deve restare identico a slugDaLink() in docs/js/common.js, altrimenti gli
 # URL generati per gli eventi non corrispondono a quelli che il sito usa
@@ -52,13 +55,33 @@ PAGINE_STATICHE = [
 ]
 
 
+def _lastmod(path):
+    """Data dell'ultima modifica vera della pagina: si aggiorna solo se il contenuto e' cambiato
+    (senza il numero di versione di CSS e JS, che cambia a ogni build). Alla prima volta vale oggi."""
+    file = DOCS / (path or "index.html")
+    try:
+        html = file.read_text(encoding="utf-8")
+    except OSError:
+        return OGGI
+    impronta = hashlib.sha1(re.sub(r"\?v=\d+", "", html).encode("utf-8")).hexdigest()
+    vecchio = _stato.get(path or "/")
+    data = vecchio["lastmod"] if vecchio and vecchio.get("hash") == impronta else OGGI
+    _stato[path or "/"] = {"hash": impronta, "lastmod": data}
+    return data
+
+
 def url_entry(path, changefreq, priority):
     loc = f"{BASE_URL}/{path}" if path else f"{BASE_URL}/"
     loc = loc.replace("&", "&amp;")
-    return f"  <url>\n    <loc>{loc}</loc>\n    <lastmod>{OGGI}</lastmod>\n    <changefreq>{changefreq}</changefreq>\n    <priority>{priority}</priority>\n  </url>"
+    return f"  <url>\n    <loc>{loc}</loc>\n    <lastmod>{_lastmod(path)}</lastmod>\n    <changefreq>{changefreq}</changefreq>\n    <priority>{priority}</priority>\n  </url>"
 
 
 def main():
+    global _stato
+    try:
+        _stato = json.loads(STATO.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        _stato = {}
     roster = json.loads((DOCS / "data" / "roster.json").read_text(encoding="utf-8"))
     eventi = json.loads((DOCS / "data" / "eventi.json").read_text(encoding="utf-8"))
 
@@ -82,6 +105,7 @@ def main():
         + "\n</urlset>\n"
     )
     (DOCS / "sitemap.xml").write_text(xml, encoding="utf-8")
+    STATO.write_text(json.dumps(_stato, ensure_ascii=False, separators=(",", ":"), sort_keys=True), encoding="utf-8")
     print(f"sitemap.xml generato: {len(entries)} URL ({len(slug_lottatori)} lottatori, {len(slug_eventi)} eventi, {len(PAGINE_STATICHE)} pagine statiche).")
 
 

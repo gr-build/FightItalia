@@ -1,6 +1,6 @@
-import { fetchJSON, renderChrome, debounce } from "./common.js?v=202610181701";
-import { ORGANIZZAZIONI } from "./europa-data.js?v=202610181701";
-import { slug, caricaIncontri } from "./europa-incontri.js?v=202610181701";
+import { fetchJSON, renderChrome, debounce } from "./common.js?v=202610181710";
+import { ORGANIZZAZIONI } from "./europa-data.js?v=202610181710";
+import { slug, caricaIncontri } from "./europa-incontri.js?v=202610181710";
 
 renderChrome("europa");
 
