@@ -274,10 +274,11 @@ def contenuto_evento(ev, card, roster_slugs, schede=None):
     if luogo:
         frasi.append(f"Si tiene a {esc(luogo)}.")
     if ev.get("stato") == "programmato":
-        frasi.append("Qui trovi la card completa e, quando saranno disponibili, gli orari in Italia.")
+        frasi.append("Qui trovi la card completa" + ("." if orari_italiani_desc(ev) else " e, quando saranno disponibili, gli orari in Italia."))
     else:
         frasi.append("Qui trovi la card completa con i risultati degli incontri.")
 
+    frasi.extend(_frasi_main_event(ev, card))
     tabella = ""
     if card:
         righe = ""
@@ -301,6 +302,33 @@ def contenuto_evento(ev, card, roster_slugs, schede=None):
             f'<p>{" ".join(frasi)}</p>{tabella}'
             '<p><a href="eventi.html">Tutti gli eventi</a> · <a href="giochi.html">Giochi</a></p>'
             '<noscript><p>Per la scheda interattiva completa serve JavaScript.</p></noscript>')
+
+
+def _frasi_main_event(ev, card):
+    """Frasi in piu' per la pagina evento, solo da dati certi: main event ed esito, oppure main event e orari in Italia."""
+    if not card or not card[0].get("fighter1") or not card[0].get("fighter2"):
+        return []
+    m = card[0]
+    f1, f2 = nome_pulito(m["fighter1"]), nome_pulito(m["fighter2"])
+    cat = categoria_it(m.get("categoria"))
+    if ev.get("stato") == "passato":
+        if not (m.get("metodo") or "").strip():
+            return []
+        tipo, desc, _ = esito_incontro(m)
+        dove = f" al round {esc(m['round'])}" if m.get("round") else ""
+        if tipo == "vittoria":
+            return [f"Nel main event {esc(f1)} ha battuto {esc(f2)} per {esc(desc)}{dove}."]
+        return [f"Il main event, {esc(f1)} contro {esc(f2)}, si è chiuso con {esc(desc)}."]
+    frasi = [f"Il main event è {esc(f1)} contro {esc(f2)}" + (f" ({esc(cat)})" if cat else "") + "."]
+    orari = ev.get("orari") or {}
+    parti = []
+    for chiave, etichetta in (("early_prelims", "early prelims"), ("prelims", "preliminari"), ("main_card", "main card")):
+        o = orari.get(chiave) or {}
+        if o.get("italia") and o.get("giorno_it"):
+            parti.append(f"{etichetta} {esc(str(o['giorno_it']).lower())} {esc(o['italia'])}")
+    if parti:
+        frasi.append("Orari in Italia: " + ", ".join(parti) + (" (indicativi)." if orari.get("indicativo") else "."))
+    return frasi
 
 
 def orari_italiani_desc(ev):
