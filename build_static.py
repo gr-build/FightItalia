@@ -99,7 +99,7 @@ def testa(base_html, *, titolo, descrizione, canonical, jsonld, slug, immagine=N
 
 # ------------------------------------------------------------------ lottatori
 
-def contenuto_lottatore(r, dett):
+def contenuto_lottatore(r, dett, recenti=None):
     nome = r["nome"]
     inf = dett.get("infobox", {}) if dett else {}
     cat = categoria_it(r.get("categoria"))
@@ -137,8 +137,13 @@ def contenuto_lottatore(r, dett):
         tabella = ('<h2>Ultimi incontri</h2><table><thead><tr><th>Esito</th><th>Avversario</th><th>Metodo</th>'
                    f'<th>Evento</th><th>Data</th></tr></thead><tbody>{righe}</tbody></table>')
     slug = r["slug"]
+    schede = ""
+    if recenti:
+        voci = "".join(f'<li><a href="incontro/{sc}.html">{esc(nome)} vs {esc(avv)}</a> · <a href="evento/{se}.html">{esc(en)}</a> ({esc(data_it(d.strftime("%b %d, %Y")))})</li>'
+                       for d, se, en, sc, avv in sorted(recenti, key=lambda x: x[0], reverse=True)[:5])
+        schede = f"<h2>Incontri recenti su MMA Oggi</h2><ul>{voci}</ul>"
     return (f'<section class="hero" style="padding:44px 0 24px;"><h1>{esc(nome)}</h1></section>'
-            f'<p>{" ".join(frasi)}</p>{tabella}'
+            f'<p>{" ".join(frasi)}</p>{tabella}{schede}'
             f'<p><a href="confronto.html?a={esc(slug)}">Confronta {esc(nome)} con un altro lottatore</a> · '
             '<a href="tutti-i-lottatori.html">Tutti i lottatori</a> · <a href="ranking.html">Ranking UFC</a></p>'
             '<noscript><p>Per la scheda interattiva completa serve JavaScript.</p></noscript>')
@@ -224,7 +229,7 @@ def ultimo_incontro_desc(dett, nome=""):
     return f"Ultimo incontro: {esito} {prep} {avv} ({ev}{quando})."
 
 
-def genera_lottatori(base):
+def genera_lottatori(base, per_lottatore=None):
     roster = json.loads((DOCS / "data" / "roster.json").read_text(encoding="utf-8"))
     out = DOCS / "lottatore"
     out.mkdir(exist_ok=True)
@@ -249,7 +254,7 @@ def genera_lottatori(base):
         html = testa(base, titolo=f"{r['nome']}: record, statistiche e incontri | MMA Oggi", descrizione=descr,
                      canonical=canonical, jsonld=ld, slug=slug)
         html = html.replace('<div id="profilo"><div class="empty-state">Carico...</div></div>',
-                            f'<div id="profilo">{contenuto_lottatore(r, dett)}</div>', 1)
+                            f'<div id="profilo">{contenuto_lottatore(r, dett, (per_lottatore or {}).get(slug))}</div>', 1)
         (out / f"{slug}.html").write_text(html, encoding="utf-8")
         vivi.add(f"{slug}.html")
         slugs.append(slug)
@@ -261,7 +266,7 @@ def genera_lottatori(base):
 
 # --------------------------------------------------------------------- eventi
 
-def contenuto_evento(ev, card, roster_slugs):
+def contenuto_evento(ev, card, roster_slugs, schede=None):
     nome = ev["evento"]
     luogo = ", ".join(x for x in (ev.get("sede"), pulisci_luogo(ev.get("luogo"))) if x)
     quando = data_it(ev.get("data"))
@@ -285,9 +290,11 @@ def contenuto_evento(ev, card, roster_slugs):
                 s = slug_da_link(link)
                 return f'<a href="lottatore/{s}.html">{esc(nome_f)}</a>' if s in roster_slugs else esc(nome_f)
             esito = " ".join(x for x in (c.get("metodo"), f"R{c['round']}" if c.get("round") else "", c.get("tempo")) if x)
+            scheda = (schede or {}).get((c.get("fighter1"), c.get("fighter2")))
+            esito_html = f'<a href="incontro/{scheda}.html">{esc(esito)}</a>' if scheda and esito else esc(esito)
             righe += (f"<tr><td>{esc(c.get('categoria', ''))}</td>"
                       f"<td>{lott(c.get('fighter1'), c.get('fighter1_link'))} vs {lott(c.get('fighter2'), c.get('fighter2_link'))}</td>"
-                      f"<td>{esc(esito)}</td></tr>")
+                      f"<td>{esito_html}</td></tr>")
         tabella = ('<h2>Card e risultati</h2><table><thead><tr><th>Categoria</th><th>Incontro</th><th>Esito</th></tr></thead>'
                    f'<tbody>{righe}</tbody></table>')
     return (f'<section class="hero" style="padding:44px 0 24px;"><h1>{esc(nome)}</h1></section>'
@@ -304,7 +311,7 @@ def orari_italiani_desc(ev):
     return f"Orari in Italia: main card {str(mc['giorno_it']).lower()} {mc['italia']}" + (" (indicativi)." if (ev.get("orari") or {}).get("indicativo") else ".")
 
 
-def genera_eventi(base, roster_slugs):
+def genera_eventi(base, roster_slugs, per_evento=None):
     eventi = json.loads((DOCS / "data" / "eventi.json").read_text(encoding="utf-8"))
     out = DOCS / "evento"
     out.mkdir(exist_ok=True)
@@ -331,7 +338,7 @@ def genera_eventi(base, roster_slugs):
         html = testa(base, titolo=f"{ev['evento']}: card, orari italiani e risultati | MMA Oggi" if orari_it else f"{ev['evento']}: card, orari e risultati | MMA Oggi", descrizione=descr,
                      canonical=canonical, jsonld=ld, slug=slug)
         html = html.replace('<div id="scheda-evento"><div class="empty-state">Carico...</div></div>',
-                            f'<div id="scheda-evento">{contenuto_evento(ev, card, roster_slugs)}</div>', 1)
+                            f'<div id="scheda-evento">{contenuto_evento(ev, card, roster_slugs, (per_evento or {}).get(slug))}</div>', 1)
         (out / f"{slug}.html").write_text(html, encoding="utf-8")
         vivi.add(f"{slug}.html")
         slugs.append(slug)
@@ -516,6 +523,7 @@ def genera_incontri(base, roster_by_slug, anagrafica):
     out = DOCS / "incontro"
     out.mkdir(exist_ok=True)
     vivi = set()
+    per_evento, per_lottatore = {}, {}   # per i collegamenti interni: {slug evento: {(f1, f2): scheda}}, {slug lottatore: [incontri recenti]}
     for ev in eventi:
         # anche un evento ancora "programmato" (in corso stanotte) ha le schede dei match gia' finiti:
         # il filtro sul metodo qui sotto lascia fuori quelli che non hanno un risultato
@@ -529,8 +537,8 @@ def genera_incontri(base, roster_by_slug, anagrafica):
         card_file = DOCS / "data" / "eventi" / f"{slug_ev}.json" if slug_ev else None
         if not card_file or not card_file.exists():
             continue
-        card = [{**c, "fighter1": nome_pulito(c["fighter1"]), "fighter2": nome_pulito(c["fighter2"])}
-                for c in json.loads(card_file.read_text(encoding="utf-8")) if c.get("metodo") and c.get("fighter1") and c.get("fighter2")]
+        grezza = [c for c in json.loads(card_file.read_text(encoding="utf-8")) if c.get("metodo") and c.get("fighter1") and c.get("fighter2")]
+        card = [{**c, "fighter1": nome_pulito(c["fighter1"]), "fighter2": nome_pulito(c["fighter2"])} for c in grezza]
         slugs = []
         for c in card:
             s = f"{slug_ev}-{slug_testo(c['fighter1'])}-vs-{slug_testo(c['fighter2'])}"
@@ -538,6 +546,12 @@ def genera_incontri(base, roster_by_slug, anagrafica):
                 s += "-2"
             slugs.append(s)
             vivi.add(f"{s}.html")
+        for g, c, s in zip(grezza, card, slugs):
+            per_evento.setdefault(slug_ev, {})[(g["fighter1"], g["fighter2"])] = s
+            for k, altro in (("fighter1", "fighter2"), ("fighter2", "fighter1")):
+                sl = slug_da_link(g.get(f"{k}_link"))
+                if sl:
+                    per_lottatore.setdefault(sl, []).append((data_iso, slug_ev, ev["evento"], s, c[altro]))
         for i, c in enumerate(card):
             tipo, desc, cartellini = esito_incontro(c)
             titolo_inc = f"{c['fighter1']} vs {c['fighter2']}"
@@ -568,14 +582,12 @@ def genera_incontri(base, roster_by_slug, anagrafica):
     elenco = sorted(f[:-5] for f in vivi)
     # elenco degli indirizzi esistenti: lo legge evento.js per mostrare il link "Scheda incontro"
     (DOCS / "data" / "incontri.json").write_text(json.dumps(elenco, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    return elenco
+    return elenco, per_evento, per_lottatore
 
 
 def main():
     base_l = (DOCS / "lottatore.html").read_text(encoding="utf-8")
     base_e = (DOCS / "evento.html").read_text(encoding="utf-8")
-    lott = genera_lottatori(base_l)
-    ev = genera_eventi(base_e, set(lott))
     base_i = (DOCS / "incontro.html").read_text(encoding="utf-8")
     roster = json.loads((DOCS / "data" / "roster.json").read_text(encoding="utf-8"))
     extra_file = DOCS / "data" / "extra-lottatori.json"
@@ -583,7 +595,10 @@ def main():
     tutti = [r for r in roster + extra if r.get("slug") or r.get("nome")]
     anagrafica = {"slug": {r["slug"]: r for r in tutti if r.get("slug")},
                   "nome": {_norm_nome(r["nome"]): r for r in tutti if r.get("nome")}}
-    inc = genera_incontri(base_i, {r["slug"]: r for r in roster if r.get("slug")}, anagrafica)
+    # prima gli incontri: servono gli indirizzi delle schede per i collegamenti dalle pagine di eventi e lottatori
+    inc, per_evento, per_lottatore = genera_incontri(base_i, {r["slug"]: r for r in roster if r.get("slug")}, anagrafica)
+    lott = genera_lottatori(base_l, per_lottatore)
+    ev = genera_eventi(base_e, set(lott), per_evento)
     print(f"Pagine statiche: {len(lott)} lottatori, {len(ev)} eventi, {len(inc)} incontri.")
 
 
