@@ -20,6 +20,7 @@ ROOT = Path(__file__).parent
 DOCS = ROOT / "docs"
 BASE_URL = "https://mmaoggi.it"
 OGGI = date.today().isoformat()
+PRIMO_ANNO_SITEMAP = 2020   # eventi in sitemap: dal 2020 in poi (anche quelli futuri)
 STATO = DOCS / "data" / "sitemap-lastmod.json"   # {indirizzo: {"hash": ..., "lastmod": ...}}: la data cambia solo se cambia la pagina
 _stato = {}
 
@@ -92,7 +93,15 @@ def main():
     slug_lottatori = sorted(p.stem for p in (DOCS / "lottatore").glob("*.html"))
     entries += [url_entry(f"lottatore/{slug}.html", "monthly", "0.5") for slug in slug_lottatori]
 
-    slug_eventi = sorted(p.stem for p in (DOCS / "evento").glob("*.html"))
+    # Eventi vecchi o annullati: la pagina resta online ma fuori dalla sitemap, cosi' Google concentra le scansioni
+    # su quelli recenti (Search Console: centinaia di pagine di eventi del 2005-2012 "rilevate ma mai scansionate").
+    recenti = set()
+    for e in eventi:
+        s = slug_da_link(e.get("link"))
+        m = re.search(r"(\d{4})", str(e.get("data", "")))
+        if s and m and int(m.group(1)) >= PRIMO_ANNO_SITEMAP and "cancel" not in s:
+            recenti.add(s)
+    slug_eventi = sorted(p.stem for p in (DOCS / "evento").glob("*.html") if p.stem in recenti)
     entries += [url_entry(f"evento/{slug}.html", "monthly", "0.4") for slug in slug_eventi]
 
     slug_incontri = sorted(p.stem for p in (DOCS / "incontro").glob("*.html"))
