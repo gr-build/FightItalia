@@ -1,4 +1,4 @@
-import { fetchJSON, slugDaLink } from "./common.js?v=202610140841";
+import { fetchJSON, slugDaLink } from "./common.js?v=202610181655";
 
 // Riquadro "Prossimi eventi" della home (a destra sul computer, a carte da scorrere sul telefono): i prossimi 4 eventi
 // programmati, con link alla scheda o a "Vedi tutti gli eventi" (eventi.html).
@@ -30,9 +30,19 @@ function carta(ev, risultato) {
     <span class="mini-corpo">
       <span class="mini-kick">${risultato ? "Ultimo evento · risultati" : kick}</span>
       <span class="mini-nome">${nome || kick}</span>
-      <span class="mini-luogo">${luogoBreve(ev)}</span>
+      ${risultato ? `<span class="mini-esito" data-slug="${slugDaLink(ev.link)}">Risultati dell'evento →</span>` : `<span class="mini-luogo">${luogoBreve(ev)}</span>`}
     </span>
   </a>`;
+}
+
+// Sotto l'ultimo evento: chi ha vinto il main event e come (solo se l'esito e' chiaro: niente pareggi o no contest)
+function esitoMain(incontri) {
+  const m = incontri && incontri[0];
+  const metodo = m && String(m.metodo || "").trim();
+  if (!metodo || /draw|no contest/i.test(metodo)) return "";
+  const breve = metodo.replace(/\s*\(.*$/, "").trim();
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  return `<b>${esc(m.fighter1)}</b> batte ${esc(m.fighter2)} · ${esc(breve)}${m.round ? ` R${esc(m.round)}` : ""}`;
 }
 
 const cartaTutti = `<a class="mini-evento mini-tutti" href="eventi.html"><span class="mini-nome">Tutti gli eventi</span><span class="mini-luogo">anche i passati →</span></a>`;
@@ -50,5 +60,11 @@ fetchJSON("data/eventi.json")
     box.innerHTML =
       (ultimoPassato ? carta(ultimoPassato, true) : "") +
       (prossimi.length ? prossimi.map((e) => carta(e, false)).join("") + cartaTutti : `<p style="font-size:12px; color:var(--text-muted);">Nessun evento programmato trovato.</p>`);
+    const esito = box.querySelector(".mini-esito");
+    if (esito) {
+      fetchJSON(`data/eventi/${esito.dataset.slug}.json`)
+        .then((incontri) => { const t = esitoMain(incontri); if (t) esito.innerHTML = t; })
+        .catch(() => {});
+    }
   })
   .catch(() => {});

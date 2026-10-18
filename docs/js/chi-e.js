@@ -2,8 +2,8 @@
 // ogni errore (come nei giochi calcistici tipo Tiki-Taka-Toe/Who Are Ya) e
 // ultimi incontri svelati uno alla volta come indizi.
 
-import { renderChrome, tracciaGioco } from "./common.js?v=202610140841";
-import { caricaLottatori, leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO, bandiera, genere } from "./giochi-comuni.js?v=202610140841";
+import { renderChrome, tracciaGioco } from "./common.js?v=202610181655";
+import { caricaLottatori, leggi, scrivi, iniziali, casualeConSeme, oggiItalia, condividi, SITO, bandiera, genere } from "./giochi-comuni.js?v=202610181655";
 
 renderChrome("giochi");
 
