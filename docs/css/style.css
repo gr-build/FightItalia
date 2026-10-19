@@ -2760,7 +2760,7 @@ a.rank-row:hover { color: var(--accent); }
 .mini-data-box b { display: block; font-size: 26px; font-weight: 600; color: var(--text); }
 .mini-data-box i { display: block; margin-top: 3px; font-style: normal; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
 .mini-data-box.risultato b { color: var(--win); font-size: 22px; }
-.mini-data-box.risultato i { color: var(--win); }
+.mini-data-box.risultato i { color: var(--text); font-weight: 600; }
 .mini-corpo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .mini-kick { font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
 .mini-evento-risultato .mini-kick { color: var(--win); }
