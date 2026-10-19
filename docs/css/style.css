@@ -2760,7 +2760,7 @@ a.rank-row:hover { color: var(--accent); }
 .mini-data-box b { display: block; font-size: 26px; font-weight: 600; color: var(--text); }
 .mini-data-box i { display: block; margin-top: 3px; font-style: normal; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
 .mini-data-box.risultato b { color: var(--win); font-size: 22px; }
-.mini-data-box.risultato i { color: var(--win); }
+.mini-data-box.risultato i { color: var(--text); font-weight: 600; }
 .mini-corpo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .mini-kick { font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
 .mini-evento-risultato .mini-kick { color: var(--win); }
@@ -2870,3 +2870,40 @@ a.fr:active { border-color: var(--accent); background: var(--bg-elevated-2); }
 :root[data-theme="light"] .home-hero .cd-palco::after { background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.6)); }
 .home-hero .hero-sub-desktop { color: #d4d4dc; text-shadow: 0 0 10px rgba(10, 10, 13, 0.95), 0 0 22px rgba(10, 10, 13, 0.9), 0 2px 14px rgba(10, 10, 13, 0.9); }
 :root[data-theme="light"] .home-hero .hero-sub-desktop { color: inherit; text-shadow: none; }
+
+/* ---- Sfida del giorno ---- */
+.sfida { max-width: 640px; margin: 0 auto; padding-bottom: 40px; }
+.sfida-carta { display: flex; flex-direction: column; gap: 14px; }
+.sfida-testa { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-secondary); }
+.sfida-num { font-family: var(--font-display); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); text-align: center; }
+.sfida-titolo { font-family: var(--font-display); font-size: 22px; text-transform: uppercase; text-align: center; margin: 4px 0 0; text-wrap: balance; }
+.sfida-contesto { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 22px 14px; border-radius: 12px; background: var(--bg-elevated); border: 1px solid var(--border); text-align: center; }
+.sfida-contesto b { font-family: var(--font-display); font-size: 30px; line-height: 1.15; text-transform: uppercase; overflow-wrap: anywhere; }
+.sfida-contesto span { font-size: 13px; color: var(--text-secondary); }
+.sfida-opzioni { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.sfida-opz { min-height: 52px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-elevated-2); color: var(--text); font-family: inherit; font-size: 16px; font-weight: 600; text-align: center; cursor: pointer; overflow-wrap: anywhere; }
+.sfida-opz:hover:not(:disabled) { border-color: var(--accent); }
+.sfida-opz:disabled { cursor: default; opacity: 1; }
+.sfida-opz.giusta { background: rgba(47, 184, 114, 0.18); border-color: var(--win); color: var(--text); }
+.sfida-opz.sbagliata { background: rgba(232, 53, 47, 0.18); border-color: var(--loss); }
+.sfida-azioni { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.sfida-azioni .btn-gioco { text-decoration: none; text-align: center; }
+.sfida-nota { font-size: 14px; color: var(--text-secondary); text-align: center; margin: 0; line-height: 1.5; }
+.sfida-punti { font-family: var(--font-display); font-size: 72px; line-height: 1; text-align: center; }
+.sfida-caselle { font-size: 28px; letter-spacing: 4px; text-align: center; }
+.sfida-serie { font-size: 16px; text-align: center; margin: 0; font-weight: 600; }
+@media (min-width: 520px) { .sfida-opzioni { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .sfida-titolo { font-size: 19px; } .sfida-contesto b { font-size: 26px; } }
+
+/* fascia "Sfida del giorno" in home */
+.sfida-banner { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin: 18px 0 8px; padding: 22px 22px 18px; border-radius: 14px; color: #fff; text-decoration: none; background: linear-gradient(100deg, #d4231d, #ff4a1f); overflow: hidden; }
+.sfida-banner::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 8px; background: repeating-linear-gradient(90deg, #111 0 8px, #fff 8px 16px); }
+.sfida-banner-testo { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.sfida-banner-tag { display: flex; flex-wrap: wrap; gap: 6px; }
+.sfida-banner-tag span { font-family: var(--font-display); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; background: #ffd21f; color: #111; }
+.sfida-banner-tag span + span { background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.7); }
+.sfida-banner h2 { font-family: var(--font-display); font-size: 28px; line-height: 1.1; text-transform: uppercase; margin: 0; }
+.sfida-banner p { margin: 0; font-size: 14px; opacity: 0.95; }
+.sfida-banner-cta { flex-shrink: 0; font-weight: 700; font-size: 15px; padding: 11px 18px; border-radius: 10px; background: #ffd21f; color: #111; box-shadow: 0 0 0 4px rgba(255, 210, 31, 0.3); }
+.sfida-banner:hover .sfida-banner-cta { background: #ffe066; }
+@media (max-width: 520px) { .sfida-banner h2 { font-size: 24px; } .sfida-banner-cta { width: 100%; text-align: center; box-sizing: border-box; } }

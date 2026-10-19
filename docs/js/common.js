@@ -292,6 +292,7 @@ export function renderChrome(active) {
           <div class="footer-feedback-corpo" hidden></div>
         </div>
         <div class="footer-social"><span>Segui MMA Oggi</span>${linkSocial()}<a class="social-link" href="seguici.html"><span class="social-nome">Contatti</span></a></div>
+        <p style="margin:0 0 6px;"><a href="sfida.html">🥊 Sfida del giorno</a> · <a href="giochi.html">Giochi di MMA</a></p>
         <p style="margin:0 0 6px;">I dati riportati hanno scopo informativo e statistico; non costituiscono consiglio di scommessa. Gioca responsabilmente.</p>
         <p style="margin:0 0 6px;">MMA Oggi — statistiche e confronti sugli sport da combattimento. Dati e immagini da Wikipedia (licenza CC BY-SA), aggiornati periodicamente. In Italia gli eventi UFC si seguono in streaming legale su discovery+ (e in parte su Eurosport).</p>
         <p style="margin:0; font-size:11.5px; color:var(--text-muted);">MMA Oggi è un progetto indipendente, non affiliato né sponsorizzato da UFC o Zuffa, LLC.</p>

@@ -23,7 +23,7 @@ function carta(ev, risultato) {
   const href = ev.link ? `evento.html?slug=${slugDaLink(ev.link)}` : "eventi.html";
   const [kick, nome] = dividi(ev);
   const box = risultato
-    ? `<span class="mini-data-box risultato"><b>✓</b><i>fatto</i></span>`
+    ? `<span class="mini-data-box risultato"><b>✓</b><i>finito</i></span>`
     : `<span class="mini-data-box"><b>${isNaN(d) ? "·" : d.getDate()}</b><i>${isNaN(d) ? "" : MESI[d.getMonth()]}</i></span>`;
   return `<a class="mini-evento${risultato ? " mini-evento-risultato" : ""}" href="${href}">
     ${box}
