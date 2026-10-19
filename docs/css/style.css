@@ -2895,15 +2895,16 @@ a.fr:active { border-color: var(--accent); background: var(--bg-elevated-2); }
 @media (min-width: 520px) { .sfida-opzioni { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 520px) { .sfida-titolo { font-size: 19px; } .sfida-contesto b { font-size: 26px; } }
 
-/* fascia "Sfida del giorno" in home */
-.sfida-banner { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin: 18px 0 8px; padding: 22px 22px 18px; border-radius: 14px; color: #fff; text-decoration: none; background: linear-gradient(100deg, #d4231d, #ff4a1f); overflow: hidden; }
-.sfida-banner::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 8px; background: repeating-linear-gradient(90deg, #111 0 8px, #fff 8px 16px); }
-.sfida-banner-testo { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+/* fascia "Sfida del giorno" in home: un ring di notte, tre corde e un guantone */
+.sfida-banner { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin: 16px 0 8px; padding: 30px 22px 18px; border-radius: 14px; color: #fff; text-decoration: none; background: radial-gradient(circle at 85% 30%, #2f5bff 0%, rgba(47, 91, 255, 0) 55%), linear-gradient(110deg, #0b1440, #14307f); overflow: hidden; }
+.sfida-banner::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 18px; background: linear-gradient(#e8352f 0 4px, transparent 4px 7px, #fff 7px 11px, transparent 11px 14px, #e8352f 14px 18px); opacity: 0.95; }
+.sfida-banner::after { content: "🥊"; position: absolute; right: 150px; bottom: -14px; font-size: 90px; line-height: 1; opacity: 0.2; transform: rotate(-18deg); pointer-events: none; }
+.sfida-banner-testo { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .sfida-banner-tag { display: flex; flex-wrap: wrap; gap: 6px; }
 .sfida-banner-tag span { font-family: var(--font-display); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; background: #ffd21f; color: #111; }
-.sfida-banner-tag span + span { background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.7); }
+.sfida-banner-tag span + span { background: #e8352f; color: #fff; }
 .sfida-banner h2 { font-family: var(--font-display); font-size: 28px; line-height: 1.1; text-transform: uppercase; margin: 0; }
 .sfida-banner p { margin: 0; font-size: 14px; opacity: 0.95; }
-.sfida-banner-cta { flex-shrink: 0; font-weight: 700; font-size: 15px; padding: 11px 18px; border-radius: 10px; background: #ffd21f; color: #111; box-shadow: 0 0 0 4px rgba(255, 210, 31, 0.3); }
+.sfida-banner-cta { position: relative; z-index: 1; flex-shrink: 0; font-weight: 700; font-size: 15px; padding: 11px 18px; border-radius: 10px; background: #ffd21f; color: #111; box-shadow: 0 0 0 4px rgba(255, 210, 31, 0.3); }
 .sfida-banner:hover .sfida-banner-cta { background: #ffe066; }
-@media (max-width: 520px) { .sfida-banner h2 { font-size: 24px; } .sfida-banner-cta { width: 100%; text-align: center; box-sizing: border-box; } }
+@media (max-width: 520px) { .sfida-banner h2 { font-size: 24px; } .sfida-banner::after { right: 10px; bottom: 56px; } .sfida-banner-cta { width: 100%; text-align: center; box-sizing: border-box; } }
