@@ -70,6 +70,9 @@ jobs:
       - name: Classifica del giorno (Top 10, verificata su due fonti)
         run: python build_top10.py
 
+      - name: Domande della Sfida del giorno
+        run: python build_sfida.py
+
       - name: Genera roster/eventi KSW e Oktagon (Europa)
         run: python -c "from build_data import genera_europa; genera_europa()"
 
