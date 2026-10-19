@@ -2908,3 +2908,8 @@ a.fr:active { border-color: var(--accent); background: var(--bg-elevated-2); }
 .sfida-banner-cta { position: relative; z-index: 1; flex-shrink: 0; font-weight: 700; font-size: 15px; padding: 11px 18px; border-radius: 10px; background: #ffd21f; color: #111; box-shadow: 0 0 0 4px rgba(255, 210, 31, 0.3); }
 .sfida-banner:hover .sfida-banner-cta { background: #ffe066; }
 @media (max-width: 520px) { .sfida-banner h2 { font-size: 24px; } .sfida-banner::after { right: 10px; bottom: 56px; } .sfida-banner-cta { width: 100%; text-align: center; box-sizing: border-box; } }
+
+/* card "Sfida del giorno" nei Giochi: rosso acceso, si vede subito */
+.gioco-card.sfida-card { background: linear-gradient(135deg, #e8201a, #ff5a1f); border-color: transparent; color: #fff; box-shadow: 0 8px 24px rgba(232, 53, 47, 0.35); }
+.gioco-card.sfida-card h2, .gioco-card.sfida-card p, .gioco-card.sfida-card .gioco-tag { color: #fff; }
+.gioco-card.sfida-card .gioco-cta { align-self: flex-start; padding: 8px 14px; border-radius: 8px; background: #ffd21f; color: #111; font-weight: 700; }
