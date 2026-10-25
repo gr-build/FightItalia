@@ -444,6 +444,20 @@ async function statoLiveDaEspn() {
   return { stato: "nessuno" };
 }
 
+const senzaAccenti = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+
+// Slug dei due lottatori (nomi ESPN) dal roster del sito; null se uno dei due non c'e'.
+async function trovaSlugCoppia(nomi) {
+  try {
+    const [roster, extra] = await Promise.all([fetchJSON("data/roster.json"), fetchJSON("data/extra-lottatori.json").catch(() => [])]);
+    const tutti = [...roster, ...extra];
+    const slug = nomi.map((n) => tutti.find((x) => x.slug && senzaAccenti(x.nome) === senzaAccenti(n))?.slug);
+    return slug[0] && slug[1] ? slug : null;
+  } catch {
+    return null;
+  }
+}
+
 async function aggiornaLive() {
   const el = document.getElementById("live-badge");
   if (!el) return;
@@ -476,6 +490,14 @@ async function aggiornaLive() {
   }
   el.hidden = false;
   el.title = d.evento || "";
+  // un tocco apre il confronto dei due lottatori di quell'incontro (se li trova nel roster), non l'elenco eventi
+  el.href = "eventi.html";
+  const coppia = d.stato === "in_corso" && d.incontro_corrente ? d.incontro_corrente.nomi : d.ultimo_risultato ? d.ultimo_risultato.nomi : null;
+  if (coppia) {
+    trovaSlugCoppia(coppia).then((slug) => {
+      if (slug) el.href = `confronto.html?a=${slug[0]}&b=${slug[1]}`;
+    });
+  }
   el.innerHTML = `<span class="live-dot" aria-hidden="true"></span><span class="live-stato">${d.stato === "in_corso" ? "In diretta" : "Appena finito"}</span><span class="live-testo">${corpo}</span>`;
 }
 

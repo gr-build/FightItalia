@@ -148,7 +148,7 @@ let ultimaCoppia = "";
 async function aggiornaConfronto() {
   const out = document.getElementById("risultato");
   if (!scelti.a || !scelti.b) return;
-  if (scelti.a.link === scelti.b.link) {
+  if (scelti.a.slug === scelti.b.slug) {
     out.innerHTML = `<div class="empty-state">Scegli due lottatori diversi per confrontarli.</div>`;
     return;
   }
@@ -159,10 +159,16 @@ async function aggiornaConfronto() {
     traccia("Confronto", { coppia });
   }
 
-  const [dA, dB] = await Promise.all([
-    fetchJSON(`data/lottatori/${scelti.a.slug}.json`),
-    fetchJSON(`data/lottatori/${scelti.b.slug}.json`),
-  ]);
+  let dA, dB;
+  try {
+    [dA, dB] = await Promise.all([
+      fetchJSON(`data/lottatori/${scelti.a.slug}.json`),
+      fetchJSON(`data/lottatori/${scelti.b.slug}.json`),
+    ]);
+  } catch {
+    out.innerHTML = `<div class="empty-state">Non ho ancora la scheda di ${scelti.a.nome} o di ${scelti.b.nome}: il confronto non è disponibile. Scegli altri lottatori.</div>`;
+    return;
+  }
   dettagli = { a: dA, b: dB };
 
   const altezzaA = cmDaStringa(dA.infobox?.Height), altezzaB = cmDaStringa(dB.infobox?.Height);
@@ -229,7 +235,8 @@ async function init() {
     document.getElementById("riprova-confronto").addEventListener("click", () => location.reload());
     return;
   }
-  opzioni = [...roster, ...extra].filter((r) => r.link && r.slug);
+  // anche chi non ha una pagina Wikipedia (senza "link") ha la sua scheda da ESPN: se lo si scartava, "Confronta" apriva due lottatori a caso
+  opzioni = [...roster, ...extra].filter((r) => r.slug);
 
   setupAutocomplete("a");
   setupAutocomplete("b");
@@ -242,6 +249,11 @@ async function init() {
   const slugB = params.get("b");
   const daLink = slugA && slugB ? [opzioni.find((o) => o.slug === slugA), opzioni.find((o) => o.slug === slugB)] : null;
 
+  if (slugA && slugB && !(daLink[0] && daLink[1])) {
+    // arrivati da un link preciso ma un lottatore non c'e': meglio dirlo che mostrarne due a caso
+    document.getElementById("risultato").innerHTML = `<div class="empty-state">Non trovo la scheda di uno dei due lottatori. Cercali qui sopra per nome.</div>`;
+    return;
+  }
   const [primo, secondo] = daLink && daLink[0] && daLink[1] ? daLink : opzioni.filter((o) => ORDINE_CATEGORIE.includes(o.categoria));
   if (primo && secondo) {
     scelti.a = primo;
