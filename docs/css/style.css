@@ -2913,3 +2913,14 @@ a.fr:active { border-color: var(--accent); background: var(--bg-elevated-2); }
 .gioco-card.sfida-card { background: linear-gradient(135deg, #e8201a, #ff5a1f); border-color: transparent; color: #fff; box-shadow: 0 8px 24px rgba(232, 53, 47, 0.35); }
 .gioco-card.sfida-card h2, .gioco-card.sfida-card p, .gioco-card.sfida-card .gioco-tag { color: #fff; }
 .gioco-card.sfida-card .gioco-cta { align-self: flex-start; padding: 8px 14px; border-radius: 8px; background: #ffd21f; color: #111; font-weight: 700; }
+
+/* elenchi di link per i motori di ricerca (build_static.genera_indici): sobri, in fondo alla pagina */
+.elenco-seo { margin: 36px 0 12px; padding-top: 18px; border-top: 1px solid var(--border); font-size: 13.5px; }
+.elenco-seo h2 { font-family: var(--font-display); font-size: 20px; text-transform: uppercase; margin: 0 0 10px; }
+.elenco-seo h3 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin: 14px 0 6px; }
+.elenco-seo ul { list-style: none; margin: 0; padding: 0; columns: 3 220px; column-gap: 24px; }
+.elenco-seo li { break-inside: avoid; padding: 3px 0; }
+.elenco-seo a { color: var(--text-secondary); text-decoration: none; }
+.elenco-seo a:hover { color: var(--accent); text-decoration: underline; }
+.elenco-seo details { margin: 6px 0; }
+.elenco-seo summary { cursor: pointer; padding: 6px 0; font-weight: 600; color: var(--text); }

@@ -613,6 +613,72 @@ def genera_incontri(base, roster_by_slug, anagrafica):
     return elenco, per_evento, per_lottatore
 
 
+# ---------------------------------------------------------------- elenchi di link per i motori di ricerca
+# Menu, elenco lottatori ed elenco eventi si riempiono con JavaScript: nell'HTML "grezzo" la home e le pagine
+# elenco non avevano quasi nessun collegamento verso le schede. Google le trova piu' lentamente (e i siti nuovi
+# hanno poco tempo di scansione da spendere). Qui si scrivono nell'HTML i collegamenti veri, tra due segnaposto
+# (<!--seo:inizio--> e <!--seo:fine-->) gia' presenti nelle pagine: si rifanno a ogni aggiornamento dei dati.
+def _inietta(nome_pagina, html_blocco):
+    f = DOCS / nome_pagina
+    t = f.read_text(encoding="utf-8")
+    nuovo = re.sub(r"<!--seo:inizio-->.*?<!--seo:fine-->", lambda m: f"<!--seo:inizio-->{html_blocco}<!--seo:fine-->", t, count=1, flags=re.S)
+    if nuovo != t:
+        f.write_text(nuovo, encoding="utf-8")
+    return "<!--seo:inizio-->" in t
+
+
+def genera_indici(slugs_lottatori):
+    roster = json.loads((DOCS / "data" / "roster.json").read_text(encoding="utf-8"))
+    eventi = json.loads((DOCS / "data" / "eventi.json").read_text(encoding="utf-8"))
+    con_pagina = {r["slug"]: r for r in roster if r.get("slug") in slugs_lottatori}
+    # lottatori in ordine alfabetico, a gruppi per iniziale del cognome
+    per_lettera = {}
+    for r in sorted(con_pagina.values(), key=lambda r: _norm_nome(r["nome"].split()[-1] + " " + r["nome"])):
+        per_lettera.setdefault(_norm_nome(r["nome"].split()[-1])[:1].upper() or "#", []).append(r)
+    blocco_l = ('<div class="container"><nav class="elenco-seo" aria-label="Elenco completo dei lottatori"><h2>Elenco completo dei lottatori UFC</h2>'
+                + "".join(f'<h3>{esc(l)}</h3><ul>' + "".join(f'<li><a href="lottatore/{r["slug"]}.html">{esc(r["nome"])}</a></li>' for r in rs) + "</ul>"
+                          for l, rs in sorted(per_lettera.items())) + "</nav></div>")
+    _inietta("tutti-i-lottatori.html", blocco_l)
+
+    # eventi: gli indirizzi esistono solo se la pagina e' stata generata
+    voci = []
+    for e in eventi:
+        slug = slug_da_link(e.get("link"))
+        d = None
+        try:
+            d = datetime.strptime(e["data"], "%b %d, %Y")
+        except (ValueError, KeyError):
+            pass
+        if slug and d and (DOCS / "evento" / f"{slug}.html").exists():
+            voci.append((d, slug, e["evento"], e.get("stato")))
+    voci.sort(reverse=True)
+    per_anno = {}
+    for d, slug, nome, stato in voci:
+        per_anno.setdefault(d.year, []).append((d, slug, nome))
+    blocco_e = ('<div class="container"><nav class="elenco-seo" aria-label="Archivio degli eventi"><h2>Archivio degli eventi UFC</h2>'
+                + "".join(f'<details{" open" if i == 0 else ""}><summary>{anno} ({len(vs)} eventi)</summary><ul>'
+                          + "".join(f'<li><a href="evento/{slug}.html">{esc(nome)}</a> ({data_it(d.strftime("%b %d, %Y"))})</li>' for d, slug, nome in vs)
+                          + "</ul></details>" for i, (anno, vs) in enumerate(sorted(per_anno.items(), reverse=True))) + "</nav></div>")
+    _inietta("eventi.html", blocco_e)
+
+    # home: sezioni, prossimi eventi, ultimo evento, campioni
+    prossimi = sorted([v for v in voci if v[3] == "programmato"])[:4]
+    passati = [v for v in voci if v[3] == "passato"][:3]
+    campioni = [r for r in con_pagina.values() if r.get("campione_attuale")]
+    sezioni = [("lottatori.html", "Tutti i lottatori UFC"), ("tutti-i-lottatori.html", "Elenco A-Z dei lottatori"), ("eventi.html", "Calendario eventi UFC"),
+               ("confronto.html", "Confronto tra lottatori"), ("campioni.html", "Campioni UFC"), ("ranking.html", "Ranking UFC"),
+               ("news.html", "Notizie MMA"), ("europa.html", "MMA in Europa"), ("giochi.html", "Giochi di MMA"), ("sfida.html", "Sfida del giorno")]
+    def lista(titolo, righe):
+        return f'<h3>{titolo}</h3><ul>' + "".join(righe) + "</ul>" if righe else ""
+    blocco_h = ('<div class="container"><nav class="elenco-seo" aria-label="Esplora MMA Oggi"><h2>Esplora MMA Oggi</h2>'
+                + lista("Sezioni", [f'<li><a href="{u}">{t}</a></li>' for u, t in sezioni])
+                + lista("Prossimi eventi", [f'<li><a href="evento/{s}.html">{esc(n)}</a> ({data_it(d.strftime("%b %d, %Y"))})</li>' for d, s, n, _ in prossimi])
+                + lista("Ultimi eventi", [f'<li><a href="evento/{s}.html">{esc(n)}</a> ({data_it(d.strftime("%b %d, %Y"))})</li>' for d, s, n, _ in passati])
+                + lista("Campioni UFC in carica", [f'<li><a href="lottatore/{r["slug"]}.html">{esc(r["nome"])}</a></li>' for r in campioni])
+                + "</nav></div>")
+    _inietta("index.html", blocco_h)
+
+
 def main():
     base_l = (DOCS / "lottatore.html").read_text(encoding="utf-8")
     base_e = (DOCS / "evento.html").read_text(encoding="utf-8")
@@ -627,6 +693,7 @@ def main():
     inc, per_evento, per_lottatore = genera_incontri(base_i, {r["slug"]: r for r in roster if r.get("slug")}, anagrafica)
     lott = genera_lottatori(base_l, per_lottatore)
     ev = genera_eventi(base_e, set(lott), per_evento)
+    genera_indici(set(lott))
     print(f"Pagine statiche: {len(lott)} lottatori, {len(ev)} eventi, {len(inc)} incontri.")
 
 
