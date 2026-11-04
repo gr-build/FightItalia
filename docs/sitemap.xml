@@ -8,7 +8,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/eventi.html</loc>
-    <lastmod>2026-10-31</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -26,7 +26,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/tutti-i-lottatori.html</loc>
-    <lastmod>2026-11-02</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -668,7 +668,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/brunno-ferreira.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -968,12 +968,6 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/cory-sandhagen.html</loc>
-    <lastmod>2026-10-18</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://mmaoggi.it/lottatore/court-mcgee.html</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -2180,7 +2174,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/justin-gaethje.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3182,7 +3176,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/nicolle-caliari.html</loc>
-    <lastmod>2026-10-31</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3302,7 +3296,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/park-hyun-sung.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -4772,7 +4766,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-307.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -4922,7 +4916,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-332.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -4963,12 +4957,6 @@
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mmaoggi.it/evento/ufc-fight-night-297.html</loc>
-    <lastmod>2026-10-25</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
     <loc>https://mmaoggi.it/evento/ufc-fight-night-adesanya-vs-imavov.html</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>monthly</changefreq>
@@ -4994,7 +4982,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-fight-night-allen-vs-curtis-2.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -5138,7 +5126,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-fight-night-cortes-acosta-vs-walker.html</loc>
-    <lastmod>2026-11-03</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -5264,7 +5252,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-fight-night-font-vs-garbrandt.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -5558,7 +5546,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-fight-night-proch-zka-vs-stirling.html</loc>
-    <lastmod>2026-10-22</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -5595,6 +5583,12 @@
   <url>
     <loc>https://mmaoggi.it/evento/ufc-fight-night-rozenstruik-vs-sakai.html</loc>
     <lastmod>2026-10-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://mmaoggi.it/evento/ufc-fight-night-salkilld-vs-saint-denis.html</loc>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -5792,7 +5786,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-on-abc-rozenstruik-vs-almeida.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -5954,7 +5948,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-on-espn-holm-vs-aldana.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -5972,13 +5966,13 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-on-espn-kattar-vs-chikadze.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-on-espn-kattar-vs-emmett.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -6182,7 +6176,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-on-espn-usman-vs-buckley.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -7826,7 +7820,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/incontro/ufc-332-eric-nolan-vs-court-mcgee.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
@@ -12188,7 +12182,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/incontro/ufc-on-espn-usman-vs-buckley-michael-chiesa-vs-court-mcgee.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
