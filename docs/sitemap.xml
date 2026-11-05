@@ -26,7 +26,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/tutti-i-lottatori.html</loc>
-    <lastmod>2026-11-04</lastmod>
+    <lastmod>2026-11-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -727,6 +727,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://mmaoggi.it/lottatore/carlos-calderon.html</loc>
+    <lastmod>2026-11-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://mmaoggi.it/lottatore/carlos-diego-ferreira.html</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>monthly</changefreq>
@@ -752,7 +758,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/carlos-vera.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -872,7 +878,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/christian-edwards.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -2294,7 +2300,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/kevin-holland.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -5126,7 +5132,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-fight-night-cortes-acosta-vs-walker.html</loc>
-    <lastmod>2026-11-04</lastmod>
+    <lastmod>2026-11-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
