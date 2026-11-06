@@ -8,7 +8,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/eventi.html</loc>
-    <lastmod>2026-11-04</lastmod>
+    <lastmod>2026-11-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -4934,13 +4934,13 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-334.html</loc>
-    <lastmod>2026-10-28</lastmod>
+    <lastmod>2026-11-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-335.html</loc>
-    <lastmod>2026-10-24</lastmod>
+    <lastmod>2026-11-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -4959,6 +4959,12 @@
   <url>
     <loc>https://mmaoggi.it/evento/ufc-fight-night-296.html</loc>
     <lastmod>2026-10-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://mmaoggi.it/evento/ufc-fight-night-297.html</loc>
+    <lastmod>2026-11-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -5552,7 +5558,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-fight-night-proch-zka-vs-stirling.html</loc>
-    <lastmod>2026-11-04</lastmod>
+    <lastmod>2026-11-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
