@@ -26,7 +26,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/tutti-i-lottatori.html</loc>
-    <lastmod>2026-11-12</lastmod>
+    <lastmod>2026-11-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2636,7 +2636,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/manel-kape.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -2991,6 +2991,12 @@
   <url>
     <loc>https://mmaoggi.it/lottatore/mike-malott.html</loc>
     <lastmod>2026-11-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://mmaoggi.it/lottatore/mike-perry-fighter.html</loc>
+    <lastmod>2026-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3836,7 +3842,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/shi-ming.html</loc>
-    <lastmod>2026-10-31</lastmod>
+    <lastmod>2026-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -4124,7 +4130,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/trey-ogden.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -4436,7 +4442,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-255.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -4910,7 +4916,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-334.html</loc>
-    <lastmod>2026-11-12</lastmod>
+    <lastmod>2026-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -5534,7 +5540,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-fight-night-proch-zka-vs-stirling.html</loc>
-    <lastmod>2026-11-09</lastmod>
+    <lastmod>2026-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -5786,7 +5792,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-on-abc-vettori-vs-holland.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -6056,7 +6062,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-on-espn-poirier-vs-hooker.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
