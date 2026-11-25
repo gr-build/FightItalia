@@ -26,7 +26,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/tutti-i-lottatori.html</loc>
-    <lastmod>2026-11-24</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -439,6 +439,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://mmaoggi.it/lottatore/anvarbek-daniyalbekov.html</loc>
+    <lastmod>2026-11-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://mmaoggi.it/lottatore/arman-tsarukyan.html</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>monthly</changefreq>
@@ -794,7 +800,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/charles-johnson-fighter.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -1166,7 +1172,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/diego-lopes-fighter.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -2942,7 +2948,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/michelle-montague.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3830,7 +3836,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/shoaib-yousaf.html</loc>
-    <lastmod>2026-11-22</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -4070,7 +4076,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/lottatore/toshiomi-kazama.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -4898,13 +4904,13 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-335.html</loc>
-    <lastmod>2026-11-21</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-336.html</loc>
-    <lastmod>2026-11-17</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -4922,7 +4928,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/evento/ufc-fight-night-adesanya-vs-magomedov.html</loc>
-    <lastmod>2026-11-24</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
@@ -11600,7 +11606,7 @@
   </url>
   <url>
     <loc>https://mmaoggi.it/incontro/ufc-on-abc-hill-vs-rountree-jr-mohammed-usman-vs-hamdy-abdelwahab.html</loc>
-    <lastmod>2026-11-08</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
